@@ -19,10 +19,16 @@
     android:layout_height="match_parent"
     tools:context="com.google.ar.core.examples.java.helloar.HelloArActivity">
 
-  <android.opengl.GLSurfaceView
-      android:id="@+id/surfaceview"
-      android:layout_width="fill_parent"
-      android:layout_height="fill_parent"
-      android:layout_gravity="top"/>
+    <android.opengl.GLSurfaceView
+        android:id="@+id/surfaceview"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_gravity="top" />
+
+    <Button
+        android:id="@+id/toggle_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/toggle_android" />
 
 </RelativeLayout>

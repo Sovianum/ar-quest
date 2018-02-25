@@ -16,4 +16,5 @@
 -->
 <resources>
   <string name="app_name">HelloAR Java</string>
+    <string name="toggle_android">Toggle android</string>
 </resources>
