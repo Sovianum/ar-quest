@@ -25,10 +25,17 @@
         android:layout_height="fill_parent"
         android:layout_gravity="top" />
 
-    <Button
-        android:id="@+id/toggle_btn"
+    <!--<Button-->
+        <!--android:id="@+id/toggle_btn"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="@string/toggle_android" />-->
+
+    <TextView
+        android:id="@+id/coord_txt"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/toggle_android" />
+        android:lines="5"
+        android:gravity="bottom"/>
 
 </RelativeLayout>
