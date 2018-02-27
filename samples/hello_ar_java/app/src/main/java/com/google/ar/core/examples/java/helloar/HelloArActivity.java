@@ -16,6 +16,11 @@
 
 package com.google.ar.core.examples.java.helloar;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
@@ -35,14 +40,8 @@ import com.google.ar.core.ArCoreApk;
 import com.google.ar.core.Camera;
 import com.google.ar.core.Config;
 import com.google.ar.core.Frame;
-import com.google.ar.core.HitResult;
-import com.google.ar.core.Plane;
-import com.google.ar.core.Point;
-import com.google.ar.core.Point.OrientationMode;
-import com.google.ar.core.PointCloud;
 import com.google.ar.core.Pose;
 import com.google.ar.core.Session;
-import com.google.ar.core.Trackable;
 import com.google.ar.core.TrackingState;
 import com.google.ar.core.examples.java.helloar.rendering.BackgroundRenderer;
 import com.google.ar.core.examples.java.helloar.rendering.ObjectRenderer;
@@ -56,6 +55,9 @@ import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationExceptio
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -68,6 +70,14 @@ import javax.microedition.khronos.opengles.GL10;
  */
 public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.Renderer {
     private static final String TAG = HelloArActivity.class.getSimpleName();
+
+    public static final int MY_PERMISSIONS_REQUEST_LOCATION = 1;
+    public static final float THRESHOLD_DISTANCE = 0.1f;
+    public static final float SPHERE_RADIUS = 1f;
+    public static final int ANDROID_CNT = 3;
+    public static final long ANDROID_PERIOD = 5000;
+    private static final float DEFAULT_TARGET_SCALE = 1f;
+    private static final float TRIGGER_TARGET_SCALE = 5f;
 
     // Rendering. The Renderers are created here, and initialized when the GL surface is created.
     private GLSurfaceView surfaceView;
@@ -91,16 +101,41 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
 
     // Tap handling and UI.
     private final ArrayBlockingQueue<MotionEvent> queuedSingleTaps = new ArrayBlockingQueue<>(16);
-    private final ArrayList<Anchor> anchors = new ArrayList<>();
 
     private Anchor cameraAnchor = null;
-    private double cnt = 0;
-    private final int updateFrequency = 7;
     private boolean needShow = false;
+
+    private List<Anchor> randomAnchors = new ArrayList<>(ANDROID_CNT);
+    private List<Float> targetScales = new ArrayList<>(ANDROID_CNT);
+    private int anchorCnt = 0;
+    private boolean needAddAndroid = false;
+    private Anchor sphereOrigin = null;
+
+    private LocationListener onSelfLocationChangeListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(final Location location) {
+            Log.e("INFO", String.valueOf(location.getLatitude()) + " " + location.getLongitude());
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {}
+
+        @Override
+        public void onProviderEnabled(String provider) {}
+
+        @Override
+        public void onProviderDisabled(String provider) {}
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        for (int i = 0; i != ANDROID_CNT; ++i) {
+            randomAnchors.add(null);
+            targetScales.add(DEFAULT_TARGET_SCALE);
+        }
+
         setContentView(R.layout.activity_main);
         surfaceView = findViewById(R.id.surfaceview);
         displayRotationHelper = new DisplayRotationHelper(/*context=*/ this);
@@ -152,6 +187,20 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
     protected void onResume() {
         super.onResume();
 
+        // ARCore requires camera permissions to operate. If we did not yet obtain runtime
+        // permission on Android M and above, now is a good time to ask the user for it.
+        if (PermissionHelper.hasPermissions(this)) {
+            if (session != null) {
+                showLoadingMessage();
+                // Note that order matters - see the note in onPause(), the reverse applies here.
+                session.resume();
+            }
+            surfaceView.onResume();
+            displayRotationHelper.onResume();
+        } else {
+            PermissionHelper.requestPermissions(this);
+        }
+
         if (session == null) {
             Exception exception = null;
             String message = null;
@@ -166,8 +215,8 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
 
                 // ARCore requires camera permissions to operate. If we did not yet obtain runtime
                 // permission on Android M and above, now is a good time to ask the user for it.
-                if (!CameraPermissionHelper.hasCameraPermission(this)) {
-                    CameraPermissionHelper.requestCameraPermission(this);
+                if (!PermissionHelper.hasPermissions(this)) {
+                    PermissionHelper.requestPermissions(this);
                     return;
                 }
 
@@ -199,9 +248,18 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
                 showSnackbarMessage("This device does not support AR", true);
             }
             session.configure(config);
+
+            // start generating random androids around you
+            Timer t = new Timer();
+            t.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    needAddAndroid = true;
+                }
+            }, 0, ANDROID_PERIOD);
         }
 
-        showLoadingMessage();
+//        showLoadingMessage();
         // Note that order matters - see the note in onPause(), the reverse applies here.
         session.resume();
         surfaceView.onResume();
@@ -223,13 +281,9 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
-        if (!CameraPermissionHelper.hasCameraPermission(this)) {
+        if (!PermissionHelper.hasPermissions(this)) {
             Toast.makeText(this, "Camera permission is needed to run this application", Toast.LENGTH_LONG)
                     .show();
-            if (!CameraPermissionHelper.shouldShowRequestPermissionRationale(this)) {
-                // Permission denied with checking "Do not ask again".
-                CameraPermissionHelper.launchPermissionSettings(this);
-            }
             finish();
         }
     }
@@ -310,43 +364,21 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
             Frame frame = session.update();
             Camera camera = frame.getCamera();
 
-            // Handle taps. Handling only one tap per frame, as taps are usually low frequency
-            // compared to frame rate.
-
-            MotionEvent tap = queuedSingleTaps.poll();
-
-            if (cnt++ % updateFrequency == 0) {
+            if (camera.getTrackingState() == TrackingState.TRACKING) {
+                checkAllCollisions();
+                if (cameraAnchor != null) {
+                    cameraAnchor.detach();
+                }
                 cameraAnchor = getCameraFloatingPoint(session, frame);
-            }
 
-
-            if (tap != null && camera.getTrackingState() == TrackingState.TRACKING) {
-                Log.e("anchor", "called");
-
-                for (HitResult hit : frame.hitTest(tap)) {
-                    // Check if any plane was hit, and if it was hit inside the plane polygon
-                    Trackable trackable = hit.getTrackable();
-                    // Creates an anchor if a plane or an oriented point was hit.
-
-
-
-                    if ((trackable instanceof Plane && ((Plane) trackable).isPoseInPolygon(hit.getHitPose()))
-                            || (trackable instanceof Point
-                            && ((Point) trackable).getOrientationMode()
-                            == OrientationMode.ESTIMATED_SURFACE_NORMAL)) {
-                        // Hits are sorted by depth. Consider only closest hit on a plane or oriented point.
-                        // Cap the number of objects created. This avoids overloading both the
-                        // rendering system and ARCore.
-                        if (anchors.size() >= 20) {
-                            anchors.get(0).detach();
-                            anchors.remove(0);
-                        }
-                        // Adding an Anchor tells ARCore that it should track this position in
-                        // space. This anchor is created on the Plane to place the 3D model
-                        // in the correct position relative both to the world and to the plane.
-                        anchors.add(hit.createAnchor());
-                        break;
+                if (needAddAndroid) {
+                    if (sphereOrigin == null) {
+                        sphereOrigin = session.createAnchor(camera.getPose());
                     }
+
+                    Pose pose = sphereOrigin.getPose().compose(getRandomOffsetPose()).extractTranslation();
+                    setNextAnchor(session.createAnchor(pose));
+                    needAddAndroid = false;
                 }
             }
 
@@ -369,35 +401,21 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
             // Compute lighting from average intensity of the image.
             final float lightIntensity = frame.getLightEstimate().getPixelIntensity();
 
-            // Visualize tracked points.
-            PointCloud pointCloud = frame.acquirePointCloud();
-            this.pointCloud.update(pointCloud);
-            this.pointCloud.draw(viewmtx, projmtx);
-
-            // Application is responsible for releasing the point cloud resources after
-            // using it.
-            pointCloud.release();
-
-            // Check if we detected at least one plane. If so, hide the loading message.
-            if (messageSnackbar != null) {
-                for (Plane plane : session.getAllTrackables(Plane.class)) {
-                    if (plane.getType() == com.google.ar.core.Plane.Type.HORIZONTAL_UPWARD_FACING
-                            && plane.getTrackingState() == TrackingState.TRACKING) {
-                        hideLoadingMessage();
-                        break;
-                    }
-                }
-            }
-
-            // Visualize planes.
-            planeRenderer.drawPlanes(
-                    session.getAllTrackables(Plane.class), camera.getDisplayOrientedPose(), projmtx);
+//            // Check if we detected at least one plane. If so, hide the loading message.
+//            if (messageSnackbar != null) {
+//                for (Plane plane : session.getAllTrackables(Plane.class)) {
+//                    if (plane.getType() == com.google.ar.core.Plane.Type.HORIZONTAL_UPWARD_FACING
+//                            && plane.getTrackingState() == TrackingState.TRACKING) {
+//                        hideLoadingMessage();
+//                        break;
+//                    }
+//                }
+//            }
 
             // Visualize anchors created by touch.
-            float scaleFactor = 1.0f;
-
-            for (Anchor anchor : anchors) {
-                if (anchor.getTrackingState() != TrackingState.TRACKING) {
+            for (int i = 0; i != randomAnchors.size(); ++i) {
+                Anchor anchor = randomAnchors.get(i);
+                if (anchor == null || anchor.getTrackingState() != TrackingState.TRACKING) {
                     continue;
                 }
                 // Get the current pose of an Anchor in world space. The Anchor pose is updated
@@ -405,12 +423,13 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
                 anchor.getPose().toMatrix(anchorMatrix, 0);
 
                 // Update and draw the model and its shadow.
-                virtualObject.updateModelMatrix(anchorMatrix, scaleFactor);
-                virtualObjectShadow.updateModelMatrix(anchorMatrix, scaleFactor);
+                virtualObject.updateModelMatrix(anchorMatrix, targetScales.get(i));
+                virtualObjectShadow.updateModelMatrix(anchorMatrix, targetScales.get(i));
                 virtualObject.draw(viewmtx, projmtx, lightIntensity);
                 virtualObjectShadow.draw(viewmtx, projmtx, lightIntensity);
             }
 
+            float scaleFactor = 1.0f;
             if (cameraAnchor != null && needShow) {
                 cameraAnchor.getPose().toMatrix(anchorMatrix, 0);
 
@@ -426,10 +445,69 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
         }
     }
 
+    private void setNextAnchor(Anchor anchor) {
+        int index = anchorCnt++ % ANDROID_CNT;
+        Anchor oldAnchor = randomAnchors.get(index);
+        if (oldAnchor != null) {
+            oldAnchor.detach();
+        }
+        randomAnchors.set(index, anchor);
+        targetScales.set(index, DEFAULT_TARGET_SCALE);
+    }
+
+    private void checkAllCollisions() {
+        if (!needShow) {
+            return;
+        }
+        for (int i = 0; i != randomAnchors.size(); i++) {
+            Anchor anchor = randomAnchors.get(i);
+            if (anchor == null) {
+                return;
+            }
+
+            if (detectCollision(cameraAnchor, anchor)) {
+                targetScales.set(i, TRIGGER_TARGET_SCALE);
+            }
+        }
+    }
+
+    private boolean detectCollision(Anchor anchor1, Anchor anchor2) {
+        float distance = getDistance(anchor1, anchor2);
+        return distance < THRESHOLD_DISTANCE;
+    }
+
+    private float getDistance(Anchor anchor1, Anchor anchor2) {
+        float[] v1 = anchor1.getPose().transformPoint(new float[]{0, 0, 0});
+        float[] v2 = anchor2.getPose().transformPoint(new float[]{0 ,0, 0});
+
+        float dist = 0;
+        for (int i = 0; i != v1.length; ++i) {
+            float d = v2[i] - v1[i];
+            dist += d * d;
+        }
+        return (float) Math.sqrt(dist);
+    }
+
     private Anchor getCameraFloatingPoint(Session session, Frame frame) {
         Camera camera = frame.getCamera();
         Pose pose = camera.getPose().compose(Pose.makeTranslation(0f, 0f, -1f)).extractTranslation();
         return session.createAnchor(pose);
+    }
+
+    private Pose getRandomOffsetPose() {
+        return Pose.makeTranslation(
+                SPHERE_RADIUS * (float) (Math.random() - 0.5),
+                SPHERE_RADIUS * (float) (Math.random() - 0.5),
+                SPHERE_RADIUS * (float) (Math.random() - 0.5)
+        );
+    }
+
+    @SuppressLint("MissingPermission")
+    private void startLocationTracking() {
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        assert locationManager != null;
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, onSelfLocationChangeListener);
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, onSelfLocationChangeListener);
     }
 
     private void showSnackbarMessage(String message, boolean finishOnDismiss) {

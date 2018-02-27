@@ -16,6 +16,7 @@ package com.google.ar.core.examples.java.helloar;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -23,30 +24,34 @@ import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 
-/** Helper to ask camera permission. */
-public final class CameraPermissionHelper {
-  private static final int CAMERA_PERMISSION_CODE = 0;
-  private static final String CAMERA_PERMISSION = Manifest.permission.CAMERA;
+/** Helper to ask permission. */
+final class PermissionHelper {
+  private static final int MY_PERMISSIONS_CODE = 0;
 
-  /** Check to see we have the necessary permissions for this app. */
-  public static boolean hasCameraPermission(Activity activity) {
-    return ContextCompat.checkSelfPermission(activity, CAMERA_PERMISSION)
-        == PackageManager.PERMISSION_GRANTED;
+  static final String CAMERA_PERMISSION = Manifest.permission.CAMERA;
+  static final String FINE_LOC_PERMISSION = Manifest.permission.ACCESS_FINE_LOCATION;
+  static final String COARSE_LOC_PERMISSION = Manifest.permission.ACCESS_COARSE_LOCATION;
+
+  static boolean hasPermissions(Context context) {
+    return hasPermission(context, CAMERA_PERMISSION) &&
+            hasPermission(context, FINE_LOC_PERMISSION) &&
+            hasPermission(context, COARSE_LOC_PERMISSION);
   }
 
-  /** Check to see we have the necessary permissions for this app, and ask for them if we don't. */
-  public static void requestCameraPermission(Activity activity) {
+  static private boolean hasPermission(Context context, String permission) {
+    return ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED;
+  }
+
+  static void requestPermissions(Activity activity) {
     ActivityCompat.requestPermissions(
-        activity, new String[] {CAMERA_PERMISSION}, CAMERA_PERMISSION_CODE);
+            activity, new String[] {
+                    CAMERA_PERMISSION,
+                    FINE_LOC_PERMISSION,
+                    COARSE_LOC_PERMISSION
+            }, MY_PERMISSIONS_CODE);
   }
 
-  /** Check to see if we need to show the rationale for this permission. */
-  public static boolean shouldShowRequestPermissionRationale(Activity activity) {
-    return ActivityCompat.shouldShowRequestPermissionRationale(activity, CAMERA_PERMISSION);
-  }
-
-  /** Launch Application Setting to grant permission. */
-  public static void launchPermissionSettings(Activity activity) {
+  static void launchPermissionSettings(Activity activity) {
     Intent intent = new Intent();
     intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
     intent.setData(Uri.fromParts("package", activity.getPackageName(), null));
