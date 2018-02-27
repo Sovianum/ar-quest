@@ -17,4 +17,6 @@
 <resources>
   <string name="app_name">HelloAR Java</string>
     <string name="toggle_android">Toggle android</string>
+    <string name="grab_str">Grab</string>
+  <string name="release_str">Release</string>
 </resources>

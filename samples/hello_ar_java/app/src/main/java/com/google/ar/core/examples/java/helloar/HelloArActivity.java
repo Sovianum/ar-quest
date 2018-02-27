@@ -24,6 +24,7 @@ import android.location.LocationManager;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.BaseTransientBottomBar;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -71,17 +72,17 @@ import javax.microedition.khronos.opengles.GL10;
 public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.Renderer {
     private static final String TAG = HelloArActivity.class.getSimpleName();
 
-    public static final int MY_PERMISSIONS_REQUEST_LOCATION = 1;
     public static final float THRESHOLD_DISTANCE = 0.1f;
     public static final float SPHERE_RADIUS = 1f;
     public static final int ANDROID_CNT = 3;
-    public static final long ANDROID_PERIOD = 5000;
     private static final float DEFAULT_TARGET_SCALE = 1f;
-    private static final float TRIGGER_TARGET_SCALE = 5f;
+    private static final float TRIGGER_TARGET_SCALE = 2f;
 
     // Rendering. The Renderers are created here, and initialized when the GL surface is created.
     private GLSurfaceView surfaceView;
     private Button toggleBtn;
+    private Button grabBtn;
+    private Button releaseBtn;
 
     private boolean installRequested;
 
@@ -103,12 +104,12 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
     private final ArrayBlockingQueue<MotionEvent> queuedSingleTaps = new ArrayBlockingQueue<>(16);
 
     private Anchor cameraAnchor = null;
+    private int grabId = -1;
     private boolean needShow = false;
 
     private List<Anchor> randomAnchors = new ArrayList<>(ANDROID_CNT);
     private List<Float> targetScales = new ArrayList<>(ANDROID_CNT);
     private int anchorCnt = 0;
-    private boolean needAddAndroid = false;
     private Anchor sphereOrigin = null;
 
     private LocationListener onSelfLocationChangeListener = new LocationListener() {
@@ -145,6 +146,22 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
             @Override
             public void onClick(View v) {
                 needShow = !needShow;
+            }
+        });
+
+        grabBtn = findViewById(R.id.grab_btn);
+        grabBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                grab();
+            }
+        });
+
+        releaseBtn = findViewById(R.id.release_btn);
+        releaseBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                release();
             }
         });
 
@@ -248,15 +265,6 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
                 showSnackbarMessage("This device does not support AR", true);
             }
             session.configure(config);
-
-            // start generating random androids around you
-            Timer t = new Timer();
-            t.scheduleAtFixedRate(new TimerTask() {
-                @Override
-                public void run() {
-                    needAddAndroid = true;
-                }
-            }, 0, ANDROID_PERIOD);
         }
 
 //        showLoadingMessage();
@@ -280,7 +288,7 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] results) {
         if (!PermissionHelper.hasPermissions(this)) {
             Toast.makeText(this, "Camera permission is needed to run this application", Toast.LENGTH_LONG)
                     .show();
@@ -370,15 +378,18 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
                     cameraAnchor.detach();
                 }
                 cameraAnchor = getCameraFloatingPoint(session, frame);
+                if (grabId >= 0) {
+                    Anchor a = randomAnchors.get(grabId);
+                    a.detach();
+                    randomAnchors.set(grabId, cameraAnchor);
+                }
 
-                if (needAddAndroid) {
-                    if (sphereOrigin == null) {
-                        sphereOrigin = session.createAnchor(camera.getPose());
+                if (sphereOrigin == null) {
+                    sphereOrigin = session.createAnchor(camera.getPose());
+                    for (int i = 0; i != ANDROID_CNT; ++i) {
+                        Pose pose = sphereOrigin.getPose().compose(getRandomOffsetPose()).extractTranslation();
+                        setNextAnchor(session.createAnchor(pose));
                     }
-
-                    Pose pose = sphereOrigin.getPose().compose(getRandomOffsetPose()).extractTranslation();
-                    setNextAnchor(session.createAnchor(pose));
-                    needAddAndroid = false;
                 }
             }
 
@@ -429,7 +440,7 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
                 virtualObjectShadow.draw(viewmtx, projmtx, lightIntensity);
             }
 
-            float scaleFactor = 1.0f;
+            float scaleFactor = 0.3f;
             if (cameraAnchor != null && needShow) {
                 cameraAnchor.getPose().toMatrix(anchorMatrix, 0);
 
@@ -467,8 +478,33 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
 
             if (detectCollision(cameraAnchor, anchor)) {
                 targetScales.set(i, TRIGGER_TARGET_SCALE);
+            } else {
+                targetScales.set(i, 1f);
             }
         }
+    }
+
+    private void grab() {
+        if (grabId >= 0) {
+            return;
+        }
+        for (int i = 0; i != ANDROID_CNT; ++i) {
+            Anchor a = randomAnchors.get(i);
+            if (detectCollision(cameraAnchor, a)) {
+                grabId = i;
+                Toast.makeText(this, "Grabbed", Toast.LENGTH_SHORT).show();
+            }
+        }
+        Toast.makeText(this, "You are to far", Toast.LENGTH_SHORT).show();
+    }
+
+    private void release() {
+        if (grabId < 0) {
+            return;
+        }
+        randomAnchors.set(grabId, session.createAnchor(cameraAnchor.getPose()));
+        grabId = -1;
+        Toast.makeText(this, "Released", Toast.LENGTH_SHORT).show();
     }
 
     private boolean detectCollision(Anchor anchor1, Anchor anchor2) {
