@@ -2,7 +2,9 @@ package com.google.ar.core.examples.java.helloar;
 
 import android.location.Location;
 
-public class GPSHelper {
+import com.google.ar.core.Session;
+
+public class PositionHelper {
     static void getOffsetVector(
             double startLatitude, double startLongitude,
             double endLatitude, double endLongitude,
@@ -23,7 +25,7 @@ public class GPSHelper {
         offset[1] = yDistance;
     }
 
-    static float getDistance(double startLatitude, double startLongitude, double endLatitude, double endLongitude) {
+    private static float getDistance(double startLatitude, double startLongitude, double endLatitude, double endLongitude) {
         final float[] latDisplace = new float[1];
         Location.distanceBetween(
                 startLatitude, startLongitude,
