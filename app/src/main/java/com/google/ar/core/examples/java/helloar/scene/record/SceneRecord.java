@@ -1,6 +1,8 @@
 package com.google.ar.core.examples.java.helloar.scene.record;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,6 +21,17 @@ public class SceneRecord {
         this.objectRecords = objectRecords;
         index = new HashMap<>(objectRecords.length);
         buildIndex();
+    }
+
+    public Map<String, Collection<ObjectRecord>> getObjectMap() {
+        Map<String, Collection<ObjectRecord>> result = new HashMap<>();
+        for (ObjectRecord rec : objectRecords) {
+            if (!result.containsKey(rec.getName())) {
+                result.put(rec.getName(), new ArrayList<ObjectRecord>());
+            }
+            result.get(rec.getName()).add(rec);
+        }
+        return result;
     }
 
     public ObjectRecord getById(int id) {

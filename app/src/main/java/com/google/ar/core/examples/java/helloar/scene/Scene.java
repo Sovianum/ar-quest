@@ -21,12 +21,12 @@ public class Scene extends SceneTree<Anchor> {
     }
 
     // it is assumed that parent id is always less than child id
-    public Map<String, Collection<Integer>> load(final SceneRecord sceneRecord) {
-        Map<String, Collection<Integer>> result = new HashMap<>();
+    public Map<String, Collection<ObjectRecord>> load(final SceneRecord sceneRecord) {
+        Map<String, Collection<ObjectRecord>> result = new HashMap<>();
 
         for (ObjectRecord objectRecord : sceneRecord.getObjectRecords()) {
             if (!result.containsKey(objectRecord.getName())) {
-                result.put(objectRecord.getName(), new ArrayList<Integer>());
+                result.put(objectRecord.getName(), new ArrayList<ObjectRecord>());
             }
 
             int sceneId;
@@ -39,7 +39,7 @@ public class Scene extends SceneTree<Anchor> {
             }
 
             objectRecord.setSceneId(sceneId);
-            result.get(objectRecord.getName()).add(sceneId);
+            result.get(objectRecord.getName()).add(objectRecord);
         }
 
         return result;

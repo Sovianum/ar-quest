@@ -5,8 +5,26 @@ public class ObjectRecord {
     private int parentId;
     private int sceneId;
     private String name;
-    private String assetName;
+    private String modelName;
+    private String textureName;
     private PoseRecord poseRecord;
+    private float scale;
+
+    public String getTextureName() {
+        return textureName;
+    }
+
+    public void setTextureName(String textureName) {
+        this.textureName = textureName;
+    }
+
+    public float getScale() {
+        return scale;
+    }
+
+    public void setScale(float scale) {
+        this.scale = scale;
+    }
 
     public int getId() {
         return id;
@@ -40,12 +58,12 @@ public class ObjectRecord {
         this.name = name;
     }
 
-    public String getAssetName() {
-        return assetName;
+    public String getModelName() {
+        return modelName;
     }
 
-    public void setAssetName(String assetName) {
-        this.assetName = assetName;
+    public void setModelName(String modelName) {
+        this.modelName = modelName;
     }
 
     public PoseRecord getPoseRecord() {
