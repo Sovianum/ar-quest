@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
    Copyright 2016 Google Inc.
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,8 +14,32 @@
    limitations under the License.
 -->
 <resources>
-  <string name="app_name">HelloAR Java</string>
+    <string name="app_name">HelloAR Java</string>
     <string name="toggle_android">Toggle android</string>
     <string name="grab_str">Grab</string>
-  <string name="release_str">Release</string>
+    <string name="release_str">Release</string>
+
+    <string name="auth_activity_btn">Auth Activity</string>
+    <string name="ar_activity_btn">AR Activity</string>
+    <string name="json_web_token">jwt</string>
+    <string name="login_title">Авторизация</string>
+    <string name="register_title">Регистрация</string>
+    <string name="login_hint">login</string>
+    <string name="password_hint">password</string>
+    <string name="confirm_password_hint">password</string>
+    <string name="login_btn">Авторизоваться</string>
+    <string name="register_btn">Зарегистрироваться</string>
+    <string name="text_login_from_register">Нет аккаунта? Зарегистрироваться.</string>
+    <string name="text_register_from_login">Уже зарегистрированы? Авторизоваться.</string>
+    <string name="logout_str">Выйти</string>
+    <string name="failed_to_authorize_str">Неверная пара логин/пароль</string>
+    <string name="response_code_template">Response code is %d</string>
+    <string name="connection_lost_str">Нет сети</string>
+    <string name="out_of_range_str">Пользователь вне зоны доступа</string>
+    <string name="server_internal_error_str">Сервер упал</string>
+    <string name="duplicate_user_str">Пользовтель с таким именем уже существует</string>
+    <string name="user_not_found_str">Пользователь не найден (что странно)</string>
+
+    <string name="show_more_str"><u>Подробнее</u></string>
+    <string name="hide_str"><u>Скрыть</u></string>
 </resources>

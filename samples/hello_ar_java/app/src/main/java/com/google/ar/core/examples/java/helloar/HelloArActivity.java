@@ -57,8 +57,6 @@ import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationExceptio
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -137,7 +135,7 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
             targetScales.add(DEFAULT_TARGET_SCALE);
         }
 
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_ar);
         surfaceView = findViewById(R.id.surfaceview);
         displayRotationHelper = new DisplayRotationHelper(/*context=*/ this);
 

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="padding">8dp</dimen>
+    <dimen name="auth_main_text_size">30sp</dimen>
+    <dimen name="link_text_size">20sp</dimen>
+    <dimen name="spaces_login">40dp</dimen>
+    <dimen name="spaces_register">40dp</dimen>
+</resources>
