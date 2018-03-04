@@ -3,8 +3,14 @@ package com.google.ar.core.examples.java.helloar.scene;
 import com.google.ar.core.Anchor;
 import com.google.ar.core.Pose;
 import com.google.ar.core.Session;
+import com.google.ar.core.TrackingState;
+import com.google.ar.core.examples.java.helloar.scene.record.ObjectRecord;
+import com.google.ar.core.examples.java.helloar.scene.record.SceneRecord;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Scene extends SceneTree<Anchor> {
     private Session session;
@@ -14,11 +20,45 @@ public class Scene extends SceneTree<Anchor> {
         this.session = session;
     }
 
+    // it is assumed that parent id is always less than child id
+    public Map<String, Collection<Integer>> load(final SceneRecord sceneRecord) {
+        Map<String, Collection<Integer>> result = new HashMap<>();
+
+        for (ObjectRecord objectRecord : sceneRecord.getObjectRecords()) {
+            if (!result.containsKey(objectRecord.getName())) {
+                result.put(objectRecord.getName(), new ArrayList<Integer>());
+            }
+
+            int sceneId;
+            if (objectRecord.getParentId() > 0) {
+                int parentSceneId = sceneRecord.getById(objectRecord.getParentId()).getSceneId();
+                // todo check if always need to use relative offset
+                sceneId = createAnchor(objectRecord.getPoseRecord().buildPose(), parentSceneId, true);
+            } else {
+                sceneId = createAnchor(objectRecord.getPoseRecord().buildPose());
+            }
+
+            objectRecord.setSceneId(sceneId);
+            result.get(objectRecord.getName()).add(sceneId);
+        }
+
+        return result;
+    }
+
     public void clear() {
         for (Anchor a : super.all()) {
             a.detach();
         }
         super.clear();
+    }
+
+    public void reAttachAnchors(Session session) {
+        this.session = session;
+        for (Anchor anchor : all()) {
+            if (anchor.getTrackingState() != TrackingState.TRACKING) {
+                replace(anchor, session.createAnchor(anchor.getPose()));
+            }
+        }
     }
 
     public int createAnchor(Pose pose) {
@@ -33,7 +73,8 @@ public class Scene extends SceneTree<Anchor> {
         }
         Pose transform;
         if (isRelative) {
-            transform = pose.compose(parent.getPose());
+            Pose parentPose = parent.getPose();
+            transform = pose.compose(parentPose);
         } else {
             transform = pose;
         }
