@@ -16,6 +16,7 @@
 
 package com.google.ar.core.examples.java.helloar;
 
+import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.hardware.Sensor;
@@ -35,7 +36,6 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -47,20 +47,20 @@ import com.google.ar.core.Frame;
 import com.google.ar.core.Pose;
 import com.google.ar.core.Session;
 import com.google.ar.core.TrackingState;
+import com.google.ar.core.examples.java.helloar.animation.Animator;
+import com.google.ar.core.examples.java.helloar.animation.PoseGeneratorHelper;
 import com.google.ar.core.examples.java.helloar.rendering.BackgroundRenderer;
 import com.google.ar.core.examples.java.helloar.rendering.ObjectRenderer;
 import com.google.ar.core.examples.java.helloar.rendering.ObjectRenderer.BlendMode;
 import com.google.ar.core.examples.java.helloar.rendering.PlaneRenderer;
 import com.google.ar.core.examples.java.helloar.rendering.PointCloudRenderer;
+import com.google.ar.core.examples.java.helloar.scene.Scene;
 import com.google.ar.core.exceptions.UnavailableApkTooOldException;
 import com.google.ar.core.exceptions.UnavailableArcoreNotInstalledException;
 import com.google.ar.core.exceptions.UnavailableSdkTooOldException;
 import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -75,16 +75,10 @@ import javax.microedition.khronos.opengles.GL10;
 public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.Renderer, SensorEventListener {
     private static final String TAG = HelloArActivity.class.getSimpleName();
 
-    public static final float THRESHOLD_DISTANCE = 0.1f;
-    public static final float SPHERE_RADIUS = 1f;
-    public static final int ANDROID_CNT = 3;
-    public static final long ANDROID_PERIOD = 5000;
-    private static final float DEFAULT_TARGET_SCALE = 1f;
-    private static final float TRIGGER_TARGET_SCALE = 5f;
+    private static final long STEP_PERIOD = 1000;
 
     // Rendering. The Renderers are created here, and initialized when the GL surface is created.
     private GLSurfaceView surfaceView;
-    private Button toggleBtn;
     private TextView coordTxt;
 
     private boolean installRequested;
@@ -103,26 +97,23 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
     private final PlaneRenderer planeRenderer = new PlaneRenderer();
     private final PointCloudRenderer pointCloud = new PointCloudRenderer();
 
+    private Scene scene;
+
     // Temporary matrix allocated here to reduce number of allocations for each frame.
     private final float[] anchorMatrix = new float[16];
 
-    private Anchor cameraAnchor = null;
-    private boolean needShow = false;
+    private boolean needStep = false;
+    private boolean needLoad = true;
 
-    private List<Anchor> randomAnchors = new ArrayList<>(ANDROID_CNT);
-    private List<Float> targetScales = new ArrayList<>(ANDROID_CNT);
-    private int anchorCnt = 0;
-
-    private boolean needAddVirtualObject = false;
-    private Anchor sphereOrigin = null;
-
-    private Anchor gpsAnchor = null;
-    private boolean needRecalculate = false;
+    private int rootID;
+    private Animator.AnchorPoseInterpProperty property;
+    private ObjectAnimator animator;
+    private int stepCnt = 0;
 
     private LocationListener onSelfLocationChangeListener = new LocationListener() {
         @Override
         public void onLocationChanged(final Location location) {
-            Log.e("INFO", String.valueOf(location.getLatitude()) + " " + location.getLongitude());
+//            Log.e("INFO", String.valueOf(location.getLatitude()) + " " + location.getLongitude());
         }
 
         @Override
@@ -140,22 +131,10 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
         super.onCreate(savedInstanceState);
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 
-        for (int i = 0; i != ANDROID_CNT; ++i) {
-            randomAnchors.add(null);
-            targetScales.add(DEFAULT_TARGET_SCALE);
-        }
-
         setContentView(R.layout.activity_main);
         surfaceView = findViewById(R.id.surfaceview);
         displayRotationHelper = new DisplayRotationHelper(/*context=*/ this);
 
-//        toggleBtn = findViewById(R.id.toggle_btn);
-//        toggleBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                needShow = !needShow;
-//            }
-//        });
         coordTxt = findViewById(R.id.coord_txt);
 
         // Set up tap listener.
@@ -199,7 +178,14 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
 
         sensorManager.registerListener(
                 this,
-                sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR),
+                sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+                SensorManager.SENSOR_DELAY_GAME,
+                SensorManager.SENSOR_DELAY_UI
+        );
+
+        sensorManager.registerListener(
+                this,
+                sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD),
                 SensorManager.SENSOR_DELAY_GAME,
                 SensorManager.SENSOR_DELAY_UI
         );
@@ -232,16 +218,9 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
         t.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                needAddVirtualObject = true;
+                needStep = true;
             }
-        }, 0, ANDROID_PERIOD);
-
-        t.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                needRecalculate = true;
-            }
-        }, 0, 10000);
+        }, 0, STEP_PERIOD);
 
         // Note that order matters - see the note in onPause(), the reverse applies here.
         session.resume();
@@ -350,6 +329,33 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
             final Camera camera = frame.getCamera();
 
             if (camera.getTrackingState() == TrackingState.TRACKING) {
+                if (needLoad) {
+                    float dist = 0.3f;
+                    rootID = scene.createAnchor(camera.getPose().compose(Pose.makeTranslation(0, 0, -3)));
+                    scene.createAnchor(Pose.makeTranslation(0, 0, dist), rootID, true);
+                    scene.createAnchor(Pose.makeTranslation(0, dist, 0), rootID, true);
+                    scene.createAnchor(Pose.makeTranslation(0, dist, dist), rootID, true);
+                    scene.createAnchor(Pose.makeTranslation(dist, 0, 0), rootID, true);
+                    scene.createAnchor(Pose.makeTranslation(dist, 0, dist), rootID, true);
+                    scene.createAnchor(Pose.makeTranslation(dist, dist, 0), rootID, true);
+                    scene.createAnchor(Pose.makeTranslation(dist, dist, dist), rootID, true);
+                    needLoad = false;
+
+                    property = Animator.createProperty(
+                            scene, rootID,
+//                            PoseGeneratorHelper.toPose(Pose.makeTranslation(0, 0, 20f))
+                            PoseGeneratorHelper.toPose(Pose.makeRotation(0, 0, 1, 10))
+                    );
+                    animator = Animator.createAnimator(property);
+                    animator.setDuration(10000);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            animator.start();
+                        }
+                    });
+                }
+
                 camera.getPose().getRotationQuaternion(arQuaternion, 0);
 
                 final Pose poseByGlobalOffset = getPoseByGlobalOffset(camera, new float[]{1, 0, 0});
@@ -360,32 +366,7 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
                     }
                 });
 
-                if (gpsAnchor == null || needRecalculate) {
-                    gpsAnchor = session.createAnchor(poseByGlobalOffset);
-                    needRecalculate = false;
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(HelloArActivity.this, "Recalculated", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                }
-
-                checkAllCollisions();
-                if (cameraAnchor != null) {
-                    cameraAnchor.detach();
-                }
-                cameraAnchor = getCameraFloatingPoint(session, frame);
-
-                if (needAddVirtualObject) {
-                    if (sphereOrigin == null) {
-                        sphereOrigin = session.createAnchor(camera.getPose());
-                    }
-
-                    Pose pose = sphereOrigin.getPose().compose(getRandomOffsetPose()).extractTranslation();
-                    setNextAnchor(session.createAnchor(pose));
-                    needAddVirtualObject = false;
-                }
+                property.actualize();
             }
 
             // Draw background.
@@ -407,38 +388,18 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
             // Compute lighting from average intensity of the image.
             final float lightIntensity = frame.getLightEstimate().getPixelIntensity();
 
-//            // Visualize anchors.
-//            for (int i = 0; i != randomAnchors.size(); ++i) {
-//                Anchor anchor = randomAnchors.get(i);
-//                if (anchor == null || anchor.getTrackingState() != TrackingState.TRACKING) {
-//                    continue;
-//                }
-//                // Get the current pose of an Anchor in world space. The Anchor pose is updated
-//                // during calls to session.update() as ARCore refines its estimate of the world.
-//                anchor.getPose().toMatrix(anchorMatrix, 0);
-//
-//                // Update and draw the model and its shadow.
-//                virtualObject.updateModelMatrix(anchorMatrix, targetScales.get(i));
-//                virtualObjectShadow.updateModelMatrix(anchorMatrix, targetScales.get(i));
-//                virtualObject.draw(viewmtx, projmtx, lightIntensity);
-//                virtualObjectShadow.draw(viewmtx, projmtx, lightIntensity);
-//            }
+            // Visualize anchors.
+            for (Anchor anchor : scene.all()) {
+                if (anchor == null || anchor.getTrackingState() != TrackingState.TRACKING) {
+                    continue;
+                }
+                // Get the current pose of an Anchor in world space. The Anchor pose is updated
+                // during calls to session.update() as ARCore refines its estimate of the world.
+                anchor.getPose().toMatrix(anchorMatrix, 0);
 
-            float scaleFactor = 1.0f;
-            if (cameraAnchor != null && needShow) {
-                cameraAnchor.getPose().toMatrix(anchorMatrix, 0);
-
-                virtualObject.updateModelMatrix(anchorMatrix, scaleFactor);
-                virtualObjectShadow.updateModelMatrix(anchorMatrix, scaleFactor);
-                virtualObject.draw(viewmtx, projmtx, lightIntensity);
-                virtualObjectShadow.draw(viewmtx, projmtx, lightIntensity);
-            }
-
-            if (gpsAnchor != null) {
-                gpsAnchor.getPose().toMatrix(anchorMatrix, 0);
-
-                virtualObject.updateModelMatrix(anchorMatrix, scaleFactor);
-                virtualObjectShadow.updateModelMatrix(anchorMatrix, scaleFactor);
+                // Update and draw the model and its shadow.
+                virtualObject.updateModelMatrix(anchorMatrix, 1);
+                virtualObjectShadow.updateModelMatrix(anchorMatrix, 1);
                 virtualObject.draw(viewmtx, projmtx, lightIntensity);
                 virtualObjectShadow.draw(viewmtx, projmtx, lightIntensity);
             }
@@ -451,75 +412,24 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if (event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
-            System.arraycopy(
-                    event.values, 0,
-                    sensorQuaternion, 0,
-                    sensorQuaternion.length
-            );
-        }
-
-        Log.w("QUATERNION", Arrays.toString(sensorQuaternion) + Arrays.toString(arQuaternion));
+//        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+//            System.arraycopy(
+//                    event.values, 0,
+//                    sensorQuaternion, 0,
+//                    sensorQuaternion.length
+//            );
+//        }
+//
+//        Log.w("QUATERNION", Arrays.toString(sensorQuaternion) + Arrays.toString(arQuaternion));
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {}
 
-    private void setNextAnchor(Anchor anchor) {
-        int index = anchorCnt++ % ANDROID_CNT;
-        Anchor oldAnchor = randomAnchors.get(index);
-        if (oldAnchor != null) {
-            oldAnchor.detach();
-        }
-        randomAnchors.set(index, anchor);
-        targetScales.set(index, DEFAULT_TARGET_SCALE);
-    }
-
-    private void checkAllCollisions() {
-        if (!needShow) {
-            return;
-        }
-        for (int i = 0; i != randomAnchors.size(); i++) {
-            Anchor anchor = randomAnchors.get(i);
-            if (anchor == null) {
-                return;
-            }
-
-            if (detectCollision(cameraAnchor, anchor)) {
-                targetScales.set(i, TRIGGER_TARGET_SCALE);
-            }
-        }
-    }
-
-    private boolean detectCollision(Anchor anchor1, Anchor anchor2) {
-        float distance = getDistance(anchor1, anchor2);
-        return distance < THRESHOLD_DISTANCE;
-    }
-
-    private float getDistance(Anchor anchor1, Anchor anchor2) {
-        float[] v1 = anchor1.getPose().transformPoint(new float[]{0, 0, 0});
-        float[] v2 = anchor2.getPose().transformPoint(new float[]{0 ,0, 0});
-
-        float dist = 0;
-        for (int i = 0; i != v1.length; ++i) {
-            float d = v2[i] - v1[i];
-            dist += d * d;
-        }
-        return (float) Math.sqrt(dist);
-    }
-
     private Anchor getCameraFloatingPoint(Session session, Frame frame) {
         Camera camera = frame.getCamera();
         Pose pose = camera.getPose().compose(Pose.makeTranslation(0f, 0f, -1f)).extractTranslation();
         return session.createAnchor(pose);
-    }
-
-    private Pose getRandomOffsetPose() {
-        return Pose.makeTranslation(
-                SPHERE_RADIUS * (float) (Math.random() - 0.5),
-                SPHERE_RADIUS * (float) (Math.random() - 0.5),
-                SPHERE_RADIUS * (float) (Math.random() - 0.5)
-        );
     }
 
     @SuppressLint("MissingPermission")
@@ -583,6 +493,7 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
             throw new Exception(message);
         }
         session.configure(config);
+        scene = new Scene(session);
     }
 
     private void writeCoordInfo(Pose cameraPose, Pose androidPose) {
