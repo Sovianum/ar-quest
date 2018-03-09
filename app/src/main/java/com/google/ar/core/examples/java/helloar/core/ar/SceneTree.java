@@ -1,4 +1,4 @@
-package com.google.ar.core.examples.java.helloar.scene;
+package com.google.ar.core.examples.java.helloar.core.ar;
 
 
 import com.google.common.collect.BiMap;
