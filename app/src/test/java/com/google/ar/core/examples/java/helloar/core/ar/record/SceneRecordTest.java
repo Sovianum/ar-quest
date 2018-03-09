@@ -6,7 +6,10 @@ import com.google.gson.GsonBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
 
 public class SceneRecordTest {
     static private final String ANDY = "andy";
@@ -46,7 +49,11 @@ public class SceneRecordTest {
                 Rotation.Identity()
         ));
 
-        sceneRecord = new SceneRecord(new ObjectRecord[]{root, child1, child2});
+        List<ObjectRecord> records = new ArrayList<>();
+        records.add(root);
+        records.add(child1);
+        records.add(child2);
+        sceneRecord = new SceneRecord(records);
     }
 
     @Test
@@ -55,13 +62,13 @@ public class SceneRecordTest {
         SceneRecord reverse = gson.fromJson(s, SceneRecord.class);
 
         assertEquals(
-                sceneRecord.getObjectRecords().length,
-                reverse.getObjectRecords().length
+                sceneRecord.getObjectRecords().size(),
+                reverse.getObjectRecords().size()
         );
 
-        for (int i = 0; i != sceneRecord.getObjectRecords().length; ++i) {
-            ObjectRecord first = sceneRecord.getObjectRecords()[i];
-            ObjectRecord second = reverse.getObjectRecords()[i];
+        for (int i = 0; i != sceneRecord.getObjectRecords().size(); ++i) {
+            ObjectRecord first = sceneRecord.getObjectRecords().get(i);
+            ObjectRecord second = reverse.getObjectRecords().get(i);
 
             assertEquals(first.getModelName(), second.getModelName());
             assertEquals(first.getId(), second.getId());

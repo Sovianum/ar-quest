@@ -30,6 +30,7 @@ import com.google.ar.core.examples.java.helloar.PermissionHelper;
 import com.google.ar.core.examples.java.helloar.R;
 import com.google.ar.core.examples.java.helloar.core.ar.Scene;
 import com.google.ar.core.examples.java.helloar.core.ar.record.ObjectRecord;
+import com.google.ar.core.examples.java.helloar.core.ar.record.ObjectRecordStorage;
 import com.google.ar.core.examples.java.helloar.core.ar.record.PoseRecord;
 import com.google.ar.core.examples.java.helloar.core.ar.record.Rotation;
 import com.google.ar.core.examples.java.helloar.core.ar.record.SceneRecord;
@@ -44,8 +45,10 @@ import com.google.ar.core.exceptions.UnavailableSdkTooOldException;
 import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -96,7 +99,7 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
     private Scene scene;
     private SceneRecord sceneRecord;
-    private Map<String, Collection<ObjectRecord>> objMap;
+    private ObjectRecordStorage objStorage;
     private Map<String, ObjectRenderer> renderers;
 
     private boolean loaded = false;
@@ -200,8 +203,7 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         displayRotationHelper.onResume();
 
         sceneRecord = getDemoScene();
-        objMap = sceneRecord.getObjectMap();
-        objMap = scene.load(sceneRecord);
+        objStorage = scene.load(sceneRecord);
     }
 
     @Override
@@ -217,7 +219,6 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
             session.pause();
         }
     }
-
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -255,8 +256,6 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         pointCloud.createOnGlThread(/*context=*/ getActivity());
     }
 
-
-
     @Override
     public void onSurfaceChanged(GL10 gl10, int width, int height) {
         displayRotationHelper.onSurfaceChanged(width, height);
@@ -285,7 +284,7 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
             Camera camera = frame.getCamera();
 
             if (camera.getTrackingState() == TrackingState.TRACKING) {
-                scene.updateAnchors(session);
+                scene.update(session);
             }
 
             // Draw background.
@@ -306,12 +305,12 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
             // Compute lighting from average intensity of the image.
             final float lightIntensity = frame.getLightEstimate().getPixelIntensity();
-            scene.updateAnchors(session);
-            for (Map.Entry<String, Collection<ObjectRecord>> entry : objMap.entrySet()) {
+            scene.update(session);
+            for (Map.Entry<String, Collection<ObjectRecord>> entry : objStorage.getNameIndex().entrySet()) {
                 final ObjectRenderer renderer = renderers.get(entry.getKey());
 
                 for (ObjectRecord objectRecord : entry.getValue()) {
-                    final Anchor anchor = scene.anchorMap().get(objectRecord.getSceneId());
+                    final Anchor anchor = scene.getAnchorMap().get(objectRecord.getSceneId());
                     if (anchor == null) {
                         continue;
                     }
@@ -440,7 +439,7 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
     private void allocateRenderers() {
         renderers = new HashMap<>();
-        for (Map.Entry<String, Collection<ObjectRecord>> entry : objMap.entrySet()) {
+        for (Map.Entry<String, Collection<ObjectRecord>> entry : objStorage.getNameIndex().entrySet()) {
             if (!renderers.containsKey(entry.getKey())) {
                 renderers.put(entry.getKey(), new ObjectRenderer());
             }
@@ -449,7 +448,7 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
     private void configureRenderers() throws IOException {
         for (Map.Entry<String, ObjectRenderer> entry : renderers.entrySet()) {
-            final ObjectRecord record = objMap.get(entry.getKey()).iterator().next();
+            final ObjectRecord record = objStorage.getByName(entry.getKey()).iterator().next();
             entry.getValue().createOnGlThread(getActivity(), record.getModelName(), record.getTextureName());
             virtualObject.setMaterialProperties(0.0f, 3.5f, 1.0f, 6.0f);
         }
@@ -492,6 +491,10 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
                 Rotation.Identity()
         ));
 
-        return new SceneRecord(new ObjectRecord[]{root, child1, child2});
+        List<ObjectRecord> records = new ArrayList<>();
+        records.add(root);
+        records.add(child1);
+        records.add(child2);
+        return new SceneRecord(records);
     }
 }
