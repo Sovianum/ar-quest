@@ -21,6 +21,11 @@ public class Scene extends SceneTree<Pose> {
 
     // it is assumed that parent id is always less than child id
     public Map<String, Collection<ObjectRecord>> load(final SceneRecord sceneRecord) {
+        return load(sceneRecord, Pose.IDENTITY);
+    }
+
+    // it is assumed that parent id is always less than child id
+    public Map<String, Collection<ObjectRecord>> load(final SceneRecord sceneRecord, Pose origin) {
         Map<String, Collection<ObjectRecord>> result = new HashMap<>();
 
         for (ObjectRecord objectRecord : sceneRecord.getObjectRecords()) {
@@ -32,9 +37,9 @@ public class Scene extends SceneTree<Pose> {
             if (objectRecord.getParentId() > 0) {
                 int parentSceneId = sceneRecord.getById(objectRecord.getParentId()).getSceneId();
                 // todo check if always need to use relative offset
-                sceneId = savePose(objectRecord.getPoseRecord().buildPose(), parentSceneId, true);
+                sceneId = savePose(objectRecord.getPoseRecord().buildPose().compose(origin), parentSceneId, true);
             } else {
-                sceneId = savePose(objectRecord.getPoseRecord().buildPose());
+                sceneId = savePose(objectRecord.getPoseRecord().buildPose().compose(origin));
             }
 
             objectRecord.setSceneId(sceneId);
