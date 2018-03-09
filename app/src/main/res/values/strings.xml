@@ -42,4 +42,7 @@
 
     <string name="show_more_str"><u>Подробнее</u></string>
     <string name="hide_str"><u>Скрыть</u></string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

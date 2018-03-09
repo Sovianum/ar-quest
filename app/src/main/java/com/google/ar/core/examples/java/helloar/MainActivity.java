@@ -14,10 +14,11 @@ import android.view.View;
 import android.widget.Button;
 
 import com.google.ar.core.examples.java.helloar.auth.AuthActivity;
-import com.google.ar.core.examples.java.helloar.quest.QuestsListFragment;
+import com.google.ar.core.examples.java.helloar.quest.QuestActivity;
+import com.google.ar.core.examples.java.helloar.quest.list.QuestsListFragment;
 
 public class MainActivity extends AppCompatActivity {
-    private Button toARActivityButton;
+    private Button toQuestActivityButton;
     private Button toAuthActivityButton;
 
     private QuestsListFragment questsListFragment;
@@ -31,12 +32,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         //removeToken(); //debug
 
-        toARActivityButton = findViewById(R.id.ar_activity_btn);
+        toQuestActivityButton = findViewById(R.id.ar_activity_btn);
         toAuthActivityButton = findViewById(R.id.auth_activity_btn);
-        toARActivityButton.setOnClickListener(new View.OnClickListener() {
+        toQuestActivityButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                goToARActivity(view);
+                goToQuestActivity(view);
             }
         });
 
@@ -56,8 +57,8 @@ public class MainActivity extends AppCompatActivity {
         selectFragment(questsListFragment);
     }
 
-    private void goToARActivity(View v) {
-        Intent intent = new Intent(this, HelloArActivity.class);
+    private void goToQuestActivity(View v) {
+        Intent intent = new Intent(this, QuestActivity.class);
         startActivity(intent);
     }
 

@@ -25,14 +25,14 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 
 /** Helper to ask permission. */
-final class PermissionHelper {
+public final class PermissionHelper {
   private static final int MY_PERMISSIONS_CODE = 0;
 
   static final String CAMERA_PERMISSION = Manifest.permission.CAMERA;
   static final String FINE_LOC_PERMISSION = Manifest.permission.ACCESS_FINE_LOCATION;
   static final String COARSE_LOC_PERMISSION = Manifest.permission.ACCESS_COARSE_LOCATION;
 
-  static boolean hasPermissions(Context context) {
+  public static boolean hasPermissions(Context context) {
     return hasPermission(context, CAMERA_PERMISSION) &&
             hasPermission(context, FINE_LOC_PERMISSION) &&
             hasPermission(context, COARSE_LOC_PERMISSION);
@@ -42,7 +42,7 @@ final class PermissionHelper {
     return ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED;
   }
 
-  static void requestPermissions(Activity activity) {
+  public static void requestPermissions(Activity activity) {
     ActivityCompat.requestPermissions(
             activity, new String[] {
                     CAMERA_PERMISSION,

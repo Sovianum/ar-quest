@@ -60,8 +60,13 @@
             android:name="com.google.ar.core"
             android:value="required" />
 
-        <activity android:name=".auth.AuthActivity"
-            android:theme="@style/Theme.AppCompat.NoActionBar"/>
+        <activity
+            android:name=".auth.AuthActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar" />
+
+        <activity
+            android:name=".quest.QuestActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar" />
     </application>
 
 </manifest>
