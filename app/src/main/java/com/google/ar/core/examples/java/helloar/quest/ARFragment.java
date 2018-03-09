@@ -68,6 +68,7 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
     private Button toggleBtn;
     private Button grabBtn;
     private Button releaseBtn;
+    private Button toQuestFragmentBtn;
 
     private boolean installRequested;
 
@@ -102,6 +103,8 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
     private boolean loaded = false;
 
+    private View.OnClickListener onClickListener;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -135,6 +138,9 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
                 release();
             }
         });
+
+        toQuestFragmentBtn = view.findViewById(R.id.to_quest_fragment_btn);
+        toQuestFragmentBtn.setOnClickListener(onClickListener);
 
         // Set up tap listener.
         gestureDetector =
@@ -174,6 +180,11 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
     }
 
+
+    public void setOnClickListener(View.OnClickListener listener) {
+        this.onClickListener = listener;
+    }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -197,7 +208,7 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
             scene = new Scene(session);
         }
 
-//        showLoadingMessage();
+        //showLoadingMessage();
         // Note that order matters - see the note in onPause(), the reverse applies here.
         session.resume();
         surfaceView.onResume();
@@ -287,9 +298,7 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
             Camera camera = frame.getCamera();
 
             if (camera.getTrackingState() == TrackingState.TRACKING) {
-                if (!loaded) {
-                    objMap = scene.load(sceneRecord);
-                }
+                //objMap = scene.load(sceneRecord);
 
                 checkAllCollisions();
                 if (cameraAnchor != null) {
@@ -321,8 +330,8 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
             // Compute lighting from average intensity of the image.
             final float lightIntensity = frame.getLightEstimate().getPixelIntensity();
-
             scene.reAttachAnchors(session);
+            objMap = scene.load(sceneRecord);
             for (Map.Entry<String, Collection<ObjectRecord>> entry : objMap.entrySet()) {
                 final ObjectRenderer renderer = renderers.get(entry.getKey());
 

@@ -14,10 +14,11 @@
        limitations under the License.
     -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:tools="http://schemas.android.com/tools"
-android:layout_width="match_parent"
-android:layout_height="match_parent"
-tools:context=".quest.ARFragment">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_ar"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".quest.ARFragment">
 
 <android.opengl.GLSurfaceView
     android:id="@+id/surfaceview"
@@ -57,6 +58,12 @@ tools:context=".quest.ARFragment">
             android:text="@string/release_str" />
 
     </LinearLayout>
+
+    <Button
+        android:id="@+id/to_quest_fragment_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/to_quest_fragment" />
 
 
 </LinearLayout>

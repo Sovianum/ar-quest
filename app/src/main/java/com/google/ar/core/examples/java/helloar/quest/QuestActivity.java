@@ -18,6 +18,20 @@ public class QuestActivity extends AppCompatActivity {
     private QuestFragment questFragment;
     private Fragment activeFragment;
 
+    private View.OnClickListener toQuestOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            selectFragment(questFragment);
+        }
+    };
+
+    private View.OnClickListener toAROnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            selectFragment(arFragment);
+        }
+    };
+
     private LocationListener onSelfLocationChangeListener = new LocationListener() {
         @Override
         public void onLocationChanged(final Location location) {
@@ -40,10 +54,10 @@ public class QuestActivity extends AppCompatActivity {
         setContentView(R.layout.activity_quest);
 
         questFragment = new QuestFragment();
-        //questFragment.setOnClickListener();
+        questFragment.setOnClickListener(toAROnClickListener);
 
         arFragment = new ARFragment();
-        //arFragment.setOnClickListener();
+        arFragment.setOnClickListener(toQuestOnClickListener);
 
         selectFragment(arFragment);
     }
