@@ -14,6 +14,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.google.ar.core.examples.java.helloar.auth.AuthActivity;
+import com.google.ar.core.examples.java.helloar.network.Api;
 import com.google.ar.core.examples.java.helloar.quest.QuestActivity;
 import com.google.ar.core.examples.java.helloar.quest.list.QuestsListFragment;
 
@@ -97,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
             Intent intentAuth = new Intent(this, AuthActivity.class);
             startActivity(intentAuth);
         } else {
-
+            Api.getInstance().setToken(jwt);
         }
     }
 

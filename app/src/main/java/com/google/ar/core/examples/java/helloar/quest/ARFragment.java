@@ -252,14 +252,14 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         backgroundRenderer.createOnGlThread(/*context=*/ getActivity());
 
         // Prepare the other rendering objects.
-        try {
+        //try {
             sceneRecord = getDemoScene();
             objMap = sceneRecord.getObjectMap();
             allocateRenderers();
-            configureRenderers();
-        } catch (IOException e) {
-            Log.e(TAG, "Failed to read obj file");
-        }
+            //configureRenderers();
+        //} catch (IOException e) {
+        //    Log.e(TAG, "Failed to read obj file");
+        //}
         try {
             planeRenderer.createOnGlThread(/*context=*/ getActivity(), "trigrid.png");
         } catch (IOException e) {
@@ -339,7 +339,7 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
                     final Anchor anchor = scene.get(objectRecord.getSceneId());
                     anchor.getPose().toMatrix(anchorMatrix, 0);
                     renderer.updateModelMatrix(anchorMatrix, objectRecord.getScale());
-                    renderer.draw(viewmtx, projmtx, lightIntensity);
+                    //renderer.draw(viewmtx, projmtx, lightIntensity);
                 }
             }
 
