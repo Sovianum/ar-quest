@@ -190,7 +190,7 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
         if (session == null) {
             configureSession();
-            scene = new Scene(session);
+            scene = new Scene();
         }
 
         //showLoadingMessage();
