@@ -253,12 +253,10 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
         // Prepare the other rendering objects.
         try {
-            virtualObject.createOnGlThread(/*context=*/ getActivity(), "andy.obj", "andy.png");
-            virtualObject.setMaterialProperties(0.0f, 3.5f, 1.0f, 6.0f);
-
-            virtualObjectShadow.createOnGlThread(/*context=*/ getActivity(), "andy_shadow.obj", "andy_shadow.png");
-            virtualObjectShadow.setBlendMode(ObjectRenderer.BlendMode.Shadow);
-            virtualObjectShadow.setMaterialProperties(1.0f, 0.0f, 0.0f, 1.0f);
+            sceneRecord = getDemoScene();
+            objMap = sceneRecord.getObjectMap();
+            allocateRenderers();
+            configureRenderers();
         } catch (IOException e) {
             Log.e(TAG, "Failed to read obj file");
         }
@@ -269,6 +267,8 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         }
         pointCloud.createOnGlThread(/*context=*/ getActivity());
     }
+
+
 
     @Override
     public void onSurfaceChanged(GL10 gl10, int width, int height) {
