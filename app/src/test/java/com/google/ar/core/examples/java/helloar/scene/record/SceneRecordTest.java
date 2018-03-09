@@ -63,7 +63,7 @@ public class SceneRecordTest {
             ObjectRecord first = sceneRecord.getObjectRecords()[i];
             ObjectRecord second = reverse.getObjectRecords()[i];
 
-            assertEquals(first.getAssetName(), second.getAssetName());
+            assertEquals(first.getModelName(), second.getModelName());
             assertEquals(first.getId(), second.getId());
             assertEquals(first.getParentId(), second.getParentId());
 
