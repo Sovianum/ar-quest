@@ -6,7 +6,7 @@ import android.util.Log;
 import android.util.Property;
 
 import com.google.ar.core.Pose;
-import com.google.ar.core.examples.java.helloar.scene.Scene;
+import com.google.ar.core.examples.java.helloar.core.ar.Scene;
 
 public class Animator {
     public static class AnchorPoseInterpProperty extends Property<Integer, Float> {

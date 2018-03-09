@@ -1,4 +1,4 @@
-package com.google.ar.core.examples.java.helloar.scene;
+package com.google.ar.core.examples.java.helloar.core.ar;
 
 
 import com.google.common.collect.BiMap;
@@ -105,7 +105,11 @@ public class SceneTree<T> {
         registry.inverse().put(id, newObj);
     }
 
-    boolean _contains(T obj) {
+    protected Collection<Integer> ids() {
+        return registry.values();
+    }
+
+    private boolean _contains(T obj) {
         return registry.containsKey(obj);
     }
 

@@ -1,4 +1,4 @@
-package com.google.ar.core.examples.java.helloar.scene.record;
+package com.google.ar.core.examples.java.helloar.core.ar.record;
 
 public class Translation {
     public static Translation Identity() {
