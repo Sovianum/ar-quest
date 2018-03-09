@@ -34,14 +34,21 @@ import com.google.ar.core.examples.java.helloar.rendering.BackgroundRenderer;
 import com.google.ar.core.examples.java.helloar.rendering.ObjectRenderer;
 import com.google.ar.core.examples.java.helloar.rendering.PlaneRenderer;
 import com.google.ar.core.examples.java.helloar.rendering.PointCloudRenderer;
+import com.google.ar.core.examples.java.helloar.scene.Scene;
+import com.google.ar.core.examples.java.helloar.scene.record.ObjectRecord;
+import com.google.ar.core.examples.java.helloar.scene.record.PoseRecord;
+import com.google.ar.core.examples.java.helloar.scene.record.Rotation;
+import com.google.ar.core.examples.java.helloar.scene.record.SceneRecord;
+import com.google.ar.core.examples.java.helloar.scene.record.Translation;
 import com.google.ar.core.exceptions.UnavailableApkTooOldException;
 import com.google.ar.core.exceptions.UnavailableArcoreNotInstalledException;
 import com.google.ar.core.exceptions.UnavailableSdkTooOldException;
 import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -85,20 +92,20 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
     private int grabId = -1;
     private boolean needShow = false;
 
-    private List<Anchor> randomAnchors = new ArrayList<>(ANDROID_CNT);
-    private List<Float> targetScales = new ArrayList<>(ANDROID_CNT);
     private int anchorCnt = 0;
     private Anchor sphereOrigin = null;
+
+    private Scene scene;
+    private SceneRecord sceneRecord;
+    private Map<String, Collection<ObjectRecord>> objMap;
+    private Map<String, ObjectRenderer> renderers;
+
+    private boolean loaded = false;
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        for (int i = 0; i != ANDROID_CNT; ++i) {
-            randomAnchors.add(null);
-            targetScales.add(DEFAULT_TARGET_SCALE);
-        }
 
         RelativeLayout view = (RelativeLayout) inflater.inflate(R.layout.fragment_ar, container, false);
 
@@ -129,6 +136,7 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
             }
         });
 
+        // Set up tap listener.
         gestureDetector =
                 new GestureDetector(
                         getActivity(),
@@ -170,7 +178,6 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
     public void onResume() {
         super.onResume();
 
-
         // ARCore requires camera permissions to operate. If we did not yet obtain runtime
         // permission on Android M and above, now is a good time to ask the user for it.
         if (PermissionHelper.hasPermissions(getActivity())) {
@@ -186,52 +193,8 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         }
 
         if (session == null) {
-            Exception exception = null;
-            String message = null;
-            try {
-                switch (ArCoreApk.getInstance().requestInstall(getActivity(), !installRequested)) {
-                    case INSTALL_REQUESTED:
-                        installRequested = true;
-                        return;
-                    case INSTALLED:
-                        break;
-                }
-
-                // ARCore requires camera permissions to operate. If we did not yet obtain runtime
-                // permission on Android M and above, now is a good time to ask the user for it.
-                if (!PermissionHelper.hasPermissions(getActivity())) {
-                    PermissionHelper.requestPermissions(getActivity());
-                    return;
-                }
-
-                session = new Session(/* context= */ getActivity());
-            } catch (UnavailableArcoreNotInstalledException
-                    | UnavailableUserDeclinedInstallationException e) {
-                message = "Please install ARCore";
-                exception = e;
-            } catch (UnavailableApkTooOldException e) {
-                message = "Please update ARCore";
-                exception = e;
-            } catch (UnavailableSdkTooOldException e) {
-                message = "Please update this app";
-                exception = e;
-            } catch (Exception e) {
-                message = "This device does not support AR";
-                exception = e;
-            }
-
-            if (message != null) {
-                showSnackbarMessage(message, true);
-                Log.e(TAG, "Exception creating session", exception);
-                return;
-            }
-
-            // Create default config and check if supported.
-            Config config = new Config(session);
-            if (!session.isSupported(config)) {
-                showSnackbarMessage("This device does not support AR", true);
-            }
-            session.configure(config);
+            configureSession();
+            scene = new Scene(session);
         }
 
 //        showLoadingMessage();
@@ -324,24 +287,20 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
             Camera camera = frame.getCamera();
 
             if (camera.getTrackingState() == TrackingState.TRACKING) {
+                if (!loaded) {
+                    objMap = scene.load(sceneRecord);
+                }
+
                 checkAllCollisions();
                 if (cameraAnchor != null) {
                     cameraAnchor.detach();
                 }
                 cameraAnchor = getCameraFloatingPoint(session, frame);
-                if (grabId >= 0) {
-                    Anchor a = randomAnchors.get(grabId);
-                    a.detach();
-                    randomAnchors.set(grabId, cameraAnchor);
-                }
-
-                if (sphereOrigin == null) {
-                    sphereOrigin = session.createAnchor(camera.getPose());
-                    for (int i = 0; i != ANDROID_CNT; ++i) {
-                        Pose pose = sphereOrigin.getPose().compose(getRandomOffsetPose()).extractTranslation();
-                        setNextAnchor(session.createAnchor(pose));
-                    }
-                }
+//                if (grabId >= 0) {
+//                    Anchor a = randomAnchors.get(grabId);
+//                    a.detach();
+//                    randomAnchors.set(grabId, cameraAnchor);
+//                }
             }
 
             // Draw background.
@@ -363,43 +322,27 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
             // Compute lighting from average intensity of the image.
             final float lightIntensity = frame.getLightEstimate().getPixelIntensity();
 
-//            // Check if we detected at least one plane. If so, hide the loading message.
-//            if (messageSnackbar != null) {
-//                for (Plane plane : session.getAllTrackables(Plane.class)) {
-//                    if (plane.getType() == com.google.ar.core.Plane.Type.HORIZONTAL_UPWARD_FACING
-//                            && plane.getTrackingState() == TrackingState.TRACKING) {
-//                        hideLoadingMessage();
-//                        break;
-//                    }
-//                }
-//            }
+            scene.reAttachAnchors(session);
+            for (Map.Entry<String, Collection<ObjectRecord>> entry : objMap.entrySet()) {
+                final ObjectRenderer renderer = renderers.get(entry.getKey());
 
-            // Visualize anchors created by touch.
-            for (int i = 0; i != randomAnchors.size(); ++i) {
-                Anchor anchor = randomAnchors.get(i);
-                if (anchor == null || anchor.getTrackingState() != TrackingState.TRACKING) {
-                    continue;
+                for (ObjectRecord objectRecord : entry.getValue()) {
+                    final Anchor anchor = scene.get(objectRecord.getSceneId());
+                    anchor.getPose().toMatrix(anchorMatrix, 0);
+                    renderer.updateModelMatrix(anchorMatrix, objectRecord.getScale());
+                    renderer.draw(viewmtx, projmtx, lightIntensity);
                 }
-                // Get the current pose of an Anchor in world space. The Anchor pose is updated
-                // during calls to session.update() as ARCore refines its estimate of the world.
-                anchor.getPose().toMatrix(anchorMatrix, 0);
-
-                // Update and draw the model and its shadow.
-                virtualObject.updateModelMatrix(anchorMatrix, targetScales.get(i));
-                virtualObjectShadow.updateModelMatrix(anchorMatrix, targetScales.get(i));
-                virtualObject.draw(viewmtx, projmtx, lightIntensity);
-                virtualObjectShadow.draw(viewmtx, projmtx, lightIntensity);
             }
 
-            float scaleFactor = 0.3f;
-            if (cameraAnchor != null && needShow) {
-                cameraAnchor.getPose().toMatrix(anchorMatrix, 0);
-
-                virtualObject.updateModelMatrix(anchorMatrix, scaleFactor);
-                virtualObjectShadow.updateModelMatrix(anchorMatrix, scaleFactor);
-                virtualObject.draw(viewmtx, projmtx, lightIntensity);
-                virtualObjectShadow.draw(viewmtx, projmtx, lightIntensity);
-            }
+//            float scaleFactor = 0.0001f;
+//            if (cameraAnchor != null && needShow) {
+//                cameraAnchor.getPose().toMatrix(anchorMatrix, 0);
+//
+//                virtualObject.updateModelMatrix(anchorMatrix, scaleFactor);
+//                virtualObjectShadow.updateModelMatrix(anchorMatrix, scaleFactor);
+//                virtualObject.draw(viewmtx, projmtx, lightIntensity);
+//                virtualObjectShadow.draw(viewmtx, projmtx, lightIntensity);
+//            }
 
         } catch (Throwable t) {
             // Avoid crashing the application due to unhandled exceptions.
@@ -407,55 +350,44 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         }
     }
 
-    private void setNextAnchor(Anchor anchor) {
-        int index = anchorCnt++ % ANDROID_CNT;
-        Anchor oldAnchor = randomAnchors.get(index);
-        if (oldAnchor != null) {
-            oldAnchor.detach();
-        }
-        randomAnchors.set(index, anchor);
-        targetScales.set(index, DEFAULT_TARGET_SCALE);
-    }
-
     private void checkAllCollisions() {
         if (!needShow) {
             return;
         }
-        for (int i = 0; i != randomAnchors.size(); i++) {
-            Anchor anchor = randomAnchors.get(i);
+        for (Anchor anchor : scene.all()) {
             if (anchor == null) {
                 return;
             }
 
-            if (detectCollision(cameraAnchor, anchor)) {
-                targetScales.set(i, TRIGGER_TARGET_SCALE);
-            } else {
-                targetScales.set(i, 1f);
-            }
+//            if (detectCollision(cameraAnchor, anchor)) {
+//                targetScales.set(i, TRIGGER_TARGET_SCALE);
+//            } else {
+//                targetScales.set(i, 1f);
+//            }
         }
     }
 
     private void grab() {
-        if (grabId >= 0) {
-            return;
-        }
-        for (int i = 0; i != ANDROID_CNT; ++i) {
-            Anchor a = randomAnchors.get(i);
-            if (detectCollision(cameraAnchor, a)) {
-                grabId = i;
-                Toast.makeText(getActivity(), "Grabbed", Toast.LENGTH_SHORT).show();
-            }
-        }
-        Toast.makeText(getActivity(), "You are to far", Toast.LENGTH_SHORT).show();
+//        if (grabId >= 0) {
+//            return;
+//        }
+//        for (int i = 0; i != ANDROID_CNT; ++i) {
+//            Anchor a = randomAnchors.get(i);
+//            if (detectCollision(cameraAnchor, a)) {
+//                grabId = i;
+//                Toast.makeText(this, "Grabbed", Toast.LENGTH_SHORT).show();
+//            }
+//        }
+//        Toast.makeText(this, "You are to far", Toast.LENGTH_SHORT).show();
     }
 
     private void release() {
-        if (grabId < 0) {
-            return;
-        }
-        randomAnchors.set(grabId, session.createAnchor(cameraAnchor.getPose()));
-        grabId = -1;
-        Toast.makeText(getActivity(), "Released", Toast.LENGTH_SHORT).show();
+//        if (grabId < 0) {
+//            return;
+//        }
+//        randomAnchors.set(grabId, session.createAnchor(cameraAnchor.getPose()));
+//        grabId = -1;
+//        Toast.makeText(this, "Released", Toast.LENGTH_SHORT).show();
     }
 
     private boolean detectCollision(Anchor anchor1, Anchor anchor2) {
@@ -479,14 +411,6 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         Camera camera = frame.getCamera();
         Pose pose = camera.getPose().compose(Pose.makeTranslation(0f, 0f, -1f)).extractTranslation();
         return session.createAnchor(pose);
-    }
-
-    private Pose getRandomOffsetPose() {
-        return Pose.makeTranslation(
-                SPHERE_RADIUS * (float) (Math.random() - 0.5),
-                SPHERE_RADIUS * (float) (Math.random() - 0.5),
-                SPHERE_RADIUS * (float) (Math.random() - 0.5)
-        );
     }
 
     private void showSnackbarMessage(String message, boolean finishOnDismiss) {
@@ -538,5 +462,111 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
                         messageSnackbar = null;
                     }
                 });
+    }
+
+    private void configureSession() {
+        Exception exception = null;
+        String message = null;
+        try {
+            switch (ArCoreApk.getInstance().requestInstall(getActivity(), !installRequested)) {
+                case INSTALL_REQUESTED:
+                    installRequested = true;
+                    return;
+                case INSTALLED:
+                    break;
+            }
+
+            // ARCore requires camera permissions to operate. If we did not yet obtain runtime
+            // permission on Android M and above, now is a good time to ask the user for it.
+            if (!PermissionHelper.hasPermissions(getActivity())) {
+                PermissionHelper.requestPermissions(getActivity());
+                return;
+            }
+
+            session = new Session(/* context= */ getActivity());
+        } catch (UnavailableArcoreNotInstalledException
+                | UnavailableUserDeclinedInstallationException e) {
+            message = "Please install ARCore";
+            exception = e;
+        } catch (UnavailableApkTooOldException e) {
+            message = "Please update ARCore";
+            exception = e;
+        } catch (UnavailableSdkTooOldException e) {
+            message = "Please update this app";
+            exception = e;
+        } catch (Exception e) {
+            message = "This device does not support AR";
+            exception = e;
+        }
+
+        if (message != null) {
+            showSnackbarMessage(message, true);
+            Log.e(TAG, "Exception creating session", exception);
+            return;
+        }
+
+        // Create default config and check if supported.
+        Config config = new Config(session);
+        if (!session.isSupported(config)) {
+            showSnackbarMessage("This device does not support AR", true);
+        }
+        session.configure(config);
+    }
+
+    private void allocateRenderers() {
+        renderers = new HashMap<>();
+        for (Map.Entry<String, Collection<ObjectRecord>> entry : objMap.entrySet()) {
+            if (!renderers.containsKey(entry.getKey())) {
+                renderers.put(entry.getKey(), new ObjectRenderer());
+            }
+        }
+    }
+
+    private void configureRenderers() throws IOException {
+        for (Map.Entry<String, ObjectRenderer> entry : renderers.entrySet()) {
+            final ObjectRecord record = objMap.get(entry.getKey()).iterator().next();
+            entry.getValue().createOnGlThread(getActivity(), record.getModelName(), record.getTextureName());
+            virtualObject.setMaterialProperties(0.0f, 3.5f, 1.0f, 6.0f);
+        }
+    }
+
+    private static SceneRecord getDemoScene() {
+        ObjectRecord root = new ObjectRecord();
+        root.setId(1);
+        root.setParentId(0);
+        root.setName("andy");
+        root.setModelName("andy.obj");
+        root.setTextureName("andy.png");
+        root.setScale(1);
+        root.setPoseRecord(new PoseRecord(
+                new Translation(0, 0, -2),
+                Rotation.Identity()
+        ));
+
+        ObjectRecord child1 = new ObjectRecord();
+        child1.setId(2);
+        child1.setParentId(1);
+        child1.setName("rose");
+        child1.setModelName("rose.obj");
+        child1.setTextureName("rose.jpg");
+        child1.setScale(0.003f);
+        child1.setPoseRecord(new PoseRecord(
+                new Translation(1, 0, 0),
+                Rotation.Identity()
+        ));
+
+        ObjectRecord child2 = new ObjectRecord();
+        child2.setId(3);
+        child2.setParentId(1);
+        child2.setName("banana");
+        child2.setModelName("banana.obj");
+        child2.setTextureName("banana.jpg");
+        child2.setScale(0.001f);
+        child2.setPoseRecord(new PoseRecord(
+                new Translation(0, 0, 1),
+                Rotation.Identity()
+        ));
+
+        return new SceneRecord(new ObjectRecord[]{root, child1, child2});
     }
 }
