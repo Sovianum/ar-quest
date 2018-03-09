@@ -1,11 +1,11 @@
-package com.google.ar.core.examples.java.helloar.scene;
+package com.google.ar.core.examples.java.helloar.core.ar;
 
 import com.google.ar.core.Anchor;
 import com.google.ar.core.Pose;
 import com.google.ar.core.Session;
 import com.google.ar.core.TrackingState;
-import com.google.ar.core.examples.java.helloar.scene.record.ObjectRecord;
-import com.google.ar.core.examples.java.helloar.scene.record.SceneRecord;
+import com.google.ar.core.examples.java.helloar.core.ar.record.ObjectRecord;
+import com.google.ar.core.examples.java.helloar.core.ar.record.SceneRecord;
 
 import java.util.ArrayList;
 import java.util.Collection;
