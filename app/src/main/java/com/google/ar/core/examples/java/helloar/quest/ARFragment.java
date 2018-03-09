@@ -27,19 +27,18 @@ import com.google.ar.core.Pose;
 import com.google.ar.core.Session;
 import com.google.ar.core.TrackingState;
 import com.google.ar.core.examples.java.helloar.DisplayRotationHelper;
-import com.google.ar.core.examples.java.helloar.HelloArActivity;
 import com.google.ar.core.examples.java.helloar.PermissionHelper;
 import com.google.ar.core.examples.java.helloar.R;
+import com.google.ar.core.examples.java.helloar.core.ar.Scene;
+import com.google.ar.core.examples.java.helloar.core.ar.record.ObjectRecord;
+import com.google.ar.core.examples.java.helloar.core.ar.record.PoseRecord;
+import com.google.ar.core.examples.java.helloar.core.ar.record.Rotation;
+import com.google.ar.core.examples.java.helloar.core.ar.record.SceneRecord;
+import com.google.ar.core.examples.java.helloar.core.ar.record.Translation;
 import com.google.ar.core.examples.java.helloar.rendering.BackgroundRenderer;
 import com.google.ar.core.examples.java.helloar.rendering.ObjectRenderer;
 import com.google.ar.core.examples.java.helloar.rendering.PlaneRenderer;
 import com.google.ar.core.examples.java.helloar.rendering.PointCloudRenderer;
-import com.google.ar.core.examples.java.helloar.scene.Scene;
-import com.google.ar.core.examples.java.helloar.scene.record.ObjectRecord;
-import com.google.ar.core.examples.java.helloar.scene.record.PoseRecord;
-import com.google.ar.core.examples.java.helloar.scene.record.Rotation;
-import com.google.ar.core.examples.java.helloar.scene.record.SceneRecord;
-import com.google.ar.core.examples.java.helloar.scene.record.Translation;
 import com.google.ar.core.exceptions.UnavailableApkTooOldException;
 import com.google.ar.core.exceptions.UnavailableArcoreNotInstalledException;
 import com.google.ar.core.exceptions.UnavailableSdkTooOldException;
@@ -55,7 +54,7 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
-    private static final String TAG = HelloArActivity.class.getSimpleName();
+    private static final String TAG = ARFragment.class.getSimpleName();
 
     public static final float THRESHOLD_DISTANCE = 0.1f;
     public static final float SPHERE_RADIUS = 1f;
