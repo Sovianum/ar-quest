@@ -23,7 +23,6 @@ import com.google.ar.core.ArCoreApk;
 import com.google.ar.core.Camera;
 import com.google.ar.core.Config;
 import com.google.ar.core.Frame;
-import com.google.ar.core.Pose;
 import com.google.ar.core.Session;
 import com.google.ar.core.TrackingState;
 import com.google.ar.core.examples.java.helloar.DisplayRotationHelper;
@@ -123,20 +122,7 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         });
 
         grabBtn = view.findViewById(R.id.grab_btn);
-        grabBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                grab();
-            }
-        });
-
         releaseBtn = view.findViewById(R.id.release_btn);
-        releaseBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                release();
-            }
-        });
 
         toQuestFragmentBtn = view.findViewById(R.id.to_quest_fragment_btn);
         toQuestFragmentBtn.setOnClickListener(onClickListener);
@@ -212,6 +198,10 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         session.resume();
         surfaceView.onResume();
         displayRotationHelper.onResume();
+
+        sceneRecord = getDemoScene();
+        objMap = sceneRecord.getObjectMap();
+        objMap = scene.load(sceneRecord);
     }
 
     @Override
@@ -252,8 +242,6 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
         // Prepare the other rendering objects.
         try {
-            sceneRecord = getDemoScene();
-            objMap = sceneRecord.getObjectMap();
             allocateRenderers();
             configureRenderers();
         } catch (IOException e) {
@@ -297,18 +285,7 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
             Camera camera = frame.getCamera();
 
             if (camera.getTrackingState() == TrackingState.TRACKING) {
-                //objMap = scene.load(sceneRecord);
-
-                checkAllCollisions();
-                if (cameraAnchor != null) {
-                    cameraAnchor.detach();
-                }
-                cameraAnchor = getCameraFloatingPoint(session, frame);
-//                if (grabId >= 0) {
-//                    Anchor a = randomAnchors.get(grabId);
-//                    a.detach();
-//                    randomAnchors.set(grabId, cameraAnchor);
-//                }
+                scene.updateAnchors(session);
             }
 
             // Draw background.
@@ -329,13 +306,16 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
             // Compute lighting from average intensity of the image.
             final float lightIntensity = frame.getLightEstimate().getPixelIntensity();
-            scene.reAttachAnchors(session);
-            objMap = scene.load(sceneRecord);
+            scene.updateAnchors(session);
             for (Map.Entry<String, Collection<ObjectRecord>> entry : objMap.entrySet()) {
                 final ObjectRenderer renderer = renderers.get(entry.getKey());
 
                 for (ObjectRecord objectRecord : entry.getValue()) {
-                    final Anchor anchor = scene.get(objectRecord.getSceneId());
+                    final Anchor anchor = scene.anchorMap().get(objectRecord.getSceneId());
+                    if (anchor == null) {
+                        continue;
+                    }
+
                     anchor.getPose().toMatrix(anchorMatrix, 0);
                     renderer.updateModelMatrix(anchorMatrix, objectRecord.getScale());
                     renderer.draw(viewmtx, projmtx, lightIntensity);
@@ -356,69 +336,6 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
             // Avoid crashing the application due to unhandled exceptions.
             Log.e(TAG, "Exception on the OpenGL thread", t);
         }
-    }
-
-    private void checkAllCollisions() {
-        if (!needShow) {
-            return;
-        }
-        for (Anchor anchor : scene.all()) {
-            if (anchor == null) {
-                return;
-            }
-
-//            if (detectCollision(cameraAnchor, anchor)) {
-//                targetScales.set(i, TRIGGER_TARGET_SCALE);
-//            } else {
-//                targetScales.set(i, 1f);
-//            }
-        }
-    }
-
-    private void grab() {
-//        if (grabId >= 0) {
-//            return;
-//        }
-//        for (int i = 0; i != ANDROID_CNT; ++i) {
-//            Anchor a = randomAnchors.get(i);
-//            if (detectCollision(cameraAnchor, a)) {
-//                grabId = i;
-//                Toast.makeText(this, "Grabbed", Toast.LENGTH_SHORT).show();
-//            }
-//        }
-//        Toast.makeText(this, "You are to far", Toast.LENGTH_SHORT).show();
-    }
-
-    private void release() {
-//        if (grabId < 0) {
-//            return;
-//        }
-//        randomAnchors.set(grabId, session.createAnchor(cameraAnchor.getPose()));
-//        grabId = -1;
-//        Toast.makeText(this, "Released", Toast.LENGTH_SHORT).show();
-    }
-
-    private boolean detectCollision(Anchor anchor1, Anchor anchor2) {
-        float distance = getDistance(anchor1, anchor2);
-        return distance < THRESHOLD_DISTANCE;
-    }
-
-    private float getDistance(Anchor anchor1, Anchor anchor2) {
-        float[] v1 = anchor1.getPose().transformPoint(new float[]{0, 0, 0});
-        float[] v2 = anchor2.getPose().transformPoint(new float[]{0 ,0, 0});
-
-        float dist = 0;
-        for (int i = 0; i != v1.length; ++i) {
-            float d = v2[i] - v1[i];
-            dist += d * d;
-        }
-        return (float) Math.sqrt(dist);
-    }
-
-    private Anchor getCameraFloatingPoint(Session session, Frame frame) {
-        Camera camera = frame.getCamera();
-        Pose pose = camera.getPose().compose(Pose.makeTranslation(0f, 0f, -1f)).extractTranslation();
-        return session.createAnchor(pose);
     }
 
     private void showSnackbarMessage(String message, boolean finishOnDismiss) {

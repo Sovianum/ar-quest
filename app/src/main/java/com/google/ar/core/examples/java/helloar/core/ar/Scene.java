@@ -3,7 +3,6 @@ package com.google.ar.core.examples.java.helloar.core.ar;
 import com.google.ar.core.Anchor;
 import com.google.ar.core.Pose;
 import com.google.ar.core.Session;
-import com.google.ar.core.TrackingState;
 import com.google.ar.core.examples.java.helloar.core.ar.record.ObjectRecord;
 import com.google.ar.core.examples.java.helloar.core.ar.record.SceneRecord;
 
@@ -12,12 +11,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Scene extends SceneTree<Anchor> {
-    private Session session;
+public class Scene extends SceneTree<Pose> {
+    private Map<Integer, Anchor> anchorMap;
 
-    public Scene(Session session) {
+    public Scene() {
         super();
-        this.session = session;
+        anchorMap = new HashMap<>();
     }
 
     // it is assumed that parent id is always less than child id
@@ -33,9 +32,9 @@ public class Scene extends SceneTree<Anchor> {
             if (objectRecord.getParentId() > 0) {
                 int parentSceneId = sceneRecord.getById(objectRecord.getParentId()).getSceneId();
                 // todo check if always need to use relative offset
-                sceneId = createAnchor(objectRecord.getPoseRecord().buildPose(), parentSceneId, true);
+                sceneId = savePose(objectRecord.getPoseRecord().buildPose(), parentSceneId, true);
             } else {
-                sceneId = createAnchor(objectRecord.getPoseRecord().buildPose());
+                sceneId = savePose(objectRecord.getPoseRecord().buildPose());
             }
 
             objectRecord.setSceneId(sceneId);
@@ -45,42 +44,38 @@ public class Scene extends SceneTree<Anchor> {
         return result;
     }
 
-    public void clear() {
-        for (Anchor a : super.all()) {
-            a.detach();
+    public Map<Integer, Anchor> anchorMap() {
+        return anchorMap;
+    }
+
+    public void updateAnchors(Session session) {
+        for (Map.Entry<Integer, Anchor> entry: anchorMap.entrySet()) {
+            entry.getValue().detach();
         }
-        super.clear();
-    }
+        anchorMap.clear();
 
-    public void reAttachAnchors(Session session) {
-        this.session = session;
-        for (Anchor anchor : all()) {
-            if (anchor.getTrackingState() != TrackingState.TRACKING) {
-                replace(anchor, session.createAnchor(anchor.getPose()));
-            }
+        for (Integer id : ids()) {
+            anchorMap.put(id, session.createAnchor(get(id)));
         }
     }
 
-    public int createAnchor(Pose pose) {
-        Anchor anchor = session.createAnchor(pose);
-        return add(anchor);
+    public int savePose(Pose pose) {
+        return add(pose);
     }
 
-    public int createAnchor(Pose pose, int parentID, boolean isRelative) {
-        Anchor parent = get(parentID);
-        if (parent == null) {
+    public int savePose(Pose pose, int parentID, boolean isRelative) {
+        Pose parentPose = get(parentID);
+        if (parentPose == null) {
             throw new ParentNotFoundException();
         }
         Pose transform;
         if (isRelative) {
-            Pose parentPose = parent.getPose();
             transform = pose.compose(parentPose);
         } else {
             transform = pose;
         }
 
-        Anchor anchor = session.createAnchor(transform);
-        return add(anchor, parent);
+        return add(transform, parentPose);
     }
 
     public void applyGlobal(int id, Pose pose) {
@@ -96,18 +91,13 @@ public class Scene extends SceneTree<Anchor> {
             return;
         }
 
-        Collection<Anchor> anchors = _subTreeElements(get(id), true);
-        if (anchors == null) {
+        Collection<Pose> poses = _subTreeElements(get(id), true);
+        if (poses == null) {
             return;
         }
 
-        Pose transformation = pose;
-        for (Anchor a : anchors) {
-            if (local) {
-                transformation = pose.compose(a.getPose());
-            }
-            a.detach();
-            replace(a, session.createAnchor(transformation));
+        for (Pose localPose : poses) {
+            replace(localPose, local ? pose.compose(localPose) : pose);
         }
     }
 }
