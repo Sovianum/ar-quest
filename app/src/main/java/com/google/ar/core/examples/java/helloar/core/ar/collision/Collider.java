@@ -27,13 +27,15 @@ public class Collider extends Enabled {
     }
 
     private static boolean collideSpheres(Collider collider1, Collider collider2) {
-        Pose offset = collider1.toLocals(collider2.position.getPose().compose(collider2.offset.getPose()));
+        Pose pose1 = collider1.position.getPose().extractTranslation().compose(collider1.offset.getPose().extractTranslation());
+        Pose pose2 = collider2.position.getPose().extractTranslation().compose(collider2.offset.getPose().extractTranslation());
+
         Sphere sphere1 = (Sphere) collider1.shape;
         Sphere sphere2 = (Sphere) collider2.shape;
 
-        float dx = offset.tx();
-        float dy = offset.ty();
-        float dz = offset.tz();
+        float dx = pose1.tx() - pose2.tx();
+        float dy = pose1.ty() - pose2.ty();
+        float dz = pose1.tz() - pose2.tz();
 
         float r1 = sphere1.getRadius();
         float r2 = sphere2.getRadius();
@@ -67,6 +69,10 @@ public class Collider extends Enabled {
         this.shape = new Point();
         this.offset = new Geom();
         this.offset = new Geom();
+    }
+
+    public Shape getShape() {
+        return shape;
     }
 
     public boolean collide(Collider another) {

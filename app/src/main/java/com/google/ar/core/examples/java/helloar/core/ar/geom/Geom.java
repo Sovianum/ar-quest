@@ -13,9 +13,21 @@ public class Geom {
         scale = 1;
     }
 
+    public Geom(Pose pose) {
+        translation = new Translation(pose);
+        rotation = new Rotation(pose);
+        scale = 1;
+    }
+
     public Geom apply(Pose pose) {
         translation.apply(pose);
         rotation.apply(pose);
+        return this;
+    }
+
+    public Geom applyGlobal(Pose pose) {
+        translation.applyGlobal(pose);
+        rotation.applyGlobal(pose);
         return this;
     }
 

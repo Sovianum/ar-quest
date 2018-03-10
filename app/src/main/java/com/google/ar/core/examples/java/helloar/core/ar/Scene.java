@@ -60,8 +60,8 @@ public class Scene extends Tree<SceneObject> {
         updateAnchors(session);
     }
 
-    public Collection<Integer> getCollisions(final Collider collider) {
-        Collection<Integer> result = new ArrayList<>();
+    public Collection<SceneObject> getCollisions(final Collider collider) {
+        Collection<SceneObject> result = new ArrayList<>();
         if (collider == null) {
             return result;
         }
@@ -71,13 +71,12 @@ public class Scene extends Tree<SceneObject> {
                 continue;
             }
 
-            int itemID = entry.getValue();
             Collider itemCollider = entry.getKey().getCollider();
             if (itemCollider == null) {
                 continue;
             }
             if (collider.collide(itemCollider)) {
-                result.add(itemID);
+                result.add(entry.getKey());
             }
         }
 

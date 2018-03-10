@@ -1,4 +1,4 @@
-package com.google.ar.core.examples.java.helloar.quest.list;
+package com.google.ar.core.examples.java.helloar.quest.quests;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;

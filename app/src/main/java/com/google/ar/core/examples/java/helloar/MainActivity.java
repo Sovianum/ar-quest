@@ -11,20 +11,47 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 
 import com.google.ar.core.examples.java.helloar.auth.AuthActivity;
 import com.google.ar.core.examples.java.helloar.network.Api;
-import com.google.ar.core.examples.java.helloar.quest.QuestActivity;
-import com.google.ar.core.examples.java.helloar.quest.list.QuestsListFragment;
+import com.google.ar.core.examples.java.helloar.quest.ARFragment;
+import com.google.ar.core.examples.java.helloar.quest.QuestFragment;
+import com.google.ar.core.examples.java.helloar.quest.items.ItemsListFragment;
+import com.google.ar.core.examples.java.helloar.quest.quests.QuestsListFragment;
 
 public class MainActivity extends AppCompatActivity {
     private Button toQuestActivityButton;
     private Button toAuthActivityButton;
 
     private QuestsListFragment questsListFragment;
+    private ARFragment arFragment;
+    private QuestFragment questFragment;
+    private ItemsListFragment itemsListFragment;
 
     private Fragment activeFragment;
+
+    private View.OnClickListener toQuestOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            selectFragment(questFragment);
+        }
+    };
+
+    private View.OnClickListener toInventoryOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            selectFragment(itemsListFragment);
+        }
+    };
+
+    private View.OnClickListener toAROnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            selectFragment(arFragment);
+        }
+    };
 
 
     @Override
@@ -33,12 +60,20 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         //removeToken(); //debug
 
+        questFragment = new QuestFragment();
+        questFragment.setOnClickListener(toAROnClickListener);
+
+        itemsListFragment = new ItemsListFragment();
+
+        arFragment = new ARFragment();
+        arFragment.setToInventoryOnClickListener(toInventoryOnClickListener);
+
         toQuestActivityButton = findViewById(R.id.ar_activity_btn);
         toAuthActivityButton = findViewById(R.id.auth_activity_btn);
         toQuestActivityButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                goToQuestActivity(view);
+                selectFragment(arFragment);
             }
         });
 
@@ -58,21 +93,33 @@ public class MainActivity extends AppCompatActivity {
         selectFragment(questsListFragment);
     }
 
-    private void goToQuestActivity(View v) {
-        Intent intent = new Intent(this, QuestActivity.class);
-        startActivity(intent);
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            // Standard Android full-screen functionality.
+            getWindow()
+                    .getDecorView()
+                    .setSystemUiVisibility(
+                            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                                    | View.SYSTEM_UI_FLAG_FULLSCREEN
+                                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
     }
-
-    private void goToAuthActivity(View v) {
-        Intent intent = new Intent(this, AuthActivity.class);
-        startActivity(intent);
-    }
-
 
     @Override
     public View onCreateView(View parent, String name, Context context, AttributeSet attrs) {
 
         return super.onCreateView(parent, name, context, attrs);
+    }
+
+    private void goToAuthActivity(View v) {
+        Intent intent = new Intent(this, AuthActivity.class);
+        startActivity(intent);
     }
 
     private void selectFragment(Fragment fragment) {
@@ -86,6 +133,7 @@ public class MainActivity extends AppCompatActivity {
         }
         activeFragment = fragment;
         fragmentTransaction.add(R.id.main_fragment_container, activeFragment);
+        fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
     }
 

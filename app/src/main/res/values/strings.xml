@@ -16,7 +16,7 @@
 <resources>
     <string name="app_name">HelloAR Java</string>
     <string name="toggle_android">Toggle android</string>
-    <string name="grab_str">Grab</string>
+    <string name="inventory_str">Inventory</string>
     <string name="release_str">Release</string>
     <string name="to_quest_fragment">Back to quest</string>
     <string name="to_ar_fragment">AR mode</string>
@@ -50,4 +50,5 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="interact_str">Interact</string>
 </resources>

@@ -1,4 +1,4 @@
-package com.google.ar.core.examples.java.helloar.quest.list;
+package com.google.ar.core.examples.java.helloar.quest.quests;
 
 
 import android.os.Bundle;
@@ -21,8 +21,6 @@ public class QuestsListFragment extends Fragment {
     private QuestAdapter adapter;
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeRefreshLayout;
-
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

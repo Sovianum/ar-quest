@@ -33,4 +33,8 @@ public class Rotation {
     public void apply(Pose pose) {
         pose.extractRotation().compose(Pose.makeRotation(q)).getRotationQuaternion(q, 0);
     }
+
+    public void applyGlobal(Pose pose) {
+        pose.getRotationQuaternion(q, 0);
+    }
 }

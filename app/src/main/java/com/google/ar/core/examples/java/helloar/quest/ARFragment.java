@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.ar.core.Anchor;
@@ -31,19 +32,25 @@ import com.google.ar.core.examples.java.helloar.PermissionHelper;
 import com.google.ar.core.examples.java.helloar.R;
 import com.google.ar.core.examples.java.helloar.core.ar.Scene;
 import com.google.ar.core.examples.java.helloar.core.ar.SceneObject;
+import com.google.ar.core.examples.java.helloar.core.ar.collision.Collider;
+import com.google.ar.core.examples.java.helloar.core.ar.collision.shape.Sphere;
 import com.google.ar.core.examples.java.helloar.core.ar.drawable.IDrawable;
+import com.google.ar.core.examples.java.helloar.core.game.InteractiveObject;
 import com.google.ar.core.examples.java.helloar.core.game.Place;
+import com.google.ar.core.examples.java.helloar.core.game.Player;
+import com.google.ar.core.examples.java.helloar.core.game.journal.Journal;
+import com.google.ar.core.examples.java.helloar.core.game.map.RoadMap;
+import com.google.ar.core.examples.java.helloar.core.game.slot.Slot;
 import com.google.ar.core.examples.java.helloar.quest.game.QuestService;
 import com.google.ar.core.examples.java.helloar.rendering.BackgroundRenderer;
 import com.google.ar.core.examples.java.helloar.rendering.ObjectRenderer;
-import com.google.ar.core.examples.java.helloar.rendering.PlaneRenderer;
-import com.google.ar.core.examples.java.helloar.rendering.PointCloudRenderer;
 import com.google.ar.core.exceptions.UnavailableApkTooOldException;
 import com.google.ar.core.exceptions.UnavailableArcoreNotInstalledException;
 import com.google.ar.core.exceptions.UnavailableSdkTooOldException;
 import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -57,9 +64,10 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
     // Rendering. The Renderers are created here, and initialized when the GL surface is created.
     private GLSurfaceView surfaceView;
     private Button toggleBtn;
-    private Button grabBtn;
+    private Button toInventoryBtn;
     private Button releaseBtn;
     private Button toQuestFragmentBtn;
+    private TextView collisionText;
 
     private boolean installRequested;
 
@@ -69,10 +77,6 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
     private DisplayRotationHelper displayRotationHelper;
 
     private final BackgroundRenderer backgroundRenderer = new BackgroundRenderer();
-    private final ObjectRenderer virtualObject = new ObjectRenderer();
-    private final ObjectRenderer virtualObjectShadow = new ObjectRenderer();
-    private final PlaneRenderer planeRenderer = new PlaneRenderer();
-    private final PointCloudRenderer pointCloud = new PointCloudRenderer();
 
     // Temporary matrix allocated here to reduce number of allocations for each frame.
     private final float[] anchorMatrix = new float[16];
@@ -80,17 +84,18 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
     // Tap handling and UI.
     private final ArrayBlockingQueue<MotionEvent> queuedSingleTaps = new ArrayBlockingQueue<>(16);
 
-    private boolean needShow = false;
-
     private Scene scene;
     private Map<String, ObjectRenderer> renderers;
     private Place place;
+    private InteractiveObject andy;
+    private InteractiveObject rose;
+    private InteractiveObject banana;
 
-    private View.OnClickListener onClickListener;
-
+    private View.OnClickListener toInventoryOnClickListener;
+    private Player player;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         RelativeLayout view = (RelativeLayout) inflater.inflate(R.layout.fragment_ar, container, false);
@@ -98,19 +103,10 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         surfaceView = view.findViewById(R.id.surfaceview);
         displayRotationHelper = new DisplayRotationHelper(/*context=*/ getActivity());
 
-        toggleBtn = view.findViewById(R.id.toggle_btn);
-        toggleBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                needShow = !needShow;
-            }
-        });
-
-        grabBtn = view.findViewById(R.id.grab_btn);
+        collisionText = view.findViewById(R.id.collision_txt);
+        toInventoryBtn = view.findViewById(R.id.inventory_btn);
+        toInventoryBtn.setOnClickListener(toInventoryOnClickListener);
         releaseBtn = view.findViewById(R.id.release_btn);
-
-        toQuestFragmentBtn = view.findViewById(R.id.to_quest_fragment_btn);
-        toQuestFragmentBtn.setOnClickListener(onClickListener);
 
         // Set up tap listener.
         gestureDetector =
@@ -146,13 +142,17 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
         installRequested = false;
 
-        return view;
+        player = new Player(new Slot(0, "inv", false), new RoadMap(), new Journal<String>());
+        player.setCollider(new Collider(new Sphere(0.05f)));
 
+        return view;
     }
 
-
-    public void setOnClickListener(View.OnClickListener listener) {
-        this.onClickListener = listener;
+    public void setToInventoryOnClickListener(View.OnClickListener lister) {
+        this.toInventoryOnClickListener = lister;
+        if (toInventoryBtn != null) {
+            toInventoryBtn.setOnClickListener(toInventoryOnClickListener);
+        }
     }
 
     @Override
@@ -163,7 +163,7 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         // permission on Android M and above, now is a good time to ask the user for it.
         if (PermissionHelper.hasPermissions(getActivity())) {
             if (session != null) {
-                showLoadingMessage();
+//                showLoadingMessage();
                 // Note that order matters - see the note in onPause(), the reverse applies here.
                 session.resume();
             }
@@ -185,9 +185,11 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         displayRotationHelper.onResume();
 
         place = QuestService.getDemoPlace();
+        andy = place.getAccessibleInteractiveObjects().get(1);
+        rose = place.getAccessibleInteractiveObjects().get(2);
+        banana = place.getAccessibleInteractiveObjects().get(3);
+
         scene.load(place.getAll(), Pose.makeTranslation(0, 0, -1));
-//        sceneRecord = getDemoScene();
-//        objStorage = scene.load(sceneRecord);
     }
 
     @Override
@@ -225,19 +227,11 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         // Create the texture and pass it to ARCore session to be filled during update().
         backgroundRenderer.createOnGlThread(/*context=*/ getActivity());
 
-        // Prepare the other rendering objects.
-        virtualObject.setMaterialProperties(0.0f, 3.5f, 1.0f, 6.0f);
         try {
             allocateRenderers();
         } catch (IOException e) {
             Log.e(TAG, "Failed to read obj file");
         }
-        try {
-            planeRenderer.createOnGlThread(/*context=*/ getActivity(), "trigrid.png");
-        } catch (IOException e) {
-            Log.e(TAG, "Failed to read plane texture");
-        }
-        pointCloud.createOnGlThread(/*context=*/ getActivity());
     }
 
     @Override
@@ -279,46 +273,25 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
                 return;
             }
 
-            // Get projection matrix.
-            float[] projmtx = new float[16];
-            camera.getProjectionMatrix(projmtx, 0, 0.1f, 100.0f);
-
-            // Get camera matrix and draw.
-            float[] viewmtx = new float[16];
-            camera.getViewMatrix(viewmtx, 0);
-
-            // Compute lighting from average intensity of the image.
-
-            ObjectRenderer renderer;
-            Anchor anchor;
-            final float lightIntensity = frame.getLightEstimate().getPixelIntensity();
-
-            for (SceneObject sceneObject : place.getAll()) {
-                if (!sceneObject.isEnabled()) {
-                    continue;
-                }
-                renderer = renderers.get(sceneObject.getIdentifiable().getName());
-                if (renderer == null) {
-                    continue;
-                }
-                anchor = scene.getAnchorMap().get(sceneObject.getIdentifiable().getSceneID());
-                if (anchor == null) {
-                    continue;
-                }
-                anchor.getPose().toMatrix(anchorMatrix, 0);
-                renderer.updateModelMatrix(anchorMatrix, sceneObject.getGeom().getScale());
-                renderer.draw(viewmtx, projmtx, lightIntensity);
+            renderScene(frame, camera);
+            updatePlayer(camera);
+            Collection<SceneObject> collided = scene.getCollisions(player.getCollider());
+            StringBuilder s = new StringBuilder("Camera: " + camera.getPose().toString() + "\n");
+            s.append("Andy: " + scene.getAnchorMap().get(andy.getIdentifiable().getSceneID()).getPose().toString() + " " + getColliderRadius(andy) + "\n");
+            s.append("Rose: " + scene.getAnchorMap().get(rose.getIdentifiable().getSceneID()).getPose().toString() + " " + getColliderRadius(rose) + "\n");
+            s.append("Banana: " + scene.getAnchorMap().get(banana.getIdentifiable().getSceneID()).getPose().toString() + " " + getColliderRadius(banana) + "\n");
+            s.append("Collided: ");
+            for (SceneObject sceneObject : collided) {
+                s.append(sceneObject.getIdentifiable().getName()).append(" ");
             }
 
-//            float scaleFactor = 0.0001f;
-//            if (cameraAnchor != null && needShow) {
-//                cameraAnchor.getPose().toMatrix(anchorMatrix, 0);
-//
-//                virtualObject.updateModelMatrix(anchorMatrix, scaleFactor);
-//                virtualObjectShadow.updateModelMatrix(anchorMatrix, scaleFactor);
-//                virtualObject.draw(viewmtx, projmtx, lightIntensity);
-//                virtualObjectShadow.draw(viewmtx, projmtx, lightIntensity);
-//            }
+            final String str = s.toString();
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    collisionText.setText(str);
+                }
+            });
 
         } catch (Throwable t) {
             // Avoid crashing the application due to unhandled exceptions.
@@ -352,16 +325,6 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
                     });
         }
         messageSnackbar.show();
-    }
-
-    private void showLoadingMessage() {
-        getActivity().runOnUiThread(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        showSnackbarMessage("Searching for surfaces...", false);
-                    }
-                });
     }
 
     private void hideLoadingMessage() {
@@ -438,5 +401,48 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
                 renderers.put(name, objectRenderer);
             }
         }
+    }
+
+    private void renderScene(Frame frame, Camera camera) {
+        // Get projection matrix.
+        float[] projmtx = new float[16];
+        camera.getProjectionMatrix(projmtx, 0, 0.1f, 100.0f);
+
+        // Get camera matrix and draw.
+        float[] viewmtx = new float[16];
+        camera.getViewMatrix(viewmtx, 0);
+
+        // Compute lighting from average intensity of the image.
+        final float lightIntensity = frame.getLightEstimate().getPixelIntensity();
+
+        ObjectRenderer renderer;
+        Anchor anchor;
+
+        for (SceneObject sceneObject : place.getAll()) {
+            if (!sceneObject.isEnabled()) {
+                continue;
+            }
+            renderer = renderers.get(sceneObject.getIdentifiable().getName());
+            if (renderer == null) {
+                continue;
+            }
+            anchor = scene.getAnchorMap().get(sceneObject.getIdentifiable().getSceneID());
+            if (anchor == null) {
+                continue;
+            }
+            anchor.getPose().toMatrix(anchorMatrix, 0);
+            renderer.updateModelMatrix(anchorMatrix, sceneObject.getGeom().getScale());
+            renderer.draw(viewmtx, projmtx, lightIntensity);
+        }
+    }
+
+    private void updatePlayer(Camera camera) {
+        player.getGeom().applyGlobal(camera.getPose());
+    }
+
+    private static String getColliderRadius(SceneObject sceneObject) {
+        return String.valueOf(
+                ((Sphere) sceneObject.getCollider().getShape()).getRadius()
+        );
     }
 }

@@ -34,4 +34,8 @@ public class Translation {
     public void apply(Pose pose) {
         pose.extractTranslation().compose(Pose.makeTranslation(t)).getTranslation(t, 0);
     }
+
+    public void applyGlobal(Pose pose) {
+        pose.getTranslation(t, 0);
+    }
 }

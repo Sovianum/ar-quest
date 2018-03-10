@@ -57,9 +57,6 @@
             android:name=".auth.AuthActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
 
-        <activity
-            android:name=".quest.QuestActivity"
-            android:theme="@style/Theme.AppCompat.NoActionBar" />
     </application>
 
 </manifest>
