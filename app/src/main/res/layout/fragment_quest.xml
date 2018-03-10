@@ -1,15 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/fragment_quest"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".quest.QuestFragment">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:id="@+id/fragment_quest"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:orientation="vertical">
 
     <TextView
+        android:id="@+id/journal_txt"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="wrap_content"
+        android:text="@string/journal_title"
+        android:textAlignment="center" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/spaces_login" />
+
+    <TextView
+        android:id="@+id/inventory_txt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/inventory_title"
+        android:textAlignment="center" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/spaces_login" />
+
+    <TextView
+        android:id="@+id/checkpoints_txt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/checkpoint_title"
+        android:textAlignment="center" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/spaces_login" />
 
     <Button
         android:id="@+id/to_ar_mode_btn"
@@ -17,4 +44,4 @@
         android:layout_height="wrap_content"
         android:text="@string/to_ar_fragment" />
 
-</FrameLayout>
+</LinearLayout>

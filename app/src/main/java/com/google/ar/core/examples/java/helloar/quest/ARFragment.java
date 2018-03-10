@@ -317,7 +317,7 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
                     anchor.getPose().toMatrix(anchorMatrix, 0);
                     renderer.updateModelMatrix(anchorMatrix, objectRecord.getScale());
-                    renderer.draw(viewmtx, projmtx, lightIntensity);
+                    //renderer.draw(viewmtx, projmtx, lightIntensity);
                 }
             }
 

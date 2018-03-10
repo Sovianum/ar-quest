@@ -37,5 +37,18 @@ dependencies {
     compile 'com.android.support:cardview-v7:27.1.0'
     compile 'com.android.support:recyclerview-v7:27.1.0'
     compile group: 'com.google.code.gson', name: 'gson', version: '2.8.2'
+    compile 'com.squareup.okhttp3:okhttp:3.9.0'
+    compile 'com.squareup.retrofit2:retrofit:2.3.0'
+    compile 'com.squareup.retrofit2:converter-gson:2.3.0'
+    compile group: 'com.google.code.gson', name: 'gson', version: '2.8.2'
     testCompile 'junit:junit:4.12'
+
+
+    // Dagger
+    compile 'com.google.dagger:dagger:2.12'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.12'
+
+    // Butter Knife
+    compile 'com.jakewharton:butterknife:8.8.1'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
 }

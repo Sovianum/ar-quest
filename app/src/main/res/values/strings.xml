@@ -41,6 +41,9 @@
     <string name="server_internal_error_str">Сервер упал</string>
     <string name="duplicate_user_str">Пользовтель с таким именем уже существует</string>
     <string name="user_not_found_str">Пользователь не найден (что странно)</string>
+    <string name="journal_title">Журнал событий</string>
+    <string name="inventory_title">Инвентарь</string>
+    <string name="checkpoint_title">Список контрольных точек</string>
 
     <string name="show_more_str"><u>Подробнее</u></string>
     <string name="hide_str"><u>Скрыть</u></string>
