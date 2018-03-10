@@ -33,7 +33,7 @@ public class InteractiveObjectTest {
 
     @Test
     public void testInteractInaccessible() {
-        obj.setAccessible(false);
+        obj.setEnabled(false);
         Collection<InteractionResult> results = obj.interact(null);
         assertEquals(1, results.size());
 

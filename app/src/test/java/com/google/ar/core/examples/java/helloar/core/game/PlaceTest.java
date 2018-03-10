@@ -1,5 +1,7 @@
 package com.google.ar.core.examples.java.helloar.core.game;
 
+import com.google.ar.core.examples.java.helloar.core.game.slot.Slot;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -9,8 +11,8 @@ import java.util.Map;
 
 import static junit.framework.Assert.assertEquals;
 
-public class SceneTest {
-    private Scene scene;
+public class PlaceTest {
+    private Place place;
 
     private InteractiveObject inter1;
     private InteractiveObject inter2;
@@ -39,7 +41,7 @@ public class SceneTest {
         inter1.setAction(new Action() {
             @Override
             public Collection<InteractionResult> act(InteractionArgument argument) {
-                inter2.setAccessible(true);
+                inter2.setEnabled(true);
                 return Utils.singleItemCollection(new InteractionResult(InteractionResult.Type.JOURNAL_RECORD, "open inter2"));
             }
         });
@@ -51,7 +53,7 @@ public class SceneTest {
                 for (Slot.RepeatedItem r : argument.items) {
                     if (r.getItem().getId() == 1) {
                         r.dropAll();
-                        slot2.setAccessible(true);
+                        slot2.setEnabled(true);
                         return Utils.singleItemCollection(
                                 new InteractionResult(InteractionResult.Type.JOURNAL_RECORD, "open slot2")
                         );
@@ -71,41 +73,40 @@ public class SceneTest {
         interactives.put(inter1.getId(), inter1);
         interactives.put(inter2.getId(), inter2);
 
-        scene = new Scene();
-        scene.setSlots(slots);
-        scene.setInteractiveObjects(interactives);
+        place = new Place();
+        place.setSlots(slots);
+        place.setInteractiveObjects(interactives);
     }
 
     @Test
     public void testScenario() {
-        assertEquals(1, scene.getAccessibleInteractiveObjects().size());
-        assertEquals(1, scene.getAccessibleSlots().size());
+        assertEquals(1, place.getAccessibleInteractiveObjects().size());
+        assertEquals(1, place.getAccessibleSlots().size());
 
-        Collection<InteractionResult> results1 = scene.getAccessibleInteractiveObjects().get(1).interact(null);
+        Collection<InteractionResult> results1 = place.getAccessibleInteractiveObjects().get(1).interact(null);
         assertEquals(1, results1.size());
         InteractionResult result1 = Utils.first(results1);
         assertEquals(InteractionResult.Type.JOURNAL_RECORD, result1.type);
-        assertEquals(2, scene.getAccessibleInteractiveObjects().size());
+        assertEquals(2, place.getAccessibleInteractiveObjects().size());
 
-        InteractiveObject inter2 = scene.getAccessibleInteractiveObjects().get(2);
+        InteractiveObject inter2 = place.getAccessibleInteractiveObjects().get(2);
 
         InteractionArgument badEmptyArgument = new InteractionArgument();
         Collection<InteractionResult> badResults1 = inter2.interact(badEmptyArgument);
         assertEquals(InteractionResult.Type.MESSAGE, Utils.first(badResults1).type);
-        assertEquals(1, scene.getAccessibleSlots().size());
+        assertEquals(1, place.getAccessibleSlots().size());
         assertEquals(1, slot1.getItemCnt(1));
 
         InteractionArgument badItemArgument = InteractionArgument.itemArg(Utils.singleItemCollection(new Slot.RepeatedItem(item2)));
         Collection<InteractionResult> badResults2 = inter2.interact(badItemArgument);
         assertEquals(InteractionResult.Type.MESSAGE, Utils.first(badResults2).type);
-        assertEquals(1, scene.getAccessibleSlots().size());
+        assertEquals(1, place.getAccessibleSlots().size());
         assertEquals(1, slot1.getItemCnt(1));
 
-        InteractionArgument goodArgument = InteractionArgument.itemArg(Utils.singleItemCollection(slot1.getItems().get(1)));
+        InteractionArgument goodArgument = InteractionArgument.itemArg(Utils.singleItemCollection(slot1.getRepeatedItems().get(1)));
         Collection<InteractionResult> goodResults = inter2.interact(goodArgument);
         assertEquals(InteractionResult.Type.JOURNAL_RECORD, Utils.first(goodResults).type);
-        assertEquals(2, scene.getAccessibleSlots().size());
+        assertEquals(2, place.getAccessibleSlots().size());
         assertEquals(0, slot1.getItemCnt(1));
     }
-
 }

@@ -5,10 +5,14 @@ import com.google.ar.core.examples.java.helloar.core.ar.collision.shape.Empty;
 import com.google.ar.core.examples.java.helloar.core.ar.collision.shape.Point;
 import com.google.ar.core.examples.java.helloar.core.ar.collision.shape.Shape;
 import com.google.ar.core.examples.java.helloar.core.ar.collision.shape.Sphere;
+import com.google.ar.core.examples.java.helloar.core.ar.enabled.Enabled;
+import com.google.ar.core.examples.java.helloar.core.ar.geom.Geom;
 
 import java.util.Collection;
 
-public class Collider {
+public class Collider extends Enabled {
+    public static Collider EMPTY = new Collider(new Empty());
+
     private static int POINT_CNT = 20;
 
     private static boolean collideDefault(Collider collider1, Collider collider2) {
@@ -23,7 +27,7 @@ public class Collider {
     }
 
     private static boolean collideSpheres(Collider collider1, Collider collider2) {
-        Pose offset = collider1.toLocals(collider2.position.compose(collider2.offset));
+        Pose offset = collider1.toLocals(collider2.position.getPose().compose(collider2.offset.getPose()));
         Sphere sphere1 = (Sphere) collider1.shape;
         Sphere sphere2 = (Sphere) collider2.shape;
 
@@ -38,31 +42,31 @@ public class Collider {
     }
 
     private Shape shape;
-    private Pose position;
-    private Pose offset;
+    private Geom position;
+    private Geom offset;
 
-    public Collider(Shape shape, Pose position, Pose offset) {
+    public Collider(Shape shape, Geom position, Geom offset) {
         this.shape = shape;
         this.position = position;
         this.offset = offset;
     }
 
-    public Collider(Shape shape, Pose offset) {
+    public Collider(Shape shape, Geom offset) {
         this.shape = shape;
         this.offset = offset;
-        this.position = Pose.IDENTITY;
+        this.position = new Geom();
     }
 
     public Collider(Shape shape) {
         this.shape = shape;
-        this.offset = Pose.IDENTITY;
-        this.position = Pose.IDENTITY;
+        this.offset = new Geom();
+        this.position = new Geom();
     }
 
     public Collider() {
         this.shape = new Point();
-        this.offset = Pose.IDENTITY;
-        this.offset = Pose.IDENTITY;
+        this.offset = new Geom();
+        this.offset = new Geom();
     }
 
     public boolean collide(Collider another) {
@@ -78,19 +82,19 @@ public class Collider {
         return collideDefault(this, another) || collideDefault(another, this);
     }
 
-    public Pose getPosition() {
+    public Geom getPosition() {
         return position;
     }
 
-    public void setPosition(Pose position) {
+    public void setPosition(Geom position) {
         this.position = position;
     }
 
     private Pose toLocals(Pose global) {
-        return global.compose(position.compose(offset).inverse());
+        return global.compose(position.getPose().compose(offset.getPose()).inverse());
     }
 
     private Pose toGlobals(Pose local) {
-        return local.compose(position).compose(offset);
+        return local.compose(position.getPose()).compose(offset.getPose());
     }
 }

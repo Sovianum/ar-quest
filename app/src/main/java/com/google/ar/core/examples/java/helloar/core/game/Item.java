@@ -1,6 +1,10 @@
 package com.google.ar.core.examples.java.helloar.core.game;
 
-public class Item {
+import com.google.ar.core.examples.java.helloar.core.ar.SceneObject;
+import com.google.ar.core.examples.java.helloar.core.ar.drawable.IDrawable;
+import com.google.ar.core.examples.java.helloar.core.ar.identifiable.Identifiable;
+
+public class Item extends SceneObject implements IDrawable {
     private final int id;
     private final String name;
     private final String description;
@@ -13,6 +17,10 @@ public class Item {
         this.description = description;
         this.modelName = modelName;
         this.textureName = textureName;
+
+        setDrawable(this);
+        setIdentifiable(new Identifiable(name, id));
+        setEnabled(false);
     }
 
     public int getId() {
@@ -27,10 +35,12 @@ public class Item {
         return description;
     }
 
+    @Override
     public String getModelName() {
         return modelName;
     }
 
+    @Override
     public String getTextureName() {
         return textureName;
     }

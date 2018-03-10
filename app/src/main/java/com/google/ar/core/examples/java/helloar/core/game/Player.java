@@ -2,6 +2,7 @@ package com.google.ar.core.examples.java.helloar.core.game;
 
 import com.google.ar.core.examples.java.helloar.core.game.journal.Journal;
 import com.google.ar.core.examples.java.helloar.core.game.map.RoadMap;
+import com.google.ar.core.examples.java.helloar.core.game.slot.Slot;
 
 public class Player {
     public static final String INVENTORY = "INVENTORY";

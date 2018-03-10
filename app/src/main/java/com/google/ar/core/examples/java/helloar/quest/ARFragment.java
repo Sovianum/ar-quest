@@ -23,18 +23,17 @@ import com.google.ar.core.ArCoreApk;
 import com.google.ar.core.Camera;
 import com.google.ar.core.Config;
 import com.google.ar.core.Frame;
+import com.google.ar.core.Pose;
 import com.google.ar.core.Session;
 import com.google.ar.core.TrackingState;
 import com.google.ar.core.examples.java.helloar.DisplayRotationHelper;
 import com.google.ar.core.examples.java.helloar.PermissionHelper;
 import com.google.ar.core.examples.java.helloar.R;
 import com.google.ar.core.examples.java.helloar.core.ar.Scene;
-import com.google.ar.core.examples.java.helloar.core.ar.record.ObjectRecord;
-import com.google.ar.core.examples.java.helloar.core.ar.record.ObjectRecordStorage;
-import com.google.ar.core.examples.java.helloar.core.ar.record.PoseRecord;
-import com.google.ar.core.examples.java.helloar.core.ar.record.Rotation;
-import com.google.ar.core.examples.java.helloar.core.ar.record.SceneRecord;
-import com.google.ar.core.examples.java.helloar.core.ar.record.Translation;
+import com.google.ar.core.examples.java.helloar.core.ar.SceneObject;
+import com.google.ar.core.examples.java.helloar.core.ar.drawable.IDrawable;
+import com.google.ar.core.examples.java.helloar.core.game.Place;
+import com.google.ar.core.examples.java.helloar.quest.game.QuestService;
 import com.google.ar.core.examples.java.helloar.rendering.BackgroundRenderer;
 import com.google.ar.core.examples.java.helloar.rendering.ObjectRenderer;
 import com.google.ar.core.examples.java.helloar.rendering.PlaneRenderer;
@@ -45,10 +44,7 @@ import com.google.ar.core.exceptions.UnavailableSdkTooOldException;
 import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -57,12 +53,6 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
     private static final String TAG = ARFragment.class.getSimpleName();
-
-    public static final float THRESHOLD_DISTANCE = 0.1f;
-    public static final float SPHERE_RADIUS = 1f;
-    public static final int ANDROID_CNT = 3;
-    private static final float DEFAULT_TARGET_SCALE = 1f;
-    private static final float TRIGGER_TARGET_SCALE = 2f;
 
     // Rendering. The Renderers are created here, and initialized when the GL surface is created.
     private GLSurfaceView surfaceView;
@@ -90,19 +80,11 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
     // Tap handling and UI.
     private final ArrayBlockingQueue<MotionEvent> queuedSingleTaps = new ArrayBlockingQueue<>(16);
 
-    private Anchor cameraAnchor = null;
-    private int grabId = -1;
     private boolean needShow = false;
 
-    private int anchorCnt = 0;
-    private Anchor sphereOrigin = null;
-
     private Scene scene;
-    private SceneRecord sceneRecord;
-    private ObjectRecordStorage objStorage;
     private Map<String, ObjectRenderer> renderers;
-
-    private boolean loaded = false;
+    private Place place;
 
     private View.OnClickListener onClickListener;
 
@@ -202,8 +184,10 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         surfaceView.onResume();
         displayRotationHelper.onResume();
 
-        sceneRecord = getDemoScene();
-        objStorage = scene.load(sceneRecord);
+        place = QuestService.getDemoPlace();
+        scene.load(place.getAll(), Pose.makeTranslation(0, 0, -1));
+//        sceneRecord = getDemoScene();
+//        objStorage = scene.load(sceneRecord);
     }
 
     @Override
@@ -242,9 +226,9 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         backgroundRenderer.createOnGlThread(/*context=*/ getActivity());
 
         // Prepare the other rendering objects.
+        virtualObject.setMaterialProperties(0.0f, 3.5f, 1.0f, 6.0f);
         try {
             allocateRenderers();
-            configureRenderers();
         } catch (IOException e) {
             Log.e(TAG, "Failed to read obj file");
         }
@@ -304,21 +288,26 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
             camera.getViewMatrix(viewmtx, 0);
 
             // Compute lighting from average intensity of the image.
+
+            ObjectRenderer renderer;
+            Anchor anchor;
             final float lightIntensity = frame.getLightEstimate().getPixelIntensity();
-            scene.update(session);
-            for (Map.Entry<String, Collection<ObjectRecord>> entry : objStorage.getNameIndex().entrySet()) {
-                final ObjectRenderer renderer = renderers.get(entry.getKey());
 
-                for (ObjectRecord objectRecord : entry.getValue()) {
-                    final Anchor anchor = scene.getAnchorMap().get(objectRecord.getSceneId());
-                    if (anchor == null) {
-                        continue;
-                    }
-
-                    anchor.getPose().toMatrix(anchorMatrix, 0);
-                    renderer.updateModelMatrix(anchorMatrix, objectRecord.getScale());
-                    //renderer.draw(viewmtx, projmtx, lightIntensity);
+            for (SceneObject sceneObject : place.getAll()) {
+                if (!sceneObject.isEnabled()) {
+                    continue;
                 }
+                renderer = renderers.get(sceneObject.getIdentifiable().getName());
+                if (renderer == null) {
+                    continue;
+                }
+                anchor = scene.getAnchorMap().get(sceneObject.getIdentifiable().getSceneID());
+                if (anchor == null) {
+                    continue;
+                }
+                anchor.getPose().toMatrix(anchorMatrix, 0);
+                renderer.updateModelMatrix(anchorMatrix, sceneObject.getGeom().getScale());
+                renderer.draw(viewmtx, projmtx, lightIntensity);
             }
 
 //            float scaleFactor = 0.0001f;
@@ -437,64 +426,17 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         session.configure(config);
     }
 
-    private void allocateRenderers() {
+    private void allocateRenderers() throws IOException {
         renderers = new HashMap<>();
-        for (Map.Entry<String, Collection<ObjectRecord>> entry : objStorage.getNameIndex().entrySet()) {
-            if (!renderers.containsKey(entry.getKey())) {
-                renderers.put(entry.getKey(), new ObjectRenderer());
+        for (SceneObject sceneObject : place.getAll()) {
+            String name = sceneObject.getIdentifiable().getName();
+            if (!renderers.containsKey(name)) {
+                IDrawable drawable = sceneObject.getDrawable();
+                ObjectRenderer objectRenderer = new ObjectRenderer();
+                objectRenderer.setMaterialProperties(0.0f, 3.5f, 1.0f, 6.0f);
+                objectRenderer.createOnGlThread(getActivity(), drawable.getModelName(), drawable.getTextureName());
+                renderers.put(name, objectRenderer);
             }
         }
-    }
-
-    private void configureRenderers() throws IOException {
-        for (Map.Entry<String, ObjectRenderer> entry : renderers.entrySet()) {
-            final ObjectRecord record = objStorage.getByName(entry.getKey()).iterator().next();
-            entry.getValue().createOnGlThread(getActivity(), record.getModelName(), record.getTextureName());
-            virtualObject.setMaterialProperties(0.0f, 3.5f, 1.0f, 6.0f);
-        }
-    }
-
-    private static SceneRecord getDemoScene() {
-        ObjectRecord root = new ObjectRecord();
-        root.setId(1);
-        root.setParentId(0);
-        root.setName("andy");
-        root.setModelName("andy.obj");
-        root.setTextureName("andy.png");
-        root.setScale(1);
-        root.setPoseRecord(new PoseRecord(
-                new Translation(0, 0, -2),
-                Rotation.Identity()
-        ));
-
-        ObjectRecord child1 = new ObjectRecord();
-        child1.setId(2);
-        child1.setParentId(1);
-        child1.setName("rose");
-        child1.setModelName("rose.obj");
-        child1.setTextureName("rose.jpg");
-        child1.setScale(0.003f);
-        child1.setPoseRecord(new PoseRecord(
-                new Translation(1, 0, 0),
-                Rotation.Identity()
-        ));
-
-        ObjectRecord child2 = new ObjectRecord();
-        child2.setId(3);
-        child2.setParentId(1);
-        child2.setName("banana");
-        child2.setModelName("banana.obj");
-        child2.setTextureName("banana.jpg");
-        child2.setScale(0.001f);
-        child2.setPoseRecord(new PoseRecord(
-                new Translation(0, 0, 1),
-                Rotation.Identity()
-        ));
-
-        List<ObjectRecord> records = new ArrayList<>();
-        records.add(root);
-        records.add(child1);
-        records.add(child2);
-        return new SceneRecord(records);
     }
 }

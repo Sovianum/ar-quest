@@ -1,5 +1,7 @@
 package com.google.ar.core.examples.java.helloar.core.game;
 
+import com.google.ar.core.examples.java.helloar.core.game.slot.Slot;
+
 public class InteractionResult {
     public static InteractionResult ERR = new InteractionResult(Type.ERROR, "");
 

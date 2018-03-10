@@ -2,6 +2,7 @@ package com.google.ar.core.examples.java.helloar.core.ar.collision;
 
 import com.google.ar.core.Pose;
 import com.google.ar.core.examples.java.helloar.core.ar.collision.shape.Sphere;
+import com.google.ar.core.examples.java.helloar.core.ar.geom.Geom;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -30,10 +31,10 @@ public class ColliderTest {
 
     @Test
     public void testCollision() {
-        collider1.setPosition(Pose.makeTranslation(100, 0, 0));
+        collider1.setPosition(new Geom().apply(Pose.makeTranslation(100, 0, 0)));
         assertFalse(collider1.collide(collider2));
 
-        collider1.setPosition(Pose.makeTranslation(20, 0, 0));
+        collider1.setPosition(new Geom().apply(Pose.makeTranslation(20, 0, 0)));
         assertTrue(collider1.collide(collider2));
     }
 }

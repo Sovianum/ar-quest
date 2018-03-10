@@ -1,5 +1,7 @@
 package com.google.ar.core.examples.java.helloar.core.game;
 
+import com.google.ar.core.examples.java.helloar.core.game.slot.Slot;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -37,7 +39,7 @@ public class SlotTest {
 
     @Test
     public void testItemWatch() {
-        Collection<Slot.RepeatedItem> items1 = slot1.getItems().values();
+        Collection<Slot.RepeatedItem> items1 = slot1.getRepeatedItems().values();
         assertEquals(1, items1.size());
 
         Slot.RepeatedItem item1 = items1.iterator().next();
@@ -45,7 +47,7 @@ public class SlotTest {
         assertEquals(1, item1.getItem().getId());
 
         List<Slot.RepeatedItem> items2 = new ArrayList<>();
-        items2.addAll(slot2.getItems().values());
+        items2.addAll(slot2.getRepeatedItems().values());
         items2.sort(new Comparator<Slot.RepeatedItem>() {
             @Override
             public int compare(Slot.RepeatedItem o1, Slot.RepeatedItem o2) {
@@ -64,12 +66,12 @@ public class SlotTest {
     public void testItemMove() {
         boolean fail = slot1.move(99, slot2);
         assertFalse(fail);
-        assertEquals(1, slot1.getItems().size());
-        assertEquals(2, slot2.getItems().size());
+        assertEquals(1, slot1.getRepeatedItems().size());
+        assertEquals(2, slot2.getRepeatedItems().size());
 
         boolean success = slot1.move(1, slot2);
         assertTrue(success);
-        assertEquals(0, slot1.getItems().size());
-        assertEquals(3, slot2.getItems().size());
+        assertEquals(0, slot1.getRepeatedItems().size());
+        assertEquals(3, slot2.getRepeatedItems().size());
     }
 }

@@ -13,7 +13,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
-public class SceneTree<T> {
+public class Tree<T> {
     static class ParentNotFoundException extends RuntimeException {}
     static class AlreadyAttachedException extends RuntimeException {}
     static class NotFoundException extends RuntimeException {}
@@ -37,25 +37,25 @@ public class SceneTree<T> {
     private final BiMap<T, Integer> registry;
     private AtomicInteger cnt;
 
-    SceneTree() {
+    Tree() {
         tree = new HashMap<>();
         registry = HashBiMap.create();
         cnt = new AtomicInteger();
     }
 
-    public Integer getID(T obj) {
+    protected Integer getID(T obj) {
         return registry.get(obj);
     }
 
-    public T get(int id) {
+    protected T get(int id) {
         return registry.inverse().get(id);
     }
 
-    public int add(T obj) {
+    protected int add(T obj) {
         return _add(obj);
     }
 
-    public int add(T child, T parent) {
+    protected int add(T child, T parent) {
         if (!registry.containsKey(parent)) {
             throw new ParentNotFoundException();
         }
@@ -70,7 +70,7 @@ public class SceneTree<T> {
         return childID;
     }
 
-    public void remove(T obj) {
+    protected void remove(T obj) {
         if (!registry.containsKey(obj)) {
             return;
         }
@@ -89,15 +89,15 @@ public class SceneTree<T> {
         }
     }
 
-    public Collection<T> all() {
+    protected Collection<T> all() {
         return registry.keySet();
     }
 
-    public void clear() {
+    protected void clear() {
         tree.clear();
     }
 
-    public void replace(T oldObj, T newObj) {
+    protected void replace(T oldObj, T newObj) {
         if (!registry.containsKey(oldObj)) {
             throw new NotFoundException();
         }
@@ -109,15 +109,11 @@ public class SceneTree<T> {
         return registry.values();
     }
 
-    private boolean _contains(T obj) {
-        return registry.containsKey(obj);
-    }
-
-    boolean _containsID(int id) {
+    protected boolean containsID(int id) {
         return registry.containsValue(id);
     }
 
-    Collection<T> _subTreeElements(T root, boolean includeRoot) {
+    protected Collection<T> getSubTreeElements(T root, boolean includeRoot) {
         if (!_contains(root)) {
             return new HashSet<>();
         }
@@ -151,6 +147,10 @@ public class SceneTree<T> {
         return result;
     }
 
+    public BiMap<T, Integer> getRegistry() {
+        return registry;
+    }
+
     private int _add(T obj) {
         if (!registry.containsKey(obj)) {
             int id = cnt.getAndIncrement();
@@ -158,5 +158,9 @@ public class SceneTree<T> {
             tree.put(id, new ParentedSet<>(id));
         }
         return registry.get(obj);
+    }
+
+    private boolean _contains(T obj) {
+        return registry.containsKey(obj);
     }
 }

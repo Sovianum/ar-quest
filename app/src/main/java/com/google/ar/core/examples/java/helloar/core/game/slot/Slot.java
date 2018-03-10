@@ -1,9 +1,15 @@
-package com.google.ar.core.examples.java.helloar.core.game;
+package com.google.ar.core.examples.java.helloar.core.game.slot;
 
+import com.google.ar.core.examples.java.helloar.core.ar.SceneObject;
+import com.google.ar.core.examples.java.helloar.core.ar.identifiable.Identifiable;
+import com.google.ar.core.examples.java.helloar.core.game.Item;
+
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Slot {
+public class Slot extends SceneObject {
     public static class RepeatedItem {
         private final Item item;
         private int cnt;
@@ -57,17 +63,18 @@ public class Slot {
             return dropped;
         }
     }
+    protected int id;
+    protected String name;
+    protected Map<Integer, RepeatedItem> items;
 
-    private int id;
-    private boolean isAccessible;
-    private String name;
-    private Map<Integer, RepeatedItem> items;
-
-    public Slot(int id, String name, boolean isAccessible) {
+    public Slot(int id, String name, boolean enabled) {
         this.id = id;
         this.name = name;
-        this.isAccessible = isAccessible;
+        setEnabled(enabled);
         this.items = new HashMap<>();
+
+        setIdentifiable(new Identifiable(name, id));
+        setEnabled(enabled);
     }
 
     public boolean move(int itemID, Slot another) {
@@ -89,18 +96,19 @@ public class Slot {
         return true;
     }
 
-    public void put(Item item) {
-        put(new RepeatedItem(item, 1));
+    public boolean put(Item item) {
+        return put(new RepeatedItem(item, 1));
     }
 
-    public void put(RepeatedItem repeatedItem) {
+    public boolean put(RepeatedItem repeatedItem) {
         int id = repeatedItem.item.getId();
         if (items.containsKey(id)) {
             RepeatedItem old = items.get(id);
             old.cnt += repeatedItem.cnt;
-            return;
+            return true;
         }
         items.put(id, repeatedItem);
+        return true;
     }
 
     public int getItemCnt(int itemID) {
@@ -110,20 +118,20 @@ public class Slot {
         return items.get(itemID).cnt;
     }
 
-    public Map<Integer, RepeatedItem> getItems() {
+    public Map<Integer, RepeatedItem> getRepeatedItems() {
         return items;
+    }
+
+    public Collection<Item> getItems() {
+        Collection<Item> result = new ArrayList<>(items.size());
+        for (RepeatedItem ri : items.values()) {
+            result.add(ri.item);
+        }
+        return result;
     }
 
     public int getId() {
         return id;
-    }
-
-    public boolean isAccessible() {
-        return isAccessible;
-    }
-
-    public void setAccessible(boolean accessible) {
-        isAccessible = accessible;
     }
 
     public String getName() {

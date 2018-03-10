@@ -1,5 +1,7 @@
 package com.google.ar.core.examples.java.helloar.core.game;
 
+import com.google.ar.core.examples.java.helloar.core.game.slot.Slot;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
