@@ -15,14 +15,16 @@ import android.view.WindowManager;
 import android.widget.Button;
 
 import com.google.ar.core.examples.java.helloar.auth.AuthActivity;
+import com.google.ar.core.examples.java.helloar.model.Quest;
 import com.google.ar.core.examples.java.helloar.network.Api;
 import com.google.ar.core.examples.java.helloar.quest.ARFragment;
 import com.google.ar.core.examples.java.helloar.quest.QuestFragment;
 import com.google.ar.core.examples.java.helloar.quest.items.ItemsListFragment;
+import com.google.ar.core.examples.java.helloar.quest.quests.QuestAdapter;
 import com.google.ar.core.examples.java.helloar.quest.quests.QuestsListFragment;
 
 public class MainActivity extends AppCompatActivity {
-    private Button toQuestActivityButton;
+    private Button toQuestFragmentButton;
     private Button toAuthActivityButton;
 
     private QuestsListFragment questsListFragment;
@@ -32,9 +34,9 @@ public class MainActivity extends AppCompatActivity {
 
     private Fragment activeFragment;
 
-    private View.OnClickListener toQuestOnClickListener = new View.OnClickListener() {
+    private QuestAdapter.OnItemClickListener toQuestItemOnClickListener = new QuestAdapter.OnItemClickListener() {
         @Override
-        public void onClick(View view) {
+        public void onItemClick(Quest item) {
             selectFragment(questFragment);
         }
     };
@@ -63,14 +65,17 @@ public class MainActivity extends AppCompatActivity {
         questFragment = new QuestFragment();
         questFragment.setOnClickListener(toAROnClickListener);
 
+        questsListFragment = new QuestsListFragment();
+        questsListFragment.setOnItemClickListener(toQuestItemOnClickListener);
+
         itemsListFragment = new ItemsListFragment();
 
         arFragment = new ARFragment();
         arFragment.setToInventoryOnClickListener(toInventoryOnClickListener);
 
-        toQuestActivityButton = findViewById(R.id.ar_activity_btn);
+        toQuestFragmentButton = findViewById(R.id.ar_fragment_btn);
         toAuthActivityButton = findViewById(R.id.auth_activity_btn);
-        toQuestActivityButton.setOnClickListener(new View.OnClickListener() {
+        toQuestFragmentButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 selectFragment(arFragment);
@@ -87,7 +92,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onStart() {
-        questsListFragment = new QuestsListFragment();
         super.onStart();
         checkAuthorization();
         selectFragment(questsListFragment);

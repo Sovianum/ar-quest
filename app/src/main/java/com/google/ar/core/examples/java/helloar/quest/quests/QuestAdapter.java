@@ -17,6 +17,12 @@ public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private List<Quest> quests;
     private QuestsListFragment fragment;
 
+    public interface OnItemClickListener {
+        void onItemClick(Quest item);
+    }
+
+    private final OnItemClickListener onItemClickListener;
+
     public class CardViewHolder extends RecyclerView.ViewHolder {
         TextView titleView;
         TextView descriptionView;
@@ -32,11 +38,21 @@ public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             ratingBar = itemView.findViewById(R.id.ratingBar_quest);
             defaultMaxLines = descriptionView.getMaxLines();
         }
+
+        public void bind(final Quest item, final OnItemClickListener onItemClickListener) {
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    onItemClickListener.onItemClick(item);
+                }
+            });
+        }
     }
 
-    QuestAdapter(QuestsListFragment fragment, List<Quest> quests) {
+    public QuestAdapter(QuestsListFragment fragment, List<Quest> quests, OnItemClickListener listener) {
         this.fragment = fragment;
         this.quests = quests;
+        this.onItemClickListener = listener;
         notifyDataSetChanged();
     }
 
@@ -74,6 +90,8 @@ public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 }
             }
         });
+
+        cardHolder.bind(quest, onItemClickListener);
     }
 
     @Override

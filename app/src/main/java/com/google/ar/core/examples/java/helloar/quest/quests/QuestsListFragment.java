@@ -21,6 +21,7 @@ public class QuestsListFragment extends Fragment {
     private QuestAdapter adapter;
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeRefreshLayout;
+    private QuestAdapter.OnItemClickListener onItemClickListener;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -31,7 +32,7 @@ public class QuestsListFragment extends Fragment {
         LinearLayoutManager manager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(manager);
 
-        adapter = new QuestAdapter(this, new ArrayList<Quest>());
+        adapter = new QuestAdapter(this, new ArrayList<Quest>(), onItemClickListener);
         recyclerView.setAdapter(adapter);
 
         swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
@@ -85,5 +86,11 @@ public class QuestsListFragment extends Fragment {
             swipeRefreshLayout.setRefreshing(refreshing);
         }
     }
+
+    public void setOnItemClickListener(QuestAdapter.OnItemClickListener listener) {
+        this.onItemClickListener = listener;
+    }
+
+
 
 }
