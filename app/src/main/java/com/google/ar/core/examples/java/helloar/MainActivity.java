@@ -20,6 +20,7 @@ import com.google.ar.core.examples.java.helloar.network.Api;
 import com.google.ar.core.examples.java.helloar.quest.ARFragment;
 import com.google.ar.core.examples.java.helloar.quest.QuestFragment;
 import com.google.ar.core.examples.java.helloar.quest.items.ItemsListFragment;
+import com.google.ar.core.examples.java.helloar.quest.journal.JournalFragment;
 import com.google.ar.core.examples.java.helloar.quest.quests.QuestAdapter;
 import com.google.ar.core.examples.java.helloar.quest.quests.QuestsListFragment;
 
@@ -31,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     private ARFragment arFragment;
     private QuestFragment questFragment;
     private ItemsListFragment itemsListFragment;
+    private JournalFragment journalFragment;
 
     private Fragment activeFragment;
 
@@ -55,6 +57,13 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    private View.OnClickListener toJournalClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            selectFragment(journalFragment);
+        }
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +72,8 @@ public class MainActivity extends AppCompatActivity {
         //removeToken(); //debug
 
         questFragment = new QuestFragment();
-        questFragment.setOnClickListener(toAROnClickListener);
+        questFragment.setOnARModeBtnClickListener(toAROnClickListener);
+        questFragment.setOnJournalClickListener(toJournalClickListener);
 
         questsListFragment = new QuestsListFragment();
         questsListFragment.setOnItemClickListener(toQuestItemOnClickListener);
@@ -72,6 +82,8 @@ public class MainActivity extends AppCompatActivity {
 
         arFragment = new ARFragment();
         arFragment.setToInventoryOnClickListener(toInventoryOnClickListener);
+
+        journalFragment = new JournalFragment();
 
         toQuestFragmentButton = findViewById(R.id.ar_fragment_btn);
         toAuthActivityButton = findViewById(R.id.auth_activity_btn);

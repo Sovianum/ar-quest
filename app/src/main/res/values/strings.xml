@@ -22,7 +22,7 @@
     <string name="to_ar_fragment">AR mode</string>
 
     <string name="auth_activity_btn">Auth Activity</string>
-    <string name="ar_activity_btn">AR Activity</string>
+    <string name="ar_activity_btn">AR Fragment</string>
     <string name="json_web_token">jwt</string>
     <string name="login_title">Авторизация</string>
     <string name="register_title">Регистрация</string>
