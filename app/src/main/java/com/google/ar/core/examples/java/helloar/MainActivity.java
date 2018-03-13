@@ -15,14 +15,19 @@ import android.view.WindowManager;
 import android.widget.Button;
 
 import com.google.ar.core.examples.java.helloar.auth.AuthActivity;
+import com.google.ar.core.examples.java.helloar.core.game.journal.Journal;
+import com.google.ar.core.examples.java.helloar.model.Inventory;
+import com.google.ar.core.examples.java.helloar.model.Item;
 import com.google.ar.core.examples.java.helloar.model.Quest;
 import com.google.ar.core.examples.java.helloar.network.Api;
 import com.google.ar.core.examples.java.helloar.quest.ARFragment;
 import com.google.ar.core.examples.java.helloar.quest.QuestFragment;
+import com.google.ar.core.examples.java.helloar.quest.items.ItemAdapter;
 import com.google.ar.core.examples.java.helloar.quest.items.ItemsListFragment;
 import com.google.ar.core.examples.java.helloar.quest.journal.JournalFragment;
 import com.google.ar.core.examples.java.helloar.quest.quests.QuestAdapter;
 import com.google.ar.core.examples.java.helloar.quest.quests.QuestsListFragment;
+import com.google.ar.core.examples.java.helloar.storage.Inventories;
 
 public class MainActivity extends AppCompatActivity {
     private Button toQuestFragmentButton;
@@ -36,6 +41,9 @@ public class MainActivity extends AppCompatActivity {
 
     private Fragment activeFragment;
 
+    private Journal<String> journal;
+    private Inventories inventories;
+
     private QuestAdapter.OnItemClickListener toQuestItemOnClickListener = new QuestAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(Quest item) {
@@ -43,10 +51,25 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    private ItemAdapter.OnItemClickListener chooseItemOnClickListener = new ItemAdapter.OnItemClickListener() {
+        @Override
+        public void onItemClick(Item item) {
+            System.out.println("You chose + " + item.getName());
+            //TODO action to choose element
+        }
+    };
+
     private View.OnClickListener toInventoryOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             selectFragment(itemsListFragment);
+        }
+    };
+
+    private View.OnClickListener toJournalOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            selectFragment(journalFragment);
         }
     };
 
@@ -69,19 +92,35 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        journal = new Journal<>();
+        journal.addNow("First record");
+        journal.addNow("Second record");
+        journal.addNow("Third record");
+        Integer questId = 1;
+        Api.setCurrentQuestId(questId);
+        Api.getJournals().addCurrentJournal(journal);
+        Inventory inventory = new Inventory();
+        inventory.addItem(new Item("Меч", "Большой и страшный меч", ""));
+        inventory.addItem(new Item("Щит", "Маленький и забавный щит", ""));
+        Api.getInventories().addCurrentInventory(inventory);
+
         //removeToken(); //debug
 
         questFragment = new QuestFragment();
         questFragment.setOnARModeBtnClickListener(toAROnClickListener);
         questFragment.setOnJournalClickListener(toJournalClickListener);
+        //questFragment.setJournal(journal);
+        questFragment.setOnItemClickListener(chooseItemOnClickListener);
 
         questsListFragment = new QuestsListFragment();
         questsListFragment.setOnItemClickListener(toQuestItemOnClickListener);
 
         itemsListFragment = new ItemsListFragment();
+        itemsListFragment.setOnItemClickListener(chooseItemOnClickListener);
 
         arFragment = new ARFragment();
         arFragment.setToInventoryOnClickListener(toInventoryOnClickListener);
+        arFragment.setToJournalOnClickListener(toJournalOnClickListener);
 
         journalFragment = new JournalFragment();
 

@@ -15,11 +15,11 @@ public class Journal<T> {
         return records;
     }
 
-    void add(T data, Date time) {
+    public void add(T data, Date time) {
         records.add(new TimestampRecord<>(data, time));
     }
 
-    void addNow(T data) {
+    public void addNow(T data) {
         records.add(TimestampRecord.recordNow(data));
     }
 }

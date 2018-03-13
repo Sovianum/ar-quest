@@ -65,6 +65,7 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
     private GLSurfaceView surfaceView;
     private Button toggleBtn;
     private Button toInventoryBtn;
+    private Button toJournalBtn;
     private Button releaseBtn;
     private Button toQuestFragmentBtn;
     private TextView collisionText;
@@ -92,6 +93,7 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
     private InteractiveObject banana;
 
     private View.OnClickListener toInventoryOnClickListener;
+    private View.OnClickListener toJouranlOnClickListener;
     private Player player;
 
     @Override
@@ -106,6 +108,8 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         collisionText = view.findViewById(R.id.collision_txt);
         toInventoryBtn = view.findViewById(R.id.inventory_btn);
         toInventoryBtn.setOnClickListener(toInventoryOnClickListener);
+        toJournalBtn = view.findViewById(R.id.journal_btn);
+        toJournalBtn.setOnClickListener(toJouranlOnClickListener);
         releaseBtn = view.findViewById(R.id.release_btn);
 
         // Set up tap listener.
@@ -152,6 +156,13 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         this.toInventoryOnClickListener = lister;
         if (toInventoryBtn != null) {
             toInventoryBtn.setOnClickListener(toInventoryOnClickListener);
+        }
+    }
+
+    public void setToJournalOnClickListener(View.OnClickListener lister) {
+        this.toJouranlOnClickListener = lister;
+        if (toJournalBtn != null) {
+            toJournalBtn.setOnClickListener(toJouranlOnClickListener);
         }
     }
 

@@ -10,11 +10,11 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.google.ar.core.examples.java.helloar.R;
-import com.google.ar.core.examples.java.helloar.model.JournalMessage;
+import com.google.ar.core.examples.java.helloar.core.game.journal.Journal;
+import com.google.ar.core.examples.java.helloar.core.game.journal.TimestampRecord;
+import com.google.ar.core.examples.java.helloar.network.Api;
 
-import java.util.List;
-
-public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class JournalMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public class CardViewHolder extends RecyclerView.ViewHolder {
         TextView messageTextView;
         TextView messageDateView;
@@ -26,15 +26,15 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
     }
 
-    private List<JournalMessage> items;
+    private Journal<String> journal;
 
-    public MessageAdapter(List<JournalMessage> items) {
-        this.items = items;
+    public JournalMessageAdapter() {
+        this.journal = Api.getJournals().getCurrentJournal();
         notifyDataSetChanged();
     }
 
-    public void setItems(List<JournalMessage> items) {
-        this.items = items;
+    public void setItems(Journal journal) {
+        this.journal = journal;
         notifyDataSetChanged();
     }
 
@@ -44,21 +44,20 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         Context context = parent.getContext();
         int CARD_ID = R.layout.item_message_card;
         View view = LayoutInflater.from(context).inflate(CARD_ID, parent, false);
-        return new MessageAdapter.CardViewHolder(view);
+        return new JournalMessageAdapter.CardViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        final JournalMessage message = items.get(position);
-
+        final TimestampRecord<String> message = journal.getRecords().get(position);
         final CardViewHolder cardHolder = (CardViewHolder) holder;
-        cardHolder.messageTextView.setText(message.getMessageText());
+        cardHolder.messageTextView.setText(message.getData());
         cardHolder.messageDateView.setText(DateFormat.format("dd-MM-yyyy (HH:mm:ss)",
-                message.getMessageTime()));
+                message.getTime()));
     }
 
     @Override
     public int getItemCount() {
-        return items.size();
+        return journal.getRecords().size();
     }
 }

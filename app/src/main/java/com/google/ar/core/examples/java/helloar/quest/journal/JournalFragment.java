@@ -11,13 +11,11 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.google.ar.core.examples.java.helloar.R;
-import com.google.ar.core.examples.java.helloar.model.JournalMessage;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.google.ar.core.examples.java.helloar.core.game.journal.Journal;
+import com.google.ar.core.examples.java.helloar.network.Api;
 
 public class JournalFragment extends Fragment {
-    private MessageAdapter adapter;
+    private JournalMessageAdapter adapter;
     private RecyclerView recyclerView;
 
     @Override
@@ -29,7 +27,7 @@ public class JournalFragment extends Fragment {
         LinearLayoutManager manager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(manager);
 
-        adapter = new MessageAdapter(new ArrayList<JournalMessage>());
+        adapter = new JournalMessageAdapter();
         recyclerView.setAdapter(adapter);
 
         return view;
@@ -41,17 +39,13 @@ public class JournalFragment extends Fragment {
         refreshItems();
     }
 
-    private void refreshItems() {
-        List<JournalMessage> items = new ArrayList<>();
-        items.add(new JournalMessage("first message"));
-        items.add(new JournalMessage("second message"));
-        items.add(new JournalMessage("third message"));
-        loadItems(items);
+    private void refreshItems() { //stubs
+        loadItems(Api.getJournals().getCurrentJournal());
     }
 
-    private void loadItems(List<JournalMessage> items) {
+    private void loadItems(Journal journal) {
         if (adapter != null) {
-            adapter.setItems(items);
+            adapter.setItems(journal);
         }
     }
 }
