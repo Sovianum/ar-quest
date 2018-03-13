@@ -13,7 +13,7 @@ public class InteractiveObjectTest {
     @Before
     public void setUp() {
         obj = new InteractiveObject(0, "name", "description", true);
-        obj.setAction(new Action() {
+        obj.setAction(new ItemlessAction() {
             @Override
             public Collection<InteractionResult> act(InteractionArgument argument) {
                 return Utils.singleItemCollection(new InteractionResult(InteractionResult.Type.JOURNAL_RECORD, "record"));

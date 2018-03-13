@@ -4,6 +4,7 @@ package com.google.ar.core.examples.java.helloar.core.game;
 import com.google.ar.core.examples.java.helloar.core.ar.SceneObject;
 import com.google.ar.core.examples.java.helloar.core.ar.identifiable.Identifiable;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 public class InteractiveObject extends SceneObject {
@@ -26,6 +27,17 @@ public class InteractiveObject extends SceneObject {
             return Utils.singleItemCollection(InteractionResult.ERR);
         }
         return action.act(argument);
+    }
+
+    public Collection<Item> getItems() {
+        if (action == null) {
+            return new ArrayList<>();
+        }
+        Collection<Item> items = action.getItems();
+        if (items != null) {
+            return items;
+        }
+        return new ArrayList<>();
     }
 
     public int getId() {

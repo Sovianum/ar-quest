@@ -4,4 +4,5 @@ import java.util.Collection;
 
 public interface Action {
     Collection<InteractionResult> act(final InteractionArgument argument);
+    Collection<Item> getItems();
 }

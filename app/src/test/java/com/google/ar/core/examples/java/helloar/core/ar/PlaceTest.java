@@ -52,20 +52,28 @@ public class PlaceTest {
         Collider collider1 = new Collider(new Sphere(5));
 
         collider1.setPosition(new Geom().apply(Pose.makeTranslation(-10, 0, 0)));
-        Collection<Integer> ids1 = scene.getCollisions(collider1);
+        Collection<Integer> ids1 = objsToIds(scene.getCollisions(collider1));
         assertEquals(0, ids1.size());
 
         collider1.setPosition(new Geom().apply(Pose.makeTranslation(0, 0, 0)));
-        Collection<Integer> ids2 = scene.getCollisions(collider1);
+        Collection<Integer> ids2 = objsToIds(scene.getCollisions(collider1));
         assertEquals(1, ids2.size());
 
         Collider collider2 = new Collider(new Sphere(7.5f));
         collider2.setPosition(new Geom().apply(Pose.makeTranslation(5, 0, 5)));
-        Collection<Integer> ids3 = scene.getCollisions(collider2);
+        Collection<Integer> ids3 = objsToIds(scene.getCollisions(collider2));
         assertEquals(2, ids3.size());
 
         Collider collider3 = new Collider(new Sphere(100f));
-        Collection<Integer> ids4 = scene.getCollisions(collider3);
+        Collection<Integer> ids4 = objsToIds(scene.getCollisions(collider3));
         assertEquals(3, ids4.size());
+    }
+
+    private Collection<Integer> objsToIds(Collection<SceneObject> objects) {
+        Collection<Integer> result = new ArrayList<>(objects.size());
+        for (SceneObject object : objects) {
+            result.add(object.getIdentifiable().getId());
+        }
+        return result;
     }
 }

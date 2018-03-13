@@ -35,21 +35,17 @@ import com.google.ar.core.examples.java.helloar.core.ar.Scene;
 import com.google.ar.core.examples.java.helloar.core.ar.SceneObject;
 import com.google.ar.core.examples.java.helloar.core.ar.collision.Collider;
 import com.google.ar.core.examples.java.helloar.core.ar.collision.shape.Sphere;
-import com.google.ar.core.examples.java.helloar.core.ar.drawable.IDrawable;
 import com.google.ar.core.examples.java.helloar.core.ar.geom.Geom;
 import com.google.ar.core.examples.java.helloar.core.game.InteractionArgument;
 import com.google.ar.core.examples.java.helloar.core.game.InteractionResult;
 import com.google.ar.core.examples.java.helloar.core.game.InteractiveObject;
 import com.google.ar.core.examples.java.helloar.core.game.Place;
-import com.google.ar.core.examples.java.helloar.core.game.Player;
-import com.google.ar.core.examples.java.helloar.core.game.journal.Journal;
-import com.google.ar.core.examples.java.helloar.core.game.map.RoadMap;
-import com.google.ar.core.examples.java.helloar.core.game.slot.Slot;
+import com.google.ar.core.examples.java.helloar.quest.game.ActorPlayer;
 import com.google.ar.core.examples.java.helloar.quest.game.DeferredClickListener;
 import com.google.ar.core.examples.java.helloar.quest.game.InteractionResultHandler;
 import com.google.ar.core.examples.java.helloar.quest.game.QuestService;
+import com.google.ar.core.examples.java.helloar.quest.game.RendererHelper;
 import com.google.ar.core.examples.java.helloar.rendering.BackgroundRenderer;
-import com.google.ar.core.examples.java.helloar.rendering.ObjectRenderer;
 import com.google.ar.core.exceptions.UnavailableApkTooOldException;
 import com.google.ar.core.exceptions.UnavailableArcoreNotInstalledException;
 import com.google.ar.core.exceptions.UnavailableSdkTooOldException;
@@ -59,9 +55,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -87,23 +81,20 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
     private final BackgroundRenderer backgroundRenderer = new BackgroundRenderer();
 
-    // Temporary matrix allocated here to reduce number of allocations for each frame.
-    private final float[] anchorMatrix = new float[16];
-
     // Tap handling and UI.
     private final ArrayBlockingQueue<MotionEvent> queuedSingleTaps = new ArrayBlockingQueue<>(16);
 
     private Scene scene;
-    private Map<String, ObjectRenderer> renderers;
     private Place place;
+    private RendererHelper rendererHelper;
     private InteractiveObject andy;
     private InteractiveObject rose;
     private InteractiveObject banana;
 
     private View.OnClickListener toInventoryOnClickListener;
-    private Player player;
+    private ActorPlayer player;
     private InteractionResultHandler interactionResultHandler;
-    private List<SceneObject> collidedObjects;
+    private List<SceneObject> collidedObjects = new ArrayList<>();
     private DeferredClickListener interactor = new DeferredClickListener() {
         private boolean needActualize = false;
 
@@ -173,17 +164,15 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
         installRequested = false;
 
-        player = new Player(new Slot(0, "inv", false), new RoadMap(), new Journal<String>());
+        player = new ActorPlayer(Pose.makeTranslation(0, 0, -0.3f));
         player.setCollider(new Collider(new Sphere(0.05f)));
         interactionResultHandler = new InteractionResultHandler(player);
-
-        collidedObjects = new ArrayList<>();
 
         return view;
     }
 
-    public void setToInventoryOnClickListener(View.OnClickListener lister) {
-        this.toInventoryOnClickListener = lister;
+    public void setToInventoryOnClickListener(View.OnClickListener listener) {
+        this.toInventoryOnClickListener = listener;
         if (toInventoryBtn != null) {
             toInventoryBtn.setOnClickListener(toInventoryOnClickListener);
         }
@@ -197,7 +186,6 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         // permission on Android M and above, now is a good time to ask the user for it.
         if (PermissionHelper.hasPermissions(getActivity())) {
             if (session != null) {
-//                showLoadingMessage();
                 // Note that order matters - see the note in onPause(), the reverse applies here.
                 session.resume();
             }
@@ -212,7 +200,6 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
             scene = new Scene();
         }
 
-        //showLoadingMessage();
         // Note that order matters - see the note in onPause(), the reverse applies here.
         session.resume();
         surfaceView.onResume();
@@ -224,6 +211,8 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         banana = place.getInteractiveObjects().get(3);
 
         scene.load(place.getAll(), Pose.makeTranslation(0, 0, -0.7f));
+
+        rendererHelper = new RendererHelper(scene);
     }
 
     @Override
@@ -262,7 +251,7 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         backgroundRenderer.createOnGlThread(/*context=*/ getActivity());
 
         try {
-            allocateRenderers();
+            rendererHelper.allocateRenderers(getActivity(), place);
         } catch (IOException e) {
             Log.e(TAG, "Failed to read obj file");
         }
@@ -393,23 +382,9 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         session.configure(config);
     }
 
-    private void allocateRenderers() throws IOException {
-        renderers = new HashMap<>();
-        for (SceneObject sceneObject : place.getAll()) {
-            String name = sceneObject.getIdentifiable().getName();
-            if (!renderers.containsKey(name)) {
-                IDrawable drawable = sceneObject.getDrawable();
-                ObjectRenderer objectRenderer = new ObjectRenderer();
-                objectRenderer.setMaterialProperties(0.0f, 3.5f, 1.0f, 6.0f);
-                objectRenderer.createOnGlThread(getActivity(), drawable.getModelName(), drawable.getTextureName());
-                renderers.put(name, objectRenderer);
-            }
-        }
-    }
-
     private void update(Frame frame, Camera camera) {
-        renderScene(frame, camera);
-        player.getGeom().applyGlobal(camera.getPose());
+        rendererHelper.renderScene(frame, camera, place);
+        player.update(camera.getPose());
         Collection<SceneObject> collided = scene.getCollisions(player.getCollider());
         final InteractiveObject closest = getClosestInteractive(collided);
 
@@ -421,39 +396,6 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
                     ARFragment.this.interactBtn.setEnabled(closest != null);
                 }
             });
-        }
-    }
-
-    private void renderScene(Frame frame, Camera camera) {
-        // Get projection matrix.
-        float[] projmtx = new float[16];
-        camera.getProjectionMatrix(projmtx, 0, 0.1f, 100.0f);
-
-        // Get camera matrix and draw.
-        float[] viewmtx = new float[16];
-        camera.getViewMatrix(viewmtx, 0);
-
-        // Compute lighting from average intensity of the image.
-        final float lightIntensity = frame.getLightEstimate().getPixelIntensity();
-
-        ObjectRenderer renderer;
-        Anchor anchor;
-
-        for (SceneObject sceneObject : place.getAll()) {
-            if (!sceneObject.isEnabled()) {
-                continue;
-            }
-            renderer = renderers.get(sceneObject.getIdentifiable().getName());
-            if (renderer == null) {
-                continue;
-            }
-            anchor = scene.getAnchorMap().get(sceneObject.getIdentifiable().getSceneID());
-            if (anchor == null) {
-                continue;
-            }
-            anchor.getPose().toMatrix(anchorMatrix, 0);
-            renderer.updateModelMatrix(anchorMatrix, sceneObject.getGeom().getScale());
-            renderer.draw(viewmtx, projmtx, lightIntensity);
         }
     }
 

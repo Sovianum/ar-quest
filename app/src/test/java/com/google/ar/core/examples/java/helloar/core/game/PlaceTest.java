@@ -38,7 +38,7 @@ public class PlaceTest {
         inventory = new Slot(0, "inv", true);
 
         inter1 = new InteractiveObject(1, "name1", "descr1", true);
-        inter1.setAction(new Action() {
+        inter1.setAction(new ItemlessAction() {
             @Override
             public Collection<InteractionResult> act(InteractionArgument argument) {
                 inter2.setEnabled(true);
@@ -47,7 +47,7 @@ public class PlaceTest {
         });
 
         inter2 = new InteractiveObject(2, "name2", "descr2", false);
-        inter2.setAction(new Action() {
+        inter2.setAction(new ItemlessAction() {
             @Override
             public Collection<InteractionResult> act(InteractionArgument argument) {
                 for (Slot.RepeatedItem r : argument.items) {

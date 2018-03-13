@@ -56,6 +56,9 @@ public class Place {
         for (Slot slot : slots.values()) {
             result.addAll(slot.getItems());
         }
+        for (InteractiveObject obj : interactiveObjects.values()) {
+            result.addAll(obj.getItems());
+        }
         return result;
     }
 
