@@ -27,7 +27,9 @@ android:orientation="vertical">
         android:textAlignment="center" />
 
     <include layout="@layout/fragment_items_list"
-        android:id="@+id/items_list_layout"/>
+        android:id="@+id/items_list_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 
     <Space
         android:layout_width="match_parent"
@@ -39,6 +41,11 @@ android:orientation="vertical">
         android:layout_height="wrap_content"
         android:text="@string/checkpoint_title"
         android:textAlignment="center" />
+
+    <include layout="@layout/fragment_checkpoints"
+        android:id="@+id/checkpoints_card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 
     <Space
         android:layout_width="match_parent"

@@ -35,6 +35,8 @@ import com.google.ar.core.examples.java.helloar.quest.items.ItemAdapter;
 
 import com.google.ar.core.examples.java.helloar.quest.items.ItemsListFragment;
 import com.google.ar.core.examples.java.helloar.quest.journal.JournalFragment;
+import com.google.ar.core.examples.java.helloar.quest.place.Checkpoint;
+import com.google.ar.core.examples.java.helloar.quest.place.Checkpoints;
 import com.google.ar.core.examples.java.helloar.quest.quests.QuestAdapter;
 import com.google.ar.core.examples.java.helloar.quest.quests.QuestsListFragment;
 import com.google.ar.core.examples.java.helloar.storage.Inventories;
@@ -116,6 +118,9 @@ public class MainActivity extends AppCompatActivity {
         inventory.addItem(new Item("Меч", "Большой и страшный меч", ""));
         inventory.addItem(new Item("Щит", "Маленький и забавный щит", ""));
         Api.getInventories().addCurrentInventory(inventory);
+        Checkpoints checkpoints = new Checkpoints();
+        checkpoints.addCheckpoint(new Checkpoint("title", "description"));
+        Api.getCheckpointsStorage().addCurrentCheckpoints(checkpoints);
 
         //removeToken(); //debug
 

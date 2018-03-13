@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.google.ar.core.examples.java.helloar.ListenerHandler;
 import com.google.ar.core.examples.java.helloar.NetworkError;
+import com.google.ar.core.examples.java.helloar.storage.CheckpointsStorage;
 import com.google.ar.core.examples.java.helloar.storage.Inventories;
 import com.google.ar.core.examples.java.helloar.storage.Journals;
 import com.google.gson.Gson;
@@ -31,6 +32,7 @@ public class Api {
     private String token;
     private static Journals journals;
     private static Inventories inventories;
+    private static CheckpointsStorage checkpointsStorage;
     private static Integer currentQuestId;
 
     private Api() {
@@ -47,6 +49,7 @@ public class Api {
 
         journals = new Journals();
         inventories = new Inventories();
+        checkpointsStorage = new CheckpointsStorage();
     }
 
     public static Journals getJournals() {
@@ -55,6 +58,10 @@ public class Api {
 
     public static Inventories getInventories() {
         return Api.inventories;
+    }
+
+    public static CheckpointsStorage getCheckpointsStorage() {
+        return Api.checkpointsStorage;
     }
 
     public static void setCurrentQuestId(Integer id) {

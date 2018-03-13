@@ -19,6 +19,8 @@ import com.google.ar.core.examples.java.helloar.core.game.journal.TimestampRecor
 import com.google.ar.core.examples.java.helloar.model.Item;
 import com.google.ar.core.examples.java.helloar.network.Api;
 import com.google.ar.core.examples.java.helloar.quest.items.ItemAdapter;
+import com.google.ar.core.examples.java.helloar.quest.place.Checkpoint;
+import com.google.ar.core.examples.java.helloar.quest.place.CheckpointsAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,11 +35,16 @@ public class QuestFragment extends Fragment {
     private View lastJournalCard;
     TextView messageTextView;
     TextView messageDateView;
+    TextView checkpointTitleView;
+    TextView checkpointDescriptionView;
     private Journal<String> journal;
 
-    private ItemAdapter adapter;
+    private ItemAdapter itemAdapter;
     private ItemAdapter.OnItemClickListener onItemClickListener;
-    private RecyclerView recyclerView;
+    private RecyclerView recyclerViewItems;
+    private RecyclerView recyclerViewCheckpoints;
+
+    private CheckpointsAdapter checkpointsAdapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -56,11 +63,18 @@ public class QuestFragment extends Fragment {
         messageDateView = lastJournalCard.findViewById(R.id.message_time);
         refreshLastJournalRecord();
 
-        recyclerView = view.findViewById(R.id.items_list_layout).findViewById(R.id.recyclerView);
+        recyclerViewItems = view.findViewById(R.id.items_list_layout).findViewById(R.id.recyclerView);
         LinearLayoutManager manager = new LinearLayoutManager(getActivity());
-        recyclerView.setLayoutManager(manager);
-        adapter = new ItemAdapter(new ArrayList<Item>(), onItemClickListener);
-        recyclerView.setAdapter(adapter);
+        recyclerViewItems.setLayoutManager(manager);
+        itemAdapter = new ItemAdapter(new ArrayList<Item>(), onItemClickListener);
+        recyclerViewItems.setAdapter(itemAdapter);
+
+        recyclerViewCheckpoints = view.findViewById(R.id.checkpoints_card).findViewById(R.id.recyclerView);
+        LinearLayoutManager managerCheckpoints = new LinearLayoutManager(getActivity());
+        recyclerViewCheckpoints.setLayoutManager(managerCheckpoints);
+        checkpointsAdapter = new CheckpointsAdapter(new ArrayList<Checkpoint>());
+        recyclerViewCheckpoints.setAdapter(checkpointsAdapter);
+
         return view;
     }
 
@@ -93,15 +107,26 @@ public class QuestFragment extends Fragment {
     public void onStart() {
         super.onStart();
         refreshItems();
+        refreshCheckpoints();
     }
 
     private void refreshItems() {
         loadItems(Api.getInventories().getCurrentInventory().getItems());
     }
 
+    private void refreshCheckpoints() {
+        loadCheckpoints(Api.getCheckpointsStorage().getCurrentCheckpoints().getCheckpoints());
+    }
+
     private void loadItems(List<Item> items) {
-        if (adapter != null) {
-            adapter.setItems(items);
+        if (itemAdapter != null) {
+            itemAdapter.setItems(items);
+        }
+    }
+
+    private void loadCheckpoints(List<Checkpoint> checkpoints) {
+        if (checkpointsAdapter != null) {
+            checkpointsAdapter.setItems(checkpoints);
         }
     }
 
