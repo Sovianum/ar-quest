@@ -15,6 +15,14 @@ import com.google.ar.core.examples.java.helloar.model.Item;
 import java.util.List;
 
 public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    private List<Item> items;
+
+    public interface OnItemClickListener {
+        void onItemClick(Item item);
+    }
+
+    private final ItemAdapter.OnItemClickListener onItemClickListener;
+
     public class CardViewHolder extends RecyclerView.ViewHolder {
         TextView nameView;
         TextView descriptionView;
@@ -26,12 +34,20 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             nameView = itemView.findViewById(R.id.name_txt);
             descriptionView = itemView.findViewById(R.id.description_txt);
         }
+
+        public void bind(final Item item, final OnItemClickListener onItemClickListener) {
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    onItemClickListener.onItemClick(item);
+                }
+            });
+        }
     }
 
-    private List<Item> items;
-
-    public ItemAdapter(List<Item> items) {
+    public ItemAdapter(List<Item> items, OnItemClickListener listener) {
         this.items = items;
+        this.onItemClickListener = listener;
         notifyDataSetChanged();
     }
 
@@ -57,6 +73,7 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         cardHolder.nameView.setText(item.getName());
         cardHolder.descriptionView.setText(item.getDescription());
         // todo add image loading
+        cardHolder.bind(item, onItemClickListener);
     }
 
     @Override

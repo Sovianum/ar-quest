@@ -17,6 +17,7 @@
     <string name="app_name">HelloAR Java</string>
     <string name="toggle_android">Toggle android</string>
     <string name="inventory_str">Inventory</string>
+    <string name="journal_str">Journal</string>
     <string name="release_str">Release</string>
     <string name="to_quest_fragment">Back to quest</string>
     <string name="to_ar_fragment">AR mode</string>

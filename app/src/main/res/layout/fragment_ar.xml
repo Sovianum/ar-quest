@@ -48,6 +48,16 @@
             android:layout_weight="1"
             android:layout_height="wrap_content"
             android:text="@string/inventory_str"
+            android:textSize="@dimen/button_text_size"
+            />
+
+        <Button
+            android:id="@+id/journal_btn"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="@string/journal_str"
+            android:textSize="@dimen/button_text_size"
             />
         
         <Button
@@ -55,14 +65,18 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="@string/interact_str"/>
+            android:text="@string/interact_str"
+            android:textSize="@dimen/button_text_size"
+            />
 
         <Button
             android:id="@+id/release_btn"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="@string/release_str" />
+            android:text="@string/release_str"
+            android:textSize="@dimen/button_text_size"
+            />
 
     </LinearLayout>
 </LinearLayout>

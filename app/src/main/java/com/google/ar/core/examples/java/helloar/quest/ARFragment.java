@@ -66,6 +66,7 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
     // Rendering. The Renderers are created here, and initialized when the GL surface is created.
     private GLSurfaceView surfaceView;
     private Button toInventoryBtn;
+    private Button toJournalBtn;
     private Button releaseBtn;
     private Button interactBtn;
     private Button toQuestFragmentBtn;
@@ -91,6 +92,7 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
     private InteractiveObject banana;
 
     private View.OnClickListener toInventoryOnClickListener;
+
     private ActorPlayer player;
     private InteractionResultHandler interactionResultHandler;
     private List<SceneObject> collidedObjects = new ArrayList<>();
@@ -113,6 +115,8 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         }
     };
 
+    private View.OnClickListener toJouranlOnClickListener;
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -124,6 +128,11 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         collisionText = view.findViewById(R.id.collision_txt);
         toInventoryBtn = view.findViewById(R.id.inventory_btn);
         interactBtn = view.findViewById(R.id.interact_btn);
+
+        toInventoryBtn.setOnClickListener(toInventoryOnClickListener);
+        toJournalBtn = view.findViewById(R.id.journal_btn);
+        toJournalBtn.setOnClickListener(toJouranlOnClickListener);
+
         releaseBtn = view.findViewById(R.id.release_btn);
 
         toInventoryBtn.setOnClickListener(toInventoryOnClickListener);
@@ -175,6 +184,13 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         this.toInventoryOnClickListener = listener;
         if (toInventoryBtn != null) {
             toInventoryBtn.setOnClickListener(toInventoryOnClickListener);
+        }
+    }
+
+    public void setToJournalOnClickListener(View.OnClickListener lister) {
+        this.toJouranlOnClickListener = lister;
+        if (toJournalBtn != null) {
+            toJournalBtn.setOnClickListener(toJouranlOnClickListener);
         }
     }
 

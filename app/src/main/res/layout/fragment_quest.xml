@@ -12,6 +12,9 @@ android:orientation="vertical">
         android:text="@string/journal_title"
         android:textAlignment="center" />
 
+    <include layout="@layout/item_message_card"
+        android:id="@+id/last_journal_record_card"/>
+
     <Space
         android:layout_width="match_parent"
         android:layout_height="@dimen/spaces_login" />
@@ -22,6 +25,9 @@ android:orientation="vertical">
         android:layout_height="wrap_content"
         android:text="@string/inventory_title"
         android:textAlignment="center" />
+
+    <include layout="@layout/fragment_items_list"
+        android:id="@+id/items_list_layout"/>
 
     <Space
         android:layout_width="match_parent"

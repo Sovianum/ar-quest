@@ -12,6 +12,7 @@ import android.widget.LinearLayout;
 
 import com.google.ar.core.examples.java.helloar.R;
 import com.google.ar.core.examples.java.helloar.model.Item;
+import com.google.ar.core.examples.java.helloar.network.Api;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +22,7 @@ public class ItemsListFragment extends Fragment {
 
     private ItemAdapter adapter;
     private RecyclerView recyclerView;
+    private ItemAdapter.OnItemClickListener onItemClickListener;
 
     @Nullable
     @Override
@@ -31,18 +33,30 @@ public class ItemsListFragment extends Fragment {
         LinearLayoutManager manager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(manager);
 
-        if (adapter == null) {
-            adapter = new ItemAdapter(new ArrayList<Item>());
-        }
+        adapter = new ItemAdapter(new ArrayList<Item>(), onItemClickListener);
         recyclerView.setAdapter(adapter);
 
         return view;
     }
 
-    public void loadItems(List<Item> items) {
-        if (adapter == null) {
-            adapter = new ItemAdapter(new ArrayList<Item>());
-        }
-        adapter.setItems(items);
+    @Override
+    public void onStart() {
+        super.onStart();
+        refreshItems();
     }
+
+    public void loadItems(List<Item> items) {
+        if (adapter != null) {
+            adapter.setItems(items);
+        }
+    }
+
+    public void setOnItemClickListener(ItemAdapter.OnItemClickListener listener) {
+        this.onItemClickListener = listener;
+    }
+
+    private void refreshItems() {
+        loadItems(Api.getInventories().getCurrentInventory().getItems());
+    }
+
 }

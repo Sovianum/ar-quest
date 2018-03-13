@@ -16,4 +16,12 @@ public class TimestampRecord<T> {
         this.data = data;
         this.time = time;
     }
+
+    public T getData() {
+        return data;
+    }
+
+    public Date getTime() {
+        return time;
+    }
 }
