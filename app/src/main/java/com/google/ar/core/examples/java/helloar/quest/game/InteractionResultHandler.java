@@ -7,18 +7,12 @@ import android.widget.Toast;
 
 import com.google.ar.core.examples.java.helloar.R;
 import com.google.ar.core.examples.java.helloar.core.game.InteractionResult;
-import com.google.ar.core.examples.java.helloar.core.game.Player;
 import com.google.ar.core.examples.java.helloar.core.game.slot.Slot;
+import com.google.ar.core.examples.java.helloar.network.Api;
 
 import java.util.Locale;
 
 public class InteractionResultHandler {
-    private Player player;
-
-    public InteractionResultHandler(Player player) {
-        this.player = player;
-    }
-
     public void onInteractionResult(final InteractionResult result, final Activity activity) {
         switch (result.getType()) {
             case MESSAGE:
@@ -40,7 +34,7 @@ public class InteractionResultHandler {
 
     private void onInventoryUpdateResult(final InteractionResult result, final Activity activity) {
         Slot.RepeatedItem repeatedItem = result.getItems();
-        player.getInventory().put(repeatedItem);
+        Api.getInventories().getCurrentInventory().put(repeatedItem);
         showMsg(
                 String.format(
                         Locale.ENGLISH,
@@ -51,7 +45,7 @@ public class InteractionResultHandler {
     }
 
     private void onJournalUpdateResult(final InteractionResult result, final Activity activity) {
-        player.getJournal().addNow(result.getMsg());
+        Api.getJournals().getCurrentJournal().addNow(result.getMsg());
         showMsg(activity.getString(R.string.journal_updated_str), activity);
     }
 

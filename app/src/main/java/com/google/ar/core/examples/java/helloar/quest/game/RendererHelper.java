@@ -25,6 +25,7 @@ public class RendererHelper {
     private final float[] projmtx = new float[16];
     private Map<String, ObjectRenderer> renderers;
     private Scene scene;
+    private float lightIntensity;
 
     public RendererHelper(Scene scene) {
         this.scene = scene;
@@ -38,18 +39,15 @@ public class RendererHelper {
         this.renderers = renderers;
     }
 
+    public void renderObject(Frame frame, Camera camera, SceneObject sceneObject) {
+        initInner(frame, camera);
+        renderInner(sceneObject);
+    }
+
     public void renderScene(Frame frame, Camera camera, Place place) {
-        // Get projection matrix.
-        camera.getProjectionMatrix(projmtx, 0, 0.1f, 100.0f);
-
-        // Get camera matrix and draw.
-        camera.getViewMatrix(viewmtx, 0);
-
-        // Compute lighting from average intensity of the image.
-        final float lightIntensity = frame.getLightEstimate().getPixelIntensity();
-
+        initInner(frame, camera);
         for (SceneObject sceneObject : place.getAll()) {
-            renderObject(sceneObject, viewmtx, projmtx, lightIntensity);
+            renderInner(sceneObject);
         }
     }
 
@@ -67,7 +65,18 @@ public class RendererHelper {
         }
     }
 
-    public void renderObject(SceneObject sceneObject, float[] viewmtx, float[] projmtx, float lightIntensity) {
+    private void initInner(Frame frame, Camera camera) {
+        // Get projection matrix.
+        camera.getProjectionMatrix(projmtx, 0, 0.1f, 100.0f);
+
+        // Get camera matrix and draw.
+        camera.getViewMatrix(viewmtx, 0);
+
+        // Compute lighting from average intensity of the image.
+        lightIntensity = frame.getLightEstimate().getPixelIntensity();
+    }
+
+    private void renderInner(SceneObject sceneObject) {
         if (sceneObject == null || !sceneObject.isEnabled()) {
             return;
         }

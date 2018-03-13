@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.google.ar.core.examples.java.helloar.R;
-import com.google.ar.core.examples.java.helloar.model.Item;
+import com.google.ar.core.examples.java.helloar.core.game.Item;
 import com.google.ar.core.examples.java.helloar.network.Api;
 
 import java.util.ArrayList;

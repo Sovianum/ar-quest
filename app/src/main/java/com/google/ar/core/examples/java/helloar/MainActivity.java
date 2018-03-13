@@ -13,34 +13,29 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.google.ar.core.Pose;
 import com.google.ar.core.examples.java.helloar.auth.AuthActivity;
-
+import com.google.ar.core.examples.java.helloar.core.ar.Scene;
 import com.google.ar.core.examples.java.helloar.core.ar.collision.Collider;
 import com.google.ar.core.examples.java.helloar.core.ar.collision.shape.Sphere;
-
+import com.google.ar.core.examples.java.helloar.core.game.Item;
+import com.google.ar.core.examples.java.helloar.core.game.Place;
+import com.google.ar.core.examples.java.helloar.core.game.Player;
 import com.google.ar.core.examples.java.helloar.core.game.journal.Journal;
-import com.google.ar.core.examples.java.helloar.model.Inventory;
-
-import com.google.ar.core.examples.java.helloar.model.Item;
+import com.google.ar.core.examples.java.helloar.core.game.slot.Slot;
 import com.google.ar.core.examples.java.helloar.model.Quest;
 import com.google.ar.core.examples.java.helloar.network.Api;
 import com.google.ar.core.examples.java.helloar.quest.ARFragment;
 import com.google.ar.core.examples.java.helloar.quest.QuestFragment;
-
 import com.google.ar.core.examples.java.helloar.quest.game.ActorPlayer;
-
+import com.google.ar.core.examples.java.helloar.quest.game.QuestService;
 import com.google.ar.core.examples.java.helloar.quest.items.ItemAdapter;
-
 import com.google.ar.core.examples.java.helloar.quest.items.ItemsListFragment;
 import com.google.ar.core.examples.java.helloar.quest.journal.JournalFragment;
 import com.google.ar.core.examples.java.helloar.quest.quests.QuestAdapter;
 import com.google.ar.core.examples.java.helloar.quest.quests.QuestsListFragment;
-import com.google.ar.core.examples.java.helloar.storage.Inventories;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private Button toQuestFragmentButton;
@@ -54,7 +49,9 @@ public class MainActivity extends AppCompatActivity {
     private ActorPlayer player;
 
     private Journal<String> journal;
-    private Inventories inventories;
+
+    private Scene scene;
+    private Place place;
 
     private QuestAdapter.OnItemClickListener toQuestItemOnClickListener = new QuestAdapter.OnItemClickListener() {
         @Override
@@ -66,7 +63,8 @@ public class MainActivity extends AppCompatActivity {
     private ItemAdapter.OnItemClickListener chooseItemOnClickListener = new ItemAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(Item item) {
-            System.out.println("You chose + " + item.getName());
+            player.hold(item);
+            Toast.makeText(MainActivity.this, "You selected: " + item.getName(), Toast.LENGTH_SHORT).show();
             //TODO action to choose element
         }
     };
@@ -74,7 +72,6 @@ public class MainActivity extends AppCompatActivity {
     private View.OnClickListener toInventoryOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            itemsListFragment.loadItems(convertItems(player.getInventory().getItems()));
             selectFragment(itemsListFragment, itemsListFragment.TAG);
         }
     };
@@ -112,10 +109,7 @@ public class MainActivity extends AppCompatActivity {
         Integer questId = 1;
         Api.setCurrentQuestId(questId);
         Api.getJournals().addCurrentJournal(journal);
-        Inventory inventory = new Inventory();
-        inventory.addItem(new Item("Меч", "Большой и страшный меч", ""));
-        inventory.addItem(new Item("Щит", "Маленький и забавный щит", ""));
-        Api.getInventories().addCurrentInventory(inventory);
+        Api.getInventories().addCurrentInventory(new Slot(0, Player.INVENTORY, false));
 
         //removeToken(); //debug
 
@@ -156,6 +150,10 @@ public class MainActivity extends AppCompatActivity {
         player = new ActorPlayer(Pose.makeTranslation(0, 0, -0.3f));
         player.setCollider(new Collider(new Sphere(0.05f)));
         arFragment.setPlayer(player);
+
+        scene = new Scene();
+        place = QuestService.getInteractionDemoPlace();
+        arFragment.setDecorations(scene, place);
     }
 
     @Override
@@ -240,14 +238,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Api.getInstance().setToken(jwt);
         }
-    }
-
-    private List<Item> convertItems(List<com.google.ar.core.examples.java.helloar.core.game.Item> items) {
-        List<Item> result = new ArrayList<>();
-        for (com.google.ar.core.examples.java.helloar.core.game.Item item : items) {
-            result.add(new Item(item.getName(), item.getDescription(), ""));
-        }
-        return result;
     }
 
     private void removeToken() {

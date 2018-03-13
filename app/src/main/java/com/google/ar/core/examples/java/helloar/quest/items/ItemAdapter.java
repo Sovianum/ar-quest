@@ -10,7 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.ar.core.examples.java.helloar.R;
-import com.google.ar.core.examples.java.helloar.model.Item;
+import com.google.ar.core.examples.java.helloar.core.game.Item;
 
 import java.util.List;
 
