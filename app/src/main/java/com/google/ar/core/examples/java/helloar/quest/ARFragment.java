@@ -1,6 +1,7 @@
 package com.google.ar.core.examples.java.helloar.quest;
 
 
+import android.app.Activity;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
@@ -35,12 +36,17 @@ import com.google.ar.core.examples.java.helloar.core.ar.SceneObject;
 import com.google.ar.core.examples.java.helloar.core.ar.collision.Collider;
 import com.google.ar.core.examples.java.helloar.core.ar.collision.shape.Sphere;
 import com.google.ar.core.examples.java.helloar.core.ar.drawable.IDrawable;
+import com.google.ar.core.examples.java.helloar.core.ar.geom.Geom;
+import com.google.ar.core.examples.java.helloar.core.game.InteractionArgument;
+import com.google.ar.core.examples.java.helloar.core.game.InteractionResult;
 import com.google.ar.core.examples.java.helloar.core.game.InteractiveObject;
 import com.google.ar.core.examples.java.helloar.core.game.Place;
 import com.google.ar.core.examples.java.helloar.core.game.Player;
 import com.google.ar.core.examples.java.helloar.core.game.journal.Journal;
 import com.google.ar.core.examples.java.helloar.core.game.map.RoadMap;
 import com.google.ar.core.examples.java.helloar.core.game.slot.Slot;
+import com.google.ar.core.examples.java.helloar.quest.game.DeferredClickListener;
+import com.google.ar.core.examples.java.helloar.quest.game.InteractionResultHandler;
 import com.google.ar.core.examples.java.helloar.quest.game.QuestService;
 import com.google.ar.core.examples.java.helloar.rendering.BackgroundRenderer;
 import com.google.ar.core.examples.java.helloar.rendering.ObjectRenderer;
@@ -50,8 +56,11 @@ import com.google.ar.core.exceptions.UnavailableSdkTooOldException;
 import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -63,9 +72,9 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
     // Rendering. The Renderers are created here, and initialized when the GL surface is created.
     private GLSurfaceView surfaceView;
-    private Button toggleBtn;
     private Button toInventoryBtn;
     private Button releaseBtn;
+    private Button interactBtn;
     private Button toQuestFragmentBtn;
     private TextView collisionText;
 
@@ -93,11 +102,30 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
     private View.OnClickListener toInventoryOnClickListener;
     private Player player;
+    private InteractionResultHandler interactionResultHandler;
+    private List<SceneObject> collidedObjects;
+    private DeferredClickListener interactor = new DeferredClickListener() {
+        private boolean needActualize = false;
+
+        @Override
+        public void actualize() {
+            if (needActualize) {
+                scene.getCollisions(player.getCollider(), collidedObjects);
+                interact();
+                collidedObjects.clear();
+                needActualize = false;
+            }
+        }
+
+        @Override
+        public void onClick(View v) {
+            needActualize = true;
+        }
+    };
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
         RelativeLayout view = (RelativeLayout) inflater.inflate(R.layout.fragment_ar, container, false);
 
         surfaceView = view.findViewById(R.id.surfaceview);
@@ -105,8 +133,11 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
         collisionText = view.findViewById(R.id.collision_txt);
         toInventoryBtn = view.findViewById(R.id.inventory_btn);
-        toInventoryBtn.setOnClickListener(toInventoryOnClickListener);
+        interactBtn = view.findViewById(R.id.interact_btn);
         releaseBtn = view.findViewById(R.id.release_btn);
+
+        toInventoryBtn.setOnClickListener(toInventoryOnClickListener);
+        interactBtn.setOnClickListener(interactor);
 
         // Set up tap listener.
         gestureDetector =
@@ -144,6 +175,9 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
         player = new Player(new Slot(0, "inv", false), new RoadMap(), new Journal<String>());
         player.setCollider(new Collider(new Sphere(0.05f)));
+        interactionResultHandler = new InteractionResultHandler(player);
+
+        collidedObjects = new ArrayList<>();
 
         return view;
     }
@@ -185,11 +219,11 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         displayRotationHelper.onResume();
 
         place = QuestService.getDemoPlace();
-        andy = place.getAccessibleInteractiveObjects().get(1);
-        rose = place.getAccessibleInteractiveObjects().get(2);
-        banana = place.getAccessibleInteractiveObjects().get(3);
+        andy = place.getInteractiveObjects().get(1);
+        rose = place.getInteractiveObjects().get(2);
+        banana = place.getInteractiveObjects().get(3);
 
-        scene.load(place.getAll(), Pose.makeTranslation(0, 0, -1));
+        scene.load(place.getAll(), Pose.makeTranslation(0, 0, -0.7f));
     }
 
     @Override
@@ -273,26 +307,10 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
                 return;
             }
 
-            renderScene(frame, camera);
-            updatePlayer(camera);
-            Collection<SceneObject> collided = scene.getCollisions(player.getCollider());
-            StringBuilder s = new StringBuilder("Camera: " + camera.getPose().toString() + "\n");
-            s.append("Andy: " + scene.getAnchorMap().get(andy.getIdentifiable().getSceneID()).getPose().toString() + " " + getColliderRadius(andy) + "\n");
-            s.append("Rose: " + scene.getAnchorMap().get(rose.getIdentifiable().getSceneID()).getPose().toString() + " " + getColliderRadius(rose) + "\n");
-            s.append("Banana: " + scene.getAnchorMap().get(banana.getIdentifiable().getSceneID()).getPose().toString() + " " + getColliderRadius(banana) + "\n");
-            s.append("Collided: ");
-            for (SceneObject sceneObject : collided) {
-                s.append(sceneObject.getIdentifiable().getName()).append(" ");
-            }
+            update(frame, camera);
+            interactor.actualize();
 
-            final String str = s.toString();
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    collisionText.setText(str);
-                }
-            });
-
+            showDebugInfo(camera);
         } catch (Throwable t) {
             // Avoid crashing the application due to unhandled exceptions.
             Log.e(TAG, "Exception on the OpenGL thread", t);
@@ -325,19 +343,6 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
                     });
         }
         messageSnackbar.show();
-    }
-
-    private void hideLoadingMessage() {
-        getActivity().runOnUiThread(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        if (messageSnackbar != null) {
-                            messageSnackbar.dismiss();
-                        }
-                        messageSnackbar = null;
-                    }
-                });
     }
 
     private void configureSession() {
@@ -376,7 +381,6 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         }
 
         if (message != null) {
-            showSnackbarMessage(message, true);
             Log.e(TAG, "Exception creating session", exception);
             return;
         }
@@ -400,6 +404,23 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
                 objectRenderer.createOnGlThread(getActivity(), drawable.getModelName(), drawable.getTextureName());
                 renderers.put(name, objectRenderer);
             }
+        }
+    }
+
+    private void update(Frame frame, Camera camera) {
+        renderScene(frame, camera);
+        player.getGeom().applyGlobal(camera.getPose());
+        Collection<SceneObject> collided = scene.getCollisions(player.getCollider());
+        final InteractiveObject closest = getClosestInteractive(collided);
+
+        Activity activity = getActivity();
+        if (activity != null) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    ARFragment.this.interactBtn.setEnabled(closest != null);
+                }
+            });
         }
     }
 
@@ -436,8 +457,79 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         }
     }
 
-    private void updatePlayer(Camera camera) {
-        player.getGeom().applyGlobal(camera.getPose());
+    private void showDebugInfo(Camera camera) {
+        Collection<SceneObject> collided = scene.getCollisions(player.getCollider());
+        StringBuilder s = new StringBuilder("Camera: " + camera.getPose().toString() + "\n");
+
+        Anchor andyAnchor = scene.getAnchorMap().get(andy.getIdentifiable().getSceneID());
+        if (andyAnchor != null) {
+            s.append("Andy: " + andyAnchor.getPose().toString() + " " + getColliderRadius(andy) + "\n");
+        }
+
+        Anchor roseAnchor = scene.getAnchorMap().get(rose.getIdentifiable().getSceneID());
+        if (roseAnchor != null) {
+            s.append("Rose: " + roseAnchor.getPose().toString() + " " + getColliderRadius(rose) + "\n");
+        }
+
+        Anchor bananaAnchor = scene.getAnchorMap().get(banana.getIdentifiable().getSceneID());
+        if (bananaAnchor != null) {
+            s.append("Banana: " + bananaAnchor.getPose().toString() + " " + getColliderRadius(banana) + "\n");
+        }
+
+        s.append("Collided: ");
+        for (SceneObject sceneObject : collided) {
+            s.append(sceneObject.getIdentifiable().getName()).append(" ");
+        }
+
+        final String str = s.toString();
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                collisionText.setText(str);
+            }
+        });
+    }
+
+    private void interact() {
+        final Activity activity = getActivity();
+        if (activity == null) {
+            return;
+        }
+
+        collidedObjects.sort(new Comparator<SceneObject>() {
+            @Override
+            public int compare(SceneObject o1, SceneObject o2) {
+                float d1 = Geom.distance(o1.getGeom(), player.getGeom());
+                float d2 = Geom.distance(o2.getGeom(), player.getGeom());
+
+                return Float.compare(d1, d2);
+            }
+        });
+
+        InteractiveObject closestObject = getClosestInteractive(collidedObjects);
+        if (closestObject == null) {
+            return;
+        }
+
+        InteractionArgument arg = new InteractionArgument(
+                null,
+                null
+        );
+        Collection<InteractionResult> results = closestObject.interact(arg);
+
+        for (InteractionResult result : results) {
+            interactionResultHandler.onInteractionResult(result, activity);
+        }
+    }
+
+    private InteractiveObject getClosestInteractive(Collection<SceneObject> objects) {
+        for (SceneObject object : objects) {
+            InteractiveObject got = place.getInteractiveObject(object.getIdentifiable().getId());
+            if (got != null) {
+                return got;
+            }
+        }
+        return null;
     }
 
     private static String getColliderRadius(SceneObject sceneObject) {

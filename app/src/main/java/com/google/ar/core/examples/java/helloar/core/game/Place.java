@@ -28,6 +28,14 @@ public class Place {
         interactiveObjects = new HashMap<>();
     }
 
+    public InteractiveObject getInteractiveObject(int id) {
+        return interactiveObjects.get(id);
+    }
+
+    public Slot getSolt(int id) {
+        return slots.get(id);
+    }
+
     public int getId() {
         return id;
     }

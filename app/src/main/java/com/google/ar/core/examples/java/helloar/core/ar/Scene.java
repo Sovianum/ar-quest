@@ -62,9 +62,15 @@ public class Scene extends Tree<SceneObject> {
 
     public Collection<SceneObject> getCollisions(final Collider collider) {
         Collection<SceneObject> result = new ArrayList<>();
+        getCollisions(collider, result);
+        return result;
+    }
+
+    public void getCollisions(final Collider collider, final Collection<SceneObject> acceptor) {
         if (collider == null) {
-            return result;
+            return;
         }
+        acceptor.clear();
 
         for (Map.Entry<SceneObject, Integer> entry : getRegistry().entrySet()) {
             if (!entry.getKey().isEnabled()) {
@@ -76,11 +82,9 @@ public class Scene extends Tree<SceneObject> {
                 continue;
             }
             if (collider.collide(itemCollider)) {
-                result.add(entry.getKey());
+                acceptor.add(entry.getKey());
             }
         }
-
-        return result;
     }
 
     public boolean addObject(SceneObject obj) {

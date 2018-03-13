@@ -18,41 +18,43 @@ import java.util.List;
 public class QuestService {
     public static Place getDemoPlace() {
         InteractiveObject root = new InteractiveObject(1, "andy", "andy", true);
+        final InteractiveObject rose = new InteractiveObject(2, "rose", "rose", false);
+        final InteractiveObject banana = new InteractiveObject(3, "banana", "banana", false);
+
         root.setDrawable(new TextureDrawable("andy.obj", "andy.png"));
         root.getGeom().apply(Pose.makeTranslation(0, 0, -1f));
-        root.setCollider(new Collider(new Sphere(0.1f)));
+        root.setCollider(new Collider(new Sphere(0.3f)));
         root.setAction(new Action() {
             @Override
             public Collection<InteractionResult> act(InteractionArgument argument) {
+                rose.setEnabled(true);
                 return Utils.singleItemCollection(new InteractionResult(
                         InteractionResult.Type.MESSAGE,
-                        "You interacted andy"
+                        "You interacted andy; now rose is available"
                 ));
             }
         });
 
-        InteractiveObject child1 = new InteractiveObject(2, "rose", "rose", true);
-        child1.getIdentifiable().setParentID(1);
-        child1.setDrawable(new TextureDrawable("rose.obj", "rose.jpg"));
-        child1.getGeom().apply(Pose.makeTranslation(0.5f, 0, 0)).setScale(0.003f);
-        child1.setCollider(new Collider(new Sphere(0.1f)));
-        child1.setAction(new Action() {
+        rose.getIdentifiable().setParentID(1);
+        rose.setDrawable(new TextureDrawable("rose.obj", "rose.jpg"));
+        rose.getGeom().apply(Pose.makeTranslation(0.5f, 0, 0)).setScale(0.003f);
+        rose.setCollider(new Collider(new Sphere(0.3f)));
+        rose.setAction(new Action() {
             @Override
             public Collection<InteractionResult> act(InteractionArgument argument) {
+                banana.setEnabled(true);
                 return Utils.singleItemCollection(new InteractionResult(
                         InteractionResult.Type.MESSAGE,
-                        "You interacted rose"
+                        "You interacted rose; now banana is available"
                 ));
             }
         });
 
-
-        InteractiveObject child2 = new InteractiveObject(3, "banana", "banana", true);
-        child2.getIdentifiable().setParentID(1);
-        child2.setDrawable(new TextureDrawable("banana.obj", "banana.jpg"));
-        child2.getGeom().apply(Pose.makeTranslation(0, 0, 0.5f)).setScale(0.001f);
-        child2.setCollider(new Collider(new Sphere(0.1f)));
-        child2.setAction(new Action() {
+        banana.getIdentifiable().setParentID(1);
+        banana.setDrawable(new TextureDrawable("banana.obj", "banana.jpg"));
+        banana.getGeom().apply(Pose.makeTranslation(0, 0, 0.5f)).setScale(0.001f);
+        banana.setCollider(new Collider(new Sphere(0.3f)));
+        banana.setAction(new Action() {
             @Override
             public Collection<InteractionResult> act(InteractionArgument argument) {
                 return Utils.singleItemCollection(new InteractionResult(
@@ -65,8 +67,8 @@ public class QuestService {
         Place place = new Place();
         List<InteractiveObject> objects = new ArrayList<>();
         objects.add(root);
-        objects.add(child1);
-        objects.add(child2);
+        objects.add(rose);
+        objects.add(banana);
         place.loadInteractiveObjects(objects);
         return place;
     }

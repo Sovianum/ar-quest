@@ -14,12 +14,30 @@ public class InteractionResult {
         ERROR,
     }
 
+    Type type;
+    String msg;
+    Slot.RepeatedItem items;
+
     public InteractionResult(Type type, String msg) {
         this.type = type;
         this.msg = msg;
     }
 
-    Type type;
-    String msg;
-    Slot.RepeatedItem items;
+    public InteractionResult(Type type, String msg, Slot.RepeatedItem items) {
+        this.type = type;
+        this.msg = msg;
+        this.items = items;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public Slot.RepeatedItem getItems() {
+        return items;
+    }
 }

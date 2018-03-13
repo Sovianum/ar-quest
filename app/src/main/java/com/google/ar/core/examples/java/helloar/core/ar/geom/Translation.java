@@ -38,4 +38,8 @@ public class Translation {
     public void applyGlobal(Pose pose) {
         pose.getTranslation(t, 0);
     }
+
+    public float get(int coordID) {
+        return t[coordID];
+    }
 }
