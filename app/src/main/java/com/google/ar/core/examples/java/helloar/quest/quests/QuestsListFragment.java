@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class QuestsListFragment extends Fragment {
+    public static final String TAG = QuestsListFragment.class.getSimpleName();
+
     private QuestAdapter adapter;
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeRefreshLayout;

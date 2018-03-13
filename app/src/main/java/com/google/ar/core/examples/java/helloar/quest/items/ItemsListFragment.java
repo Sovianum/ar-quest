@@ -17,9 +17,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ItemsListFragment extends Fragment {
+    public static final String TAG = ItemsListFragment.class.getSimpleName();
+
     private ItemAdapter adapter;
     private RecyclerView recyclerView;
-
 
     @Nullable
     @Override
@@ -30,28 +31,18 @@ public class ItemsListFragment extends Fragment {
         LinearLayoutManager manager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(manager);
 
-        adapter = new ItemAdapter(new ArrayList<Item>());
+        if (adapter == null) {
+            adapter = new ItemAdapter(new ArrayList<Item>());
+        }
         recyclerView.setAdapter(adapter);
 
         return view;
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        refreshItems();
-    }
-
-    private void refreshItems() {
-        List<Item> items = new ArrayList<>();
-        items.add(new Item("Меч", "Большой и страшный меч", ""));
-        items.add(new Item("Щит", "Маленький и забавный щит", ""));
-        loadItems(items);
-    }
-
-    private void loadItems(List<Item> items) {
-        if (adapter != null) {
-            adapter.setItems(items);
+    public void loadItems(List<Item> items) {
+        if (adapter == null) {
+            adapter = new ItemAdapter(new ArrayList<Item>());
         }
+        adapter.setItems(items);
     }
 }

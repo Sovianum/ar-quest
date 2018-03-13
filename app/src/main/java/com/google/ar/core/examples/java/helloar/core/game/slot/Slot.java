@@ -5,8 +5,8 @@ import com.google.ar.core.examples.java.helloar.core.ar.identifiable.Identifiabl
 import com.google.ar.core.examples.java.helloar.core.game.Item;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Slot extends SceneObject {
@@ -122,8 +122,8 @@ public class Slot extends SceneObject {
         return items;
     }
 
-    public Collection<Item> getItems() {
-        Collection<Item> result = new ArrayList<>(items.size());
+    public List<Item> getItems() {
+        List<Item> result = new ArrayList<>(items.size());
         for (RepeatedItem ri : items.values()) {
             result.add(ri.item);
         }

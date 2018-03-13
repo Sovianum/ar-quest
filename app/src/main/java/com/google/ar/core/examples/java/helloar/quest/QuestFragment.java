@@ -13,6 +13,8 @@ import android.widget.TextView;
 import com.google.ar.core.examples.java.helloar.R;
 
 public class QuestFragment extends Fragment {
+    public static final String TAG = QuestFragment.class.getSimpleName();
+
     private View.OnClickListener onARModeBtnClickListener;
     private View.OnClickListener onJournalClickListener;
     private Button toARModeBtn;

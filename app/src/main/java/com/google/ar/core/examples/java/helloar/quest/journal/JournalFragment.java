@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class JournalFragment extends Fragment {
+    public static final String TAG = JournalFragment.class.getSimpleName();
+
     private MessageAdapter adapter;
     private RecyclerView recyclerView;
 

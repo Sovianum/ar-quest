@@ -33,7 +33,6 @@ import com.google.ar.core.examples.java.helloar.PermissionHelper;
 import com.google.ar.core.examples.java.helloar.R;
 import com.google.ar.core.examples.java.helloar.core.ar.Scene;
 import com.google.ar.core.examples.java.helloar.core.ar.SceneObject;
-import com.google.ar.core.examples.java.helloar.core.ar.collision.Collider;
 import com.google.ar.core.examples.java.helloar.core.ar.collision.shape.Sphere;
 import com.google.ar.core.examples.java.helloar.core.ar.geom.Geom;
 import com.google.ar.core.examples.java.helloar.core.game.InteractionArgument;
@@ -62,7 +61,7 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
-    private static final String TAG = ARFragment.class.getSimpleName();
+    public static final String TAG = ARFragment.class.getSimpleName();
 
     // Rendering. The Renderers are created here, and initialized when the GL surface is created.
     private GLSurfaceView surfaceView;
@@ -163,12 +162,13 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         surfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
 
         installRequested = false;
-
-        player = new ActorPlayer(Pose.makeTranslation(0, 0, -0.3f));
-        player.setCollider(new Collider(new Sphere(0.05f)));
         interactionResultHandler = new InteractionResultHandler(player);
 
         return view;
+    }
+
+    public void setPlayer(ActorPlayer player) {
+        this.player = player;
     }
 
     public void setToInventoryOnClickListener(View.OnClickListener listener) {

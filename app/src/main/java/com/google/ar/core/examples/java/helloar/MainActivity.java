@@ -14,15 +14,23 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 
+import com.google.ar.core.Pose;
 import com.google.ar.core.examples.java.helloar.auth.AuthActivity;
+import com.google.ar.core.examples.java.helloar.core.ar.collision.Collider;
+import com.google.ar.core.examples.java.helloar.core.ar.collision.shape.Sphere;
+import com.google.ar.core.examples.java.helloar.model.Item;
 import com.google.ar.core.examples.java.helloar.model.Quest;
 import com.google.ar.core.examples.java.helloar.network.Api;
 import com.google.ar.core.examples.java.helloar.quest.ARFragment;
 import com.google.ar.core.examples.java.helloar.quest.QuestFragment;
+import com.google.ar.core.examples.java.helloar.quest.game.ActorPlayer;
 import com.google.ar.core.examples.java.helloar.quest.items.ItemsListFragment;
 import com.google.ar.core.examples.java.helloar.quest.journal.JournalFragment;
 import com.google.ar.core.examples.java.helloar.quest.quests.QuestAdapter;
 import com.google.ar.core.examples.java.helloar.quest.quests.QuestsListFragment;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private Button toQuestFragmentButton;
@@ -33,34 +41,34 @@ public class MainActivity extends AppCompatActivity {
     private QuestFragment questFragment;
     private ItemsListFragment itemsListFragment;
     private JournalFragment journalFragment;
-
-    private Fragment activeFragment;
+    private ActorPlayer player;
 
     private QuestAdapter.OnItemClickListener toQuestItemOnClickListener = new QuestAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(Quest item) {
-            selectFragment(questFragment);
+            selectFragment(questFragment, questFragment.TAG);
         }
     };
 
     private View.OnClickListener toInventoryOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            selectFragment(itemsListFragment);
+            itemsListFragment.loadItems(convertItems(player.getInventory().getItems()));
+            selectFragment(itemsListFragment, itemsListFragment.TAG);
         }
     };
 
     private View.OnClickListener toAROnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            selectFragment(arFragment);
+            selectFragment(arFragment, arFragment.TAG);
         }
     };
 
     private View.OnClickListener toJournalClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            selectFragment(journalFragment);
+            selectFragment(journalFragment, journalFragment.TAG);
         }
     };
 
@@ -90,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
         toQuestFragmentButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                selectFragment(arFragment);
+                selectFragment(arFragment, arFragment.TAG);
             }
         });
 
@@ -100,13 +108,17 @@ public class MainActivity extends AppCompatActivity {
                 goToAuthActivity(view);
             }
         });
+
+        player = new ActorPlayer(Pose.makeTranslation(0, 0, -0.3f));
+        player.setCollider(new Collider(new Sphere(0.05f)));
+        arFragment.setPlayer(player);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         checkAuthorization();
-        selectFragment(questsListFragment);
+        selectFragment(questsListFragment, questsListFragment.TAG);
     }
 
     @Override
@@ -138,19 +150,39 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    private void selectFragment(Fragment fragment) {
-        if (fragment == activeFragment) {
-            return;
-        }
+    private void selectFragment(Fragment fragment, String tag) {
         FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        if (activeFragment != null) {
-            fragmentTransaction.remove(activeFragment);
+        int index = fragmentManager.getBackStackEntryCount() - 1;
+
+        boolean needPut = true;
+        boolean needRemove = false;
+
+        Fragment lastFragment = null;
+        if (index >= 0) {
+            FragmentManager.BackStackEntry backEntry = fragmentManager.getBackStackEntryAt(index);
+            String lastTag = backEntry.getName();
+            lastFragment = fragmentManager.findFragmentByTag(lastTag);
+
+            if (lastFragment == fragment) {
+                needPut = false;
+                needRemove = false;
+            } else {
+                needPut = true;
+                needRemove = true;
+            }
         }
-        activeFragment = fragment;
-        fragmentTransaction.add(R.id.main_fragment_container, activeFragment);
-        fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.commit();
+
+        if (needPut || needRemove) {
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            if (needRemove && lastFragment != null) {
+                fragmentTransaction.remove(lastFragment);
+            }
+            fragmentTransaction.add(R.id.main_fragment_container, fragment, tag);
+            fragmentTransaction.addToBackStack(tag);
+            fragmentTransaction.commit();
+        }
+
+
     }
 
     private void checkAuthorization() {
@@ -164,6 +196,14 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Api.getInstance().setToken(jwt);
         }
+    }
+
+    private List<Item> convertItems(List<com.google.ar.core.examples.java.helloar.core.game.Item> items) {
+        List<Item> result = new ArrayList<>();
+        for (com.google.ar.core.examples.java.helloar.core.game.Item item : items) {
+            result.add(new Item(item.getName(), item.getDescription(), ""));
+        }
+        return result;
     }
 
     private void removeToken() {
