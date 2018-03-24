@@ -10,11 +10,13 @@ import android.support.design.widget.BaseTransientBottomBar;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.Display;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -25,14 +27,18 @@ import com.google.ar.core.ArCoreApk;
 import com.google.ar.core.Camera;
 import com.google.ar.core.Config;
 import com.google.ar.core.Frame;
+import com.google.ar.core.HitResult;
+import com.google.ar.core.Plane;
 import com.google.ar.core.Pose;
 import com.google.ar.core.Session;
+import com.google.ar.core.Trackable;
 import com.google.ar.core.TrackingState;
 import com.google.ar.core.examples.java.helloar.App;
 import com.google.ar.core.examples.java.helloar.DisplayRotationHelper;
 import com.google.ar.core.examples.java.helloar.GameModule;
 import com.google.ar.core.examples.java.helloar.PermissionHelper;
 import com.google.ar.core.examples.java.helloar.R;
+import com.google.ar.core.examples.java.helloar.common.ContinuousAction;
 import com.google.ar.core.examples.java.helloar.core.ar.Scene;
 import com.google.ar.core.examples.java.helloar.core.ar.SceneObject;
 import com.google.ar.core.examples.java.helloar.core.ar.collision.shape.Sphere;
@@ -42,7 +48,7 @@ import com.google.ar.core.examples.java.helloar.core.game.InteractionResult;
 import com.google.ar.core.examples.java.helloar.core.game.InteractiveObject;
 import com.google.ar.core.examples.java.helloar.core.game.Item;
 import com.google.ar.core.examples.java.helloar.core.game.Place;
-import com.google.ar.core.examples.java.helloar.core.game.Utils;
+import com.google.ar.core.examples.java.helloar.common.CollectionUtils;
 import com.google.ar.core.examples.java.helloar.core.game.slot.Slot;
 import com.google.ar.core.examples.java.helloar.quest.game.DeferredClickListener;
 import com.google.ar.core.examples.java.helloar.quest.game.InteractionResultHandler;
@@ -91,6 +97,23 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
     @Inject
     GameModule gameModule;
+
+    ContinuousAction snackbarAction = new ContinuousAction(
+            new Runnable() {
+                @Override
+                public void run() {
+                    ARFragment.this.showSnackbarMessage(getString(R.string.direct_camera_to_floor_str), false);
+                    ARFragment.this.hideButtons();
+                }
+            },
+            new Runnable() {
+                @Override
+                public void run() {
+                    ARFragment.this.hideSnackbarMessage();
+                    ARFragment.this.showButtons();
+                }
+            }
+    );
 
     private boolean installRequested;
 
@@ -192,6 +215,10 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         installRequested = false;
         interactionResultHandler = new InteractionResultHandler();
 
+        if (!snackbarAction.isStarted()) {
+            hideButtons();
+        }
+
         return view;
     }
 
@@ -202,8 +229,6 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         andy = place.getInteractiveObjects().get(1);
         rose = place.getInteractiveObjects().get(2);
         banana = place.getInteractiveObjects().get(3);
-
-        scene.load(place.getAll(), Pose.makeTranslation(0, 0, -0.7f));
     }
 
     public void setToInventoryOnClickListener(View.OnClickListener listener) {
@@ -317,7 +342,16 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
             Camera camera = frame.getCamera();
 
             if (camera.getTrackingState() == TrackingState.TRACKING) {
-                scene.update(session);
+                if (!scene.isLoaded()) {
+                    snackbarAction.startIfNotRunning();
+                    Pose planeOrigin = getPlaneOrigin(frame);
+                    if (planeOrigin != null) {
+                        scene.load(place.getAll(), planeOrigin);
+                    }
+                } else {
+                    snackbarAction.stopIfRunning();
+                    scene.update(session);
+                }
             }
 
             // Draw background.
@@ -331,7 +365,6 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
             update(frame, camera);
             interactor.actualize();
 
-//            showDebugInfo(camera);
         } catch (Throwable t) {
             // Avoid crashing the application due to unhandled exceptions.
             Log.e(TAG, "Exception on the OpenGL thread", t);
@@ -359,11 +392,20 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
                         @Override
                         public void onDismissed(Snackbar transientBottomBar, int event) {
                             super.onDismissed(transientBottomBar, event);
-                            getActivity().finish();
+                            Activity activity = getActivity();
+                            if (activity != null) {
+                                activity.finish();
+                            }
                         }
                     });
         }
         messageSnackbar.show();
+    }
+
+    private void hideSnackbarMessage() {
+        if (messageSnackbar != null) {
+            messageSnackbar.dismiss();
+        }
     }
 
     private void configureSession() {
@@ -436,6 +478,47 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         }
     }
 
+    private Pose getPlaneOrigin(Frame frame) {
+        Anchor origin = null;
+
+        Activity activity = getActivity();
+        if (activity == null) {
+            return null;
+        }
+        WindowManager manager = activity.getWindowManager();
+
+        Display display = manager.getDefaultDisplay();
+        android.graphics.Point size = new android.graphics.Point();
+        display.getSize(size);
+
+        for (HitResult hit : frame.hitTest(size.x / 2, size.y / 2)) { // todo check if correct screen position
+            Trackable trackable = hit.getTrackable();
+
+            if (trackable instanceof Plane) {
+                origin = hit.createAnchor();
+                break;
+            }
+        }
+        if (origin != null) {
+            return origin.getPose();
+        }
+        return null;
+    }
+
+    private void showButtons() {
+        toInventoryBtn.setAlpha(1);
+        toJournalBtn.setAlpha(1);
+        releaseBtn.setAlpha(1);
+        interactBtn.setAlpha(1);
+    }
+
+    private void hideButtons() {
+        toInventoryBtn.setAlpha(0);
+        toJournalBtn.setAlpha(0);
+        releaseBtn.setAlpha(0);
+        interactBtn.setAlpha(0);
+    }
+
     private void showDebugInfo(Camera camera) {
         Collection<SceneObject> collided = scene.getCollisions(gameModule.getPlayer().getCollider());
         StringBuilder s = new StringBuilder("Camera: " + camera.getPose().toString() + "\n");
@@ -492,7 +575,7 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
         InteractionArgument arg = new InteractionArgument(
                 null,
-                Utils.singleItemCollection(new Slot.RepeatedItem(gameModule.getPlayer().getItem()))
+                CollectionUtils.singleItemCollection(new Slot.RepeatedItem(gameModule.getPlayer().getItem()))
         );
         Collection<InteractionResult> results = closestObject.interact(arg);
 

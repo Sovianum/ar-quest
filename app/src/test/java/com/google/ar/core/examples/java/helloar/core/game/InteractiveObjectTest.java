@@ -1,5 +1,7 @@
 package com.google.ar.core.examples.java.helloar.core.game;
 
+import com.google.ar.core.examples.java.helloar.common.CollectionUtils;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -16,7 +18,7 @@ public class InteractiveObjectTest {
         obj.setAction(new ItemlessAction() {
             @Override
             public Collection<InteractionResult> act(InteractionArgument argument) {
-                return Utils.singleItemCollection(new InteractionResult(InteractionResult.Type.JOURNAL_RECORD, "record"));
+                return CollectionUtils.singleItemCollection(new InteractionResult(InteractionResult.Type.JOURNAL_RECORD, "record"));
             }
         });
     }

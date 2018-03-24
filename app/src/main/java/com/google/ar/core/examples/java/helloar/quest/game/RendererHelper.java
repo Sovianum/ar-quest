@@ -15,10 +15,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by artem on 3/13/18.
- */
-
 public class RendererHelper {
     private final float[] anchorMatrix = new float[16];
     private final float[] viewmtx = new float[16];

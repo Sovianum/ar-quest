@@ -32,10 +32,6 @@ public class Place {
         return interactiveObjects.get(id);
     }
 
-    public Slot getSolt(int id) {
-        return slots.get(id);
-    }
-
     public int getId() {
         return id;
     }
@@ -64,6 +60,10 @@ public class Place {
 
     public Map<Integer, Slot> getSlots() {
         return slots;
+    }
+
+    public Slot getSlot(int id) {
+        return slots.get(id);
     }
 
     public Map<Integer, Slot> getAccessibleSlots() {

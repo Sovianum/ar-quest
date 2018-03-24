@@ -1,6 +1,7 @@
 package com.google.ar.core.examples.java.helloar.core.game;
 
 
+import com.google.ar.core.examples.java.helloar.common.CollectionUtils;
 import com.google.ar.core.examples.java.helloar.core.ar.SceneObject;
 import com.google.ar.core.examples.java.helloar.core.ar.identifiable.Identifiable;
 
@@ -24,7 +25,7 @@ public class InteractiveObject extends SceneObject {
 
     public Collection<InteractionResult> interact(final InteractionArgument argument) {
         if (!isEnabled()) {
-            return Utils.singleItemCollection(InteractionResult.ERR);
+            return CollectionUtils.singleItemCollection(InteractionResult.ERR);
         }
         return action.act(argument);
     }

@@ -94,8 +94,6 @@ public class MainActivity extends AppCompatActivity {
         questsListFragment = new QuestsListFragment();
         questsListFragment.setOnItemClickListener(toQuestItemOnClickListener);
 
-        placeFragment = new PlaceFragment();
-
         toQuestFragmentButton.setOnClickListener(getSelectFragmentListener(arFragment));
     }
 
@@ -125,6 +123,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setUpQuestFragment() {
+        placeFragment = new PlaceFragment();
+
         questFragment = new QuestFragment();
         questFragment.setOnARModeBtnClickListener(getSelectFragmentListener(arFragment));
         questFragment.setOnJournalClickListener(getSelectFragmentListener(journalFragment));

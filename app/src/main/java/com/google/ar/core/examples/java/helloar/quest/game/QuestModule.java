@@ -1,6 +1,7 @@
 package com.google.ar.core.examples.java.helloar.quest.game;
 
 import com.google.ar.core.Pose;
+import com.google.ar.core.examples.java.helloar.App;
 import com.google.ar.core.examples.java.helloar.GameModule;
 import com.google.ar.core.examples.java.helloar.core.ar.collision.Collider;
 import com.google.ar.core.examples.java.helloar.core.ar.collision.shape.Sphere;
@@ -12,7 +13,7 @@ import com.google.ar.core.examples.java.helloar.core.game.InteractiveObject;
 import com.google.ar.core.examples.java.helloar.core.game.Item;
 import com.google.ar.core.examples.java.helloar.core.game.ItemlessAction;
 import com.google.ar.core.examples.java.helloar.core.game.Place;
-import com.google.ar.core.examples.java.helloar.core.game.Utils;
+import com.google.ar.core.examples.java.helloar.common.CollectionUtils;
 import com.google.ar.core.examples.java.helloar.core.game.slot.Slot;
 
 import java.util.ArrayList;
@@ -34,7 +35,8 @@ public class QuestModule {
     @Provides
     @Singleton
     public QuestModule provideQuestModule() {
-        return new QuestModule();
+        App.getAppComponent().inject(this);
+        return this;
     }
 
     public Place getInteractionDemoPlace() {
@@ -70,13 +72,14 @@ public class QuestModule {
                             return resultTransitions.get(cnt++);
                         }
                     }
+                    return CollectionUtils.singleItemCollection(new InteractionResult(InteractionResult.Type.MESSAGE, "Где еда?"));
                 }
-                return Utils.singleItemCollection(new InteractionResult(InteractionResult.Type.MESSAGE, "Мне нечего тебе сказать"));
+                return CollectionUtils.singleItemCollection(new InteractionResult(InteractionResult.Type.MESSAGE, "Мне нечего тебе сказать"));
             }
 
             @Override
             public Collection<Item> getItems() {
-                return Utils.singleItemCollection(rose);
+                return CollectionUtils.singleItemCollection(rose);
             }
 
             private List<Collection<InteractionResult>> getResultTransitions() {
@@ -130,12 +133,12 @@ public class QuestModule {
                         }
                     }
                 }
-                return Utils.singleItemCollection(new InteractionResult(InteractionResult.Type.MESSAGE, "Ммм?"));
+                return CollectionUtils.singleItemCollection(new InteractionResult(InteractionResult.Type.MESSAGE, "Ммм?"));
             }
 
             @Override
             public Collection<Item> getItems() {
-                return Utils.singleItemCollection(banana);
+                return CollectionUtils.singleItemCollection(banana);
             }
 
             private List<Collection<InteractionResult>> getResultTransitions() {
@@ -178,12 +181,16 @@ public class QuestModule {
     }
 
     public Place getAppearenceDemoPlace() {
-        InteractiveObject root = new InteractiveObject(1, "andy", "andy", true);
+        InteractiveObject andy = new InteractiveObject(1, "andy", "andy", true);
+        andy.setDrawable(new TextureDrawable("andy.obj", "andy.png"));
+        andy.getGeom().apply(Pose.makeTranslation(0, 0, 0f));
+        andy.setCollider(new Collider(new Sphere(0.3f)));
+
         final InteractiveObject rose = new InteractiveObject(2, "rose", "rose", false);
         final InteractiveObject banana = new InteractiveObject(3, "banana", "banana", false);
 
 
-        root.setAction(new Action() {
+        andy.setAction(new Action() {
             private final Item toy = new Item(10, "toy", "toy", "bigmax.obj", "bigmax.jpg");
 
             @Override
@@ -209,7 +216,7 @@ public class QuestModule {
             @Override
             public Collection<Item> getItems() {
                 toy.getGeom().setScale(0.001f);
-                return Utils.singleItemCollection(toy);
+                return CollectionUtils.singleItemCollection(toy);
             }
         });
 
@@ -221,7 +228,7 @@ public class QuestModule {
             @Override
             public Collection<InteractionResult> act(InteractionArgument argument) {
                 banana.setEnabled(true);
-                return Utils.singleItemCollection(new InteractionResult(
+                return CollectionUtils.singleItemCollection(new InteractionResult(
                         InteractionResult.Type.MESSAGE,
                         "You interacted rose; now banana is available"
                 ));
@@ -235,7 +242,7 @@ public class QuestModule {
         banana.setAction(new ItemlessAction() {
             @Override
             public Collection<InteractionResult> act(InteractionArgument argument) {
-                return Utils.singleItemCollection(new InteractionResult(
+                return CollectionUtils.singleItemCollection(new InteractionResult(
                         InteractionResult.Type.MESSAGE,
                         "You interacted banana"
                 ));
@@ -244,7 +251,7 @@ public class QuestModule {
 
         Place place = new Place();
         List<InteractiveObject> objects = new ArrayList<>();
-        objects.add(root);
+        objects.add(andy);
         objects.add(rose);
         objects.add(banana);
         place.loadInteractiveObjects(objects);

@@ -1,5 +1,6 @@
 package com.google.ar.core.examples.java.helloar.core.game;
 
+import com.google.ar.core.examples.java.helloar.common.CollectionUtils;
 import com.google.ar.core.examples.java.helloar.core.game.slot.Slot;
 
 import org.junit.Before;
@@ -42,7 +43,7 @@ public class PlaceTest {
             @Override
             public Collection<InteractionResult> act(InteractionArgument argument) {
                 inter2.setEnabled(true);
-                return Utils.singleItemCollection(new InteractionResult(InteractionResult.Type.JOURNAL_RECORD, "open inter2"));
+                return CollectionUtils.singleItemCollection(new InteractionResult(InteractionResult.Type.JOURNAL_RECORD, "open inter2"));
             }
         });
 
@@ -54,12 +55,12 @@ public class PlaceTest {
                     if (r.getItem().getId() == 1) {
                         r.dropAll();
                         slot2.setEnabled(true);
-                        return Utils.singleItemCollection(
+                        return CollectionUtils.singleItemCollection(
                                 new InteractionResult(InteractionResult.Type.JOURNAL_RECORD, "open slot2")
                         );
                     }
                 }
-                return Utils.singleItemCollection(
+                return CollectionUtils.singleItemCollection(
                         new InteractionResult(InteractionResult.Type.MESSAGE, "failed to interact")
                 );
             }
@@ -85,7 +86,7 @@ public class PlaceTest {
 
         Collection<InteractionResult> results1 = place.getAccessibleInteractiveObjects().get(1).interact(null);
         assertEquals(1, results1.size());
-        InteractionResult result1 = Utils.first(results1);
+        InteractionResult result1 = CollectionUtils.first(results1);
         assertEquals(InteractionResult.Type.JOURNAL_RECORD, result1.type);
         assertEquals(2, place.getAccessibleInteractiveObjects().size());
 
@@ -93,19 +94,19 @@ public class PlaceTest {
 
         InteractionArgument badEmptyArgument = new InteractionArgument();
         Collection<InteractionResult> badResults1 = inter2.interact(badEmptyArgument);
-        assertEquals(InteractionResult.Type.MESSAGE, Utils.first(badResults1).type);
+        assertEquals(InteractionResult.Type.MESSAGE, CollectionUtils.first(badResults1).type);
         assertEquals(1, place.getAccessibleSlots().size());
         assertEquals(1, slot1.getItemCnt(1));
 
-        InteractionArgument badItemArgument = InteractionArgument.itemArg(Utils.singleItemCollection(new Slot.RepeatedItem(item2)));
+        InteractionArgument badItemArgument = InteractionArgument.itemArg(CollectionUtils.singleItemCollection(new Slot.RepeatedItem(item2)));
         Collection<InteractionResult> badResults2 = inter2.interact(badItemArgument);
-        assertEquals(InteractionResult.Type.MESSAGE, Utils.first(badResults2).type);
+        assertEquals(InteractionResult.Type.MESSAGE, CollectionUtils.first(badResults2).type);
         assertEquals(1, place.getAccessibleSlots().size());
         assertEquals(1, slot1.getItemCnt(1));
 
-        InteractionArgument goodArgument = InteractionArgument.itemArg(Utils.singleItemCollection(slot1.getRepeatedItems().get(1)));
+        InteractionArgument goodArgument = InteractionArgument.itemArg(CollectionUtils.singleItemCollection(slot1.getRepeatedItems().get(1)));
         Collection<InteractionResult> goodResults = inter2.interact(goodArgument);
-        assertEquals(InteractionResult.Type.JOURNAL_RECORD, Utils.first(goodResults).type);
+        assertEquals(InteractionResult.Type.JOURNAL_RECORD, CollectionUtils.first(goodResults).type);
         assertEquals(2, place.getAccessibleSlots().size());
         assertEquals(0, slot1.getItemCnt(1));
     }

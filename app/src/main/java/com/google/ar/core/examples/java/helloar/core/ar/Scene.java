@@ -14,6 +14,7 @@ import java.util.Map;
 
 public class Scene extends Tree<SceneObject> {
     private Map<Integer, Anchor> anchorMap;
+    private boolean loaded = false;
 
     public Scene() {
         super();
@@ -27,6 +28,7 @@ public class Scene extends Tree<SceneObject> {
     // it is assumed that parent id is always less than child id
     public void load(final List<SceneObject> sceneObjects) {
         load(sceneObjects, Pose.IDENTITY);
+        loaded = true;
     }
 
     // it is assumed that parent id is always less than child id
@@ -54,10 +56,31 @@ public class Scene extends Tree<SceneObject> {
                 addObject(obj);
             }
         }
+        loaded = true;
+    }
+
+    public boolean isLoaded() {
+        return loaded;
+    }
+
+    public void reset() {
+        anchorMap = new HashMap<>();
+        loaded = false;
     }
 
     public void update(Session session) {
-        updateAnchors(session);
+        for (Map.Entry<Integer, Anchor> entry: anchorMap.entrySet()) {
+            entry.getValue().detach();
+        }
+        anchorMap.clear();
+
+        for (Integer id : ids()) {
+            SceneObject object = get(id);
+            if (object == null || !object.isEnabled()) {
+                continue;
+            }
+            anchorMap.put(id, session.createAnchor(object.getGeom().getPose()));
+        }
     }
 
     public Collection<SceneObject> getCollisions(final Collider collider) {
@@ -116,21 +139,6 @@ public class Scene extends Tree<SceneObject> {
         }
         for (SceneObject sceneObject : sceneObjects) {
             sceneObject.getGeom().apply(pose);
-        }
-    }
-
-    private void updateAnchors(Session session) {
-        for (Map.Entry<Integer, Anchor> entry: anchorMap.entrySet()) {
-            entry.getValue().detach();
-        }
-        anchorMap.clear();
-
-        for (Integer id : ids()) {
-            SceneObject object = get(id);
-            if (object == null || !object.isEnabled()) {
-                continue;
-            }
-            anchorMap.put(id, session.createAnchor(object.getGeom().getPose()));
         }
     }
 }
