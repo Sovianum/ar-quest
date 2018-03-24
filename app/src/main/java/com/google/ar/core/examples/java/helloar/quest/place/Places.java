@@ -16,9 +16,11 @@ public class Places {
         return places;
     }
 
-    public void setItems(List<Place> items) {
-        this.places = items;
+    public void setPlaces(List<Place> places) {
+        this.places = places;
     }
+
+    public List<Place> getPlaces;
 
     public void addCheckpoint(Place item) {
         places.add(item);

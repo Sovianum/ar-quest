@@ -1,7 +1,7 @@
 package com.google.ar.core.examples.java.helloar.quest.game;
 
 import com.google.ar.core.Pose;
-import com.google.ar.core.examples.java.helloar.GameApi;
+import com.google.ar.core.examples.java.helloar.GameModule;
 import com.google.ar.core.examples.java.helloar.core.ar.collision.Collider;
 import com.google.ar.core.examples.java.helloar.core.ar.collision.shape.Sphere;
 import com.google.ar.core.examples.java.helloar.core.ar.drawable.TextureDrawable;
@@ -20,8 +20,24 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
-public class QuestService {
-    public static Place getInteractionDemoPlace() {
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import dagger.Module;
+import dagger.Provides;
+
+@Module
+public class QuestModule {
+    @Inject
+    GameModule gameModule;
+
+    @Provides
+    @Singleton
+    public QuestModule provideQuestModule() {
+        return new QuestModule();
+    }
+
+    public Place getInteractionDemoPlace() {
         InteractiveObject andy = new InteractiveObject(1, "andy", "andy", true);
         andy.setDrawable(new TextureDrawable("andy.obj", "andy.png"));
         andy.getGeom().apply(Pose.makeTranslation(0, 0, -0.5f));
@@ -50,7 +66,7 @@ public class QuestService {
                         Item innerItem = item.getItem();
                         if (innerItem != null && Objects.equals(innerItem.getName(), "banana")) {
                             item.getItem().setEnabled(false);
-                            GameApi.getInventories().getCurrentInventory().remove(10);
+                            gameModule.getCurrentInventory().remove(10);
                             return resultTransitions.get(cnt++);
                         }
                     }
@@ -109,7 +125,7 @@ public class QuestService {
                     for (Slot.RepeatedItem item : argument.getItems()) {
                         if (item.getItem().getName().equals("rose")) {
                             item.getItem().setEnabled(false);
-                            GameApi.getInventories().getCurrentInventory().remove(20);
+                            gameModule.getCurrentInventory().remove(20);
                             return transitions.get(cnt++);
                         }
                     }
@@ -161,7 +177,7 @@ public class QuestService {
         return place;
     }
 
-    public static Place getAppearenceDemoPlace() {
+    public Place getAppearenceDemoPlace() {
         InteractiveObject root = new InteractiveObject(1, "andy", "andy", true);
         final InteractiveObject rose = new InteractiveObject(2, "rose", "rose", false);
         final InteractiveObject banana = new InteractiveObject(3, "banana", "banana", false);

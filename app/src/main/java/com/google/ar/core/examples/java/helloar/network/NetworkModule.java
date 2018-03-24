@@ -6,49 +6,67 @@ import android.util.Log;
 
 import com.google.ar.core.examples.java.helloar.ListenerHandler;
 import com.google.ar.core.examples.java.helloar.NetworkError;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Singleton;
+
+import dagger.Module;
+import dagger.Provides;
 import okhttp3.OkHttpClient;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class Api {
-    public static final String TEXT_PLAIN = "text/plain";
+@Module
+public class NetworkModule {
+    public interface OnDataGetListener<T> {
+        void onSuccess(final T items);
 
-    private static final Api INSTANCE = new Api();
-    private static final Gson GSON = new GsonBuilder().create();
-    private final Executor executor = Executors.newSingleThreadExecutor();
-    private final LoaderService service;
-    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+        void onError(final Exception error);
+    }
+
     private String token;
+    private String baseUrl;
 
-    private Api() {
-        OkHttpClient okHttpClient = new OkHttpClient().newBuilder()
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    private OkHttpClient okHttpClient;
+    private Retrofit retrofit;
+    private final LoaderService service;
+
+    public NetworkModule(String baseUrl) {
+        this.baseUrl = baseUrl;
+        okHttpClient = new OkHttpClient().newBuilder()
                 .readTimeout(60, TimeUnit.SECONDS)
                 .build();
-
-        final Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(ServerInfo.BACKEND_URL)
+        retrofit = new Retrofit.Builder()
+                .baseUrl(baseUrl)
                 .addConverterFactory(GsonConverterFactory.create())
                 .client(okHttpClient)
                 .build();
         service = retrofit.create(LoaderService.class);
     }
 
-    public void
-    setToken(String token) {
-        this.token = token;
+    @Provides
+    @Singleton
+    OkHttpClient provideOkHttpClient() {
+        return okHttpClient;
     }
 
-    public static Api
-    getInstance() {
-        return INSTANCE;
+    @Provides
+    @Singleton
+    Retrofit provideRetrofit() {
+        return retrofit;
+    }
+
+    @Provides
+    @Singleton
+    NetworkModule provideNetworkModule() {
+        return new NetworkModule(baseUrl);
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 
     private <T> void handleDefaultSuccess(
@@ -96,11 +114,5 @@ public class Api {
                 }
             }
         });
-    }
-
-    public interface OnDataGetListener<T> {
-        void onSuccess(final T items);
-
-        void onError(final Exception error);
     }
 }

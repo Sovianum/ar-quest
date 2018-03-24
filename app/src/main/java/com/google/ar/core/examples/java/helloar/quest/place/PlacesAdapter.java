@@ -8,32 +8,34 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.google.ar.core.examples.java.helloar.GameApi;
+import com.google.ar.core.examples.java.helloar.App;
+import com.google.ar.core.examples.java.helloar.GameModule;
 import com.google.ar.core.examples.java.helloar.R;
 import com.google.ar.core.examples.java.helloar.core.game.Place;
 
+import javax.inject.Inject;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class PlacesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    private Places items;
+    @Inject
+    GameModule gameModule;
 
     public class CardViewHolder extends RecyclerView.ViewHolder {
+        @BindView(R.id.title_txt)
         TextView titleView;
+        @BindView(R.id.description_txt)
         TextView descriptionView;
 
         public CardViewHolder(View itemView) {
             super(itemView);
-            titleView = itemView.findViewById(R.id.title_txt);
-            descriptionView = itemView.findViewById(R.id.description_txt);
+            ButterKnife.bind(this, itemView);
         }
     }
 
     public PlacesAdapter() {
-        this.items = GameApi.getPlacesStorage().getCurrentPlaces();
-        notifyDataSetChanged();
-    }
-
-
-    public void setItems(Places items) {
-        this.items = items;
+        App.getAppComponent().inject(this);
         notifyDataSetChanged();
     }
 
@@ -48,15 +50,15 @@ public class PlacesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        final Place item = items.getCheckpoints().get(position);
+        final Place place = gameModule.getCurrentPlaces().getCheckpoints().get(position);
 
         final CardViewHolder cardHolder = (CardViewHolder) holder;
-        cardHolder.titleView.setText(item.getName());
-        cardHolder.descriptionView.setText(item.getDescription());
+        cardHolder.titleView.setText(place.getName());
+        cardHolder.descriptionView.setText(place.getDescription());
     }
 
     @Override
     public int getItemCount() {
-        return items.getCheckpoints().size();
+        return gameModule.getCurrentPlaces().getCheckpoints().size();
     }
 }

@@ -28,7 +28,9 @@ import com.google.ar.core.Frame;
 import com.google.ar.core.Pose;
 import com.google.ar.core.Session;
 import com.google.ar.core.TrackingState;
+import com.google.ar.core.examples.java.helloar.App;
 import com.google.ar.core.examples.java.helloar.DisplayRotationHelper;
+import com.google.ar.core.examples.java.helloar.GameModule;
 import com.google.ar.core.examples.java.helloar.PermissionHelper;
 import com.google.ar.core.examples.java.helloar.R;
 import com.google.ar.core.examples.java.helloar.core.ar.Scene;
@@ -42,7 +44,6 @@ import com.google.ar.core.examples.java.helloar.core.game.Item;
 import com.google.ar.core.examples.java.helloar.core.game.Place;
 import com.google.ar.core.examples.java.helloar.core.game.Utils;
 import com.google.ar.core.examples.java.helloar.core.game.slot.Slot;
-import com.google.ar.core.examples.java.helloar.quest.game.ActorPlayer;
 import com.google.ar.core.examples.java.helloar.quest.game.DeferredClickListener;
 import com.google.ar.core.examples.java.helloar.quest.game.InteractionResultHandler;
 import com.google.ar.core.examples.java.helloar.quest.game.RendererHelper;
@@ -59,19 +60,37 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 
+import javax.inject.Inject;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
     public static final String TAG = ARFragment.class.getSimpleName();
 
     // Rendering. The Renderers are created here, and initialized when the GL surface is created.
-    private GLSurfaceView surfaceView;
-    private Button toInventoryBtn;
-    private Button toJournalBtn;
-    private Button releaseBtn;
-    private Button interactBtn;
-    private TextView collisionText;
+    @BindView(R.id.surfaceview)
+    GLSurfaceView surfaceView;
+
+    @BindView(R.id.collision_txt)
+    TextView collisionText;
+
+    @BindView(R.id.inventory_btn)
+    Button toInventoryBtn;
+
+    @BindView(R.id.journal_btn)
+    Button toJournalBtn;
+
+    @BindView(R.id.release_btn)
+    Button releaseBtn;
+
+    @BindView(R.id.interact_btn)
+    Button interactBtn;
+
+    @Inject
+    GameModule gameModule;
 
     private boolean installRequested;
 
@@ -94,7 +113,6 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
     private View.OnClickListener toInventoryOnClickListener;
 
-    private ActorPlayer player;
     private InteractionResultHandler interactionResultHandler;
     private List<SceneObject> collidedObjects = new ArrayList<>();
     private DeferredClickListener interactor = new DeferredClickListener() {
@@ -103,7 +121,7 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         @Override
         public void actualize() {
             if (needActualize) {
-                scene.getCollisions(player.getCollider(), collidedObjects);
+                scene.getCollisions(gameModule.getPlayer().getCollider(), collidedObjects);
                 interact();
                 collidedObjects.clear();
                 needActualize = false;
@@ -116,29 +134,23 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         }
     };
 
-    private View.OnClickListener toJouranlOnClickListener;
+    private View.OnClickListener toJournalOnClickListener;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         RelativeLayout view = (RelativeLayout) inflater.inflate(R.layout.fragment_ar, container, false);
+        ButterKnife.bind(this, view);
+        App.getAppComponent().inject(this);
 
-        surfaceView = view.findViewById(R.id.surfaceview);
-        displayRotationHelper = new DisplayRotationHelper(/*context=*/ getActivity());
-
-        collisionText = view.findViewById(R.id.collision_txt);
-        toInventoryBtn = view.findViewById(R.id.inventory_btn);
-        interactBtn = view.findViewById(R.id.interact_btn);
+        displayRotationHelper = new DisplayRotationHelper(getActivity());
 
         toInventoryBtn.setOnClickListener(toInventoryOnClickListener);
-        toJournalBtn = view.findViewById(R.id.journal_btn);
-        toJournalBtn.setOnClickListener(toJouranlOnClickListener);
-
-        releaseBtn = view.findViewById(R.id.release_btn);
+        toJournalBtn.setOnClickListener(toJournalOnClickListener);
         releaseBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                player.release();
+                gameModule.getPlayer().release();
             }
         });
 
@@ -194,21 +206,17 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         scene.load(place.getAll(), Pose.makeTranslation(0, 0, -0.7f));
     }
 
-    public void setPlayer(ActorPlayer player) {
-        this.player = player;
-    }
-
     public void setToInventoryOnClickListener(View.OnClickListener listener) {
-        this.toInventoryOnClickListener = listener;
+        toInventoryOnClickListener = listener;
         if (toInventoryBtn != null) {
             toInventoryBtn.setOnClickListener(toInventoryOnClickListener);
         }
     }
 
-    public void setToJournalOnClickListener(View.OnClickListener lister) {
-        this.toJouranlOnClickListener = lister;
+    public void setToJournalOnClickListener(View.OnClickListener listener) {
+        toJournalOnClickListener = listener;
         if (toJournalBtn != null) {
-            toJournalBtn.setOnClickListener(toJouranlOnClickListener);
+            toJournalBtn.setOnClickListener(toJournalOnClickListener);
         }
     }
 
@@ -408,8 +416,8 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
     private void update(Frame frame, Camera camera) {
         rendererHelper.renderScene(frame, camera, place);
-        player.update(camera.getPose());
-        Collection<SceneObject> collided = scene.getCollisions(player.getCollider());
+        gameModule.getPlayer().update(camera.getPose());
+        Collection<SceneObject> collided = scene.getCollisions(gameModule.getPlayer().getCollider());
         final InteractiveObject closest = getClosestInteractive(collided);
 
         Activity activity = getActivity();
@@ -422,14 +430,14 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
             });
         }
 
-        Item item = player.getItem();
+        Item item = gameModule.getPlayer().getItem();
         if (item != null) {
             rendererHelper.renderObject(frame, camera, item);
         }
     }
 
     private void showDebugInfo(Camera camera) {
-        Collection<SceneObject> collided = scene.getCollisions(player.getCollider());
+        Collection<SceneObject> collided = scene.getCollisions(gameModule.getPlayer().getCollider());
         StringBuilder s = new StringBuilder("Camera: " + camera.getPose().toString() + "\n");
 
         Anchor andyAnchor = scene.getAnchorMap().get(andy.getIdentifiable().getSceneID());
@@ -470,8 +478,8 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         collidedObjects.sort(new Comparator<SceneObject>() {
             @Override
             public int compare(SceneObject o1, SceneObject o2) {
-                float d1 = Geom.distance(o1.getGeom(), player.getGeom());
-                float d2 = Geom.distance(o2.getGeom(), player.getGeom());
+                float d1 = Geom.distance(o1.getGeom(), gameModule.getPlayer().getGeom());
+                float d2 = Geom.distance(o2.getGeom(), gameModule.getPlayer().getGeom());
 
                 return Float.compare(d1, d2);
             }
@@ -484,7 +492,7 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
         InteractionArgument arg = new InteractionArgument(
                 null,
-                Utils.singleItemCollection(new Slot.RepeatedItem(player.getItem()))
+                Utils.singleItemCollection(new Slot.RepeatedItem(gameModule.getPlayer().getItem()))
         );
         Collection<InteractionResult> results = closestObject.interact(arg);
 

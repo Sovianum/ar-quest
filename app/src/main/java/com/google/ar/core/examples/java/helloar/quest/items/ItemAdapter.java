@@ -14,6 +14,9 @@ import com.google.ar.core.examples.java.helloar.core.game.Item;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private List<Item> items;
 
@@ -24,15 +27,16 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final ItemAdapter.OnItemClickListener onItemClickListener;
 
     public class CardViewHolder extends RecyclerView.ViewHolder {
+        @BindView(R.id.name_txt)
         TextView nameView;
+        @BindView(R.id.description_txt)
         TextView descriptionView;
+        @BindView(R.id.item_img)
         ImageView imageView;
 
         public CardViewHolder(View itemView) {
             super(itemView);
-            imageView = itemView.findViewById(R.id.item_img);
-            nameView = itemView.findViewById(R.id.name_txt);
-            descriptionView = itemView.findViewById(R.id.description_txt);
+            ButterKnife.bind(this, itemView);
         }
 
         public void bind(final Item item, final OnItemClickListener onItemClickListener) {

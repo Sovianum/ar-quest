@@ -2,6 +2,7 @@ package com.google.ar.core.examples.java.helloar.auth;
 
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,36 +14,46 @@ import android.widget.TextView;
 
 import com.google.ar.core.examples.java.helloar.R;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
 public class LoginFragment extends AuthFragment {
-    private EditText loginText;
-    private EditText passwordText;
-    private Button loginButton;
-    private ProgressBar progressBar;
-    private TextView linkToRegister;
+    @BindView(R.id.login_edit)
+    EditText loginText;
+
+    @BindView(R.id.password_edit)
+    EditText passwordText;
+
+    @BindView(R.id.login_btn)
+    Button loginButton;
+
+    @BindView(R.id.progressBar)
+    ProgressBar progressBar;
+
+    @BindView(R.id.link_to_register)
+    TextView linkToRegister;
+
     private View.OnClickListener onClickListener;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         LinearLayout view = (LinearLayout) inflater.inflate(R.layout.fragment_login, container, false);
-        loginText = view.findViewById(R.id.login_edit);
-        passwordText = view.findViewById(R.id.password_edit);
-        loginButton = view.findViewById(R.id.login_btn);
-        progressBar = view.findViewById(R.id.progressBar);
-        linkToRegister = view.findViewById(R.id.link_to_register);
-
-        loginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                progressBar.setVisibility(View.VISIBLE);
-                getStubsToken(); //debug
-            }
-        });
-
-        linkToRegister.setOnClickListener(onClickListener);
+        ButterKnife.bind(this, view);
+        if (onClickListener != null) {
+            linkToRegister.setOnClickListener(onClickListener);
+        }
         return view;
     }
 
+    @OnClick(R.id.login_btn)
+    public void onLoginButtonClickListener() {
+        progressBar.setVisibility(View.VISIBLE);
+        getStubsToken(); //debug
+    }
+
+    // TODO remove or use
     public void setLoading(boolean loading) {
         if (loading) {
             progressBar.setVisibility(View.VISIBLE);
@@ -52,7 +63,9 @@ public class LoginFragment extends AuthFragment {
     }
 
     public void setOnClickListener(View.OnClickListener listener) {
-        this.onClickListener = listener;
+        onClickListener = listener;
+        if (linkToRegister != null) {
+            linkToRegister.setOnClickListener(onClickListener);
+        }
     }
-
 }

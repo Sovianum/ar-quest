@@ -5,14 +5,24 @@ import android.app.Activity;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.google.ar.core.examples.java.helloar.GameApi;
+import com.google.ar.core.examples.java.helloar.App;
+import com.google.ar.core.examples.java.helloar.GameModule;
 import com.google.ar.core.examples.java.helloar.R;
 import com.google.ar.core.examples.java.helloar.core.game.InteractionResult;
 import com.google.ar.core.examples.java.helloar.core.game.slot.Slot;
 
 import java.util.Locale;
 
+import javax.inject.Inject;
+
 public class InteractionResultHandler {
+    @Inject
+    GameModule gameModule;
+
+    public InteractionResultHandler() {
+        App.getAppComponent().inject(this);
+    }
+
     public void onInteractionResult(final InteractionResult result, final Activity activity) {
         switch (result.getType()) {
             case MESSAGE:
@@ -34,7 +44,7 @@ public class InteractionResultHandler {
 
     private void onInventoryUpdateResult(final InteractionResult result, final Activity activity) {
         Slot.RepeatedItem repeatedItem = result.getItems();
-        GameApi.getInventories().getCurrentInventory().put(repeatedItem);
+        gameModule.getCurrentInventory().put(repeatedItem);
         showMsg(
                 String.format(
                         Locale.ENGLISH,
@@ -45,7 +55,7 @@ public class InteractionResultHandler {
     }
 
     private void onJournalUpdateResult(final InteractionResult result, final Activity activity) {
-        GameApi.getJournals().getCurrentJournal().addNow(result.getMsg());
+        gameModule.getCurrentJournal().addNow(result.getMsg());
         showMsg(activity.getString(R.string.journal_updated_str), activity);
     }
 

@@ -2,6 +2,7 @@ package com.google.ar.core.examples.java.helloar.auth;
 
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,35 +14,44 @@ import android.widget.TextView;
 
 import com.google.ar.core.examples.java.helloar.R;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
 public class RegistrationFragment extends AuthFragment {
-    private EditText loginText;
-    private EditText passwordText;
-    private Button registerButton;
-    private ProgressBar progressBar;
-    private TextView linkToLogin;
+    @BindView(R.id.login_edit)
+    EditText loginText;
+
+    @BindView(R.id.password_edit)
+    EditText passwordText;
+
+    @BindView(R.id.register_btn)
+    Button registerButton;
+
+    @BindView(R.id.progressBar)
+    ProgressBar progressBar;
+
+    @BindView(R.id.link_to_login)
+    TextView linkToLogin;
+
     private View.OnClickListener onClickListener;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         LinearLayout view = (LinearLayout) inflater.inflate(R.layout.fragment_registration, container, false);
-        loginText = view.findViewById(R.id.login_edit);
-        passwordText = view.findViewById(R.id.password_edit);
-        registerButton = view.findViewById(R.id.register_btn);
-        progressBar = view.findViewById(R.id.progressBar);
-        linkToLogin = view.findViewById(R.id.link_to_login);
-
-        registerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                setLoading(true);
-                getStubsToken(); //debug
-            }
-        });
-
-        linkToLogin.setOnClickListener(onClickListener);
-        return view;
+        ButterKnife.bind(this, view);
+        if (onClickListener != null) {
+            linkToLogin.setOnClickListener(onClickListener);
         }
+        return view;
+    }
+
+    @OnClick(R.id.register_btn)
+    public void onRegisterButtonClick() {
+        setLoading(true);
+        getStubsToken(); //debug
+    }
 
     public void setLoading(boolean loading) {
         if (loading) {
@@ -52,7 +62,9 @@ public class RegistrationFragment extends AuthFragment {
     }
 
     public void setOnClickListener(View.OnClickListener listener) {
-        this.onClickListener = listener;
+        onClickListener = listener;
+        if (linkToLogin != null) {
+            linkToLogin.setOnClickListener(listener);
+        }
     }
-
 }

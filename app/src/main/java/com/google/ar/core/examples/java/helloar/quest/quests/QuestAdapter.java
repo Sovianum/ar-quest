@@ -13,6 +13,9 @@ import com.google.ar.core.examples.java.helloar.model.Quest;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private List<Quest> quests;
     private QuestsListFragment fragment;
@@ -24,18 +27,20 @@ public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private final OnItemClickListener onItemClickListener;
 
     public class CardViewHolder extends RecyclerView.ViewHolder {
+        @BindView(R.id.title_txt)
         TextView titleView;
+        @BindView(R.id.description_txt)
         TextView descriptionView;
+        @BindView(R.id.expander_view)
         TextView expanderView;
+        @BindView(R.id.ratingBar_quest)
         RatingBar ratingBar;
+
         int defaultMaxLines;
 
         CardViewHolder(final View itemView) {
             super(itemView);
-            titleView = itemView.findViewById(R.id.title_txt);
-            descriptionView = itemView.findViewById(R.id.description_txt);
-            expanderView = itemView.findViewById(R.id.expander_view);
-            ratingBar = itemView.findViewById(R.id.ratingBar_quest);
+            ButterKnife.bind(this, itemView);
             defaultMaxLines = descriptionView.getMaxLines();
         }
 

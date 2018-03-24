@@ -1,6 +1,7 @@
 package com.google.ar.core.examples.java.helloar.quest.items;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -10,25 +11,38 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
-import com.google.ar.core.examples.java.helloar.GameApi;
+import com.google.ar.core.examples.java.helloar.App;
+import com.google.ar.core.examples.java.helloar.GameModule;
 import com.google.ar.core.examples.java.helloar.R;
 import com.google.ar.core.examples.java.helloar.core.game.Item;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class ItemsListFragment extends Fragment {
     public static final String TAG = ItemsListFragment.class.getSimpleName();
 
     private ItemAdapter adapter;
-    private RecyclerView recyclerView;
+
+    @BindView(R.id.itemsRecyclerView)
+    RecyclerView recyclerView;
     private ItemAdapter.OnItemClickListener onItemClickListener;
+
+    @Inject
+    GameModule gameModule;
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
+        App.getAppComponent().inject(this);
+
         LinearLayout view = (LinearLayout) inflater.inflate(R.layout.fragment_items_list, container, false);
-        recyclerView = view.findViewById(R.id.recyclerView);
+        ButterKnife.bind(this, view);
 
         LinearLayoutManager manager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(manager);
@@ -56,7 +70,7 @@ public class ItemsListFragment extends Fragment {
     }
 
     private void refreshItems() {
-        loadItems(GameApi.getInventories().getCurrentInventory().getItems());
+        loadItems(gameModule.getCurrentInventory().getItems());
     }
 
 }

@@ -2,6 +2,7 @@ package com.google.ar.core.examples.java.helloar.quest.journal;
 
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -10,21 +11,31 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
-import com.google.ar.core.examples.java.helloar.GameApi;
+import com.google.ar.core.examples.java.helloar.App;
+import com.google.ar.core.examples.java.helloar.GameModule;
 import com.google.ar.core.examples.java.helloar.R;
-import com.google.ar.core.examples.java.helloar.core.game.journal.Journal;
+
+import javax.inject.Inject;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class JournalFragment extends Fragment {
     public static final String TAG = JournalFragment.class.getSimpleName();
 
     private JournalMessageAdapter adapter;
-    private RecyclerView recyclerView;
+
+    @BindView(R.id.journalRecyclerView)
+    RecyclerView recyclerView;
+
+    @Inject
+    GameModule gameModule;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        App.getAppComponent().inject(this);
         LinearLayout view = (LinearLayout) inflater.inflate(R.layout.fragment_journal, container, false);
-        recyclerView = view.findViewById(R.id.recyclerView);
+        ButterKnife.bind(this, view);
 
         LinearLayoutManager manager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(manager);
@@ -41,13 +52,9 @@ public class JournalFragment extends Fragment {
         refreshItems();
     }
 
-    private void refreshItems() { //stubs
-        loadItems(GameApi.getJournals().getCurrentJournal());
-    }
-
-    private void loadItems(Journal journal) {
+    private void refreshItems() {
         if (adapter != null) {
-            adapter.setItems(journal);
+            adapter.notifyDataSetChanged();
         }
     }
 }

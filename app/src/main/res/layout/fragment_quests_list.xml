@@ -10,7 +10,7 @@
         android:layout_height="match_parent">
 
         <android.support.v7.widget.RecyclerView
-            android:id="@+id/recyclerView"
+            android:id="@+id/questsRecyclerView"
             android:padding="@dimen/padding"
             android:clipToPadding="false"
             android:layout_width="match_parent"

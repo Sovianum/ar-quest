@@ -9,32 +9,34 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.google.ar.core.examples.java.helloar.GameApi;
+import com.google.ar.core.examples.java.helloar.App;
+import com.google.ar.core.examples.java.helloar.GameModule;
 import com.google.ar.core.examples.java.helloar.R;
-import com.google.ar.core.examples.java.helloar.core.game.journal.Journal;
 import com.google.ar.core.examples.java.helloar.core.game.journal.TimestampRecord;
 
+import javax.inject.Inject;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class JournalMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    @Inject
+    GameModule gameModule;
+
     public class CardViewHolder extends RecyclerView.ViewHolder {
+        @BindView(R.id.message_text)
         TextView messageTextView;
+        @BindView(R.id.message_time)
         TextView messageDateView;
 
         public CardViewHolder(View itemView) {
             super(itemView);
-            messageTextView = itemView.findViewById(R.id.message_text);
-            messageDateView = itemView.findViewById(R.id.message_time);
+            ButterKnife.bind(this, itemView);
         }
     }
 
-    private Journal<String> journal;
-
     public JournalMessageAdapter() {
-        this.journal = GameApi.getJournals().getCurrentJournal();
-        notifyDataSetChanged();
-    }
-
-    public void setItems(Journal journal) {
-        this.journal = journal;
+        App.getAppComponent().inject(this);
         notifyDataSetChanged();
     }
 
@@ -49,7 +51,7 @@ public class JournalMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        final TimestampRecord<String> message = journal.getRecords().get(position);
+        final TimestampRecord<String> message = gameModule.getCurrentJournal().getRecords().get(position);
         final CardViewHolder cardHolder = (CardViewHolder) holder;
         cardHolder.messageTextView.setText(message.getData());
         cardHolder.messageDateView.setText(DateFormat.format("dd-MM-yyyy (HH:mm:ss)",
@@ -58,6 +60,6 @@ public class JournalMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
     @Override
     public int getItemCount() {
-        return journal.getRecords().size();
+        return gameModule.getCurrentJournal().getRecords().size();
     }
 }

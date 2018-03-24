@@ -1,6 +1,5 @@
 package com.google.ar.core.examples.java.helloar;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -9,28 +8,23 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
-import android.util.AttributeSet;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.google.ar.core.Pose;
 import com.google.ar.core.examples.java.helloar.auth.AuthActivity;
 import com.google.ar.core.examples.java.helloar.core.ar.Scene;
-import com.google.ar.core.examples.java.helloar.core.ar.collision.Collider;
-import com.google.ar.core.examples.java.helloar.core.ar.collision.shape.Sphere;
 import com.google.ar.core.examples.java.helloar.core.game.Item;
 import com.google.ar.core.examples.java.helloar.core.game.Place;
 import com.google.ar.core.examples.java.helloar.core.game.Player;
 import com.google.ar.core.examples.java.helloar.core.game.journal.Journal;
 import com.google.ar.core.examples.java.helloar.core.game.slot.Slot;
 import com.google.ar.core.examples.java.helloar.model.Quest;
-import com.google.ar.core.examples.java.helloar.network.Api;
+import com.google.ar.core.examples.java.helloar.network.NetworkModule;
 import com.google.ar.core.examples.java.helloar.quest.ARFragment;
 import com.google.ar.core.examples.java.helloar.quest.QuestFragment;
-import com.google.ar.core.examples.java.helloar.quest.game.ActorPlayer;
-import com.google.ar.core.examples.java.helloar.quest.game.QuestService;
+import com.google.ar.core.examples.java.helloar.quest.game.QuestModule;
 import com.google.ar.core.examples.java.helloar.quest.items.ItemAdapter;
 import com.google.ar.core.examples.java.helloar.quest.items.ItemsListFragment;
 import com.google.ar.core.examples.java.helloar.quest.journal.JournalFragment;
@@ -39,9 +33,18 @@ import com.google.ar.core.examples.java.helloar.quest.place.Places;
 import com.google.ar.core.examples.java.helloar.quest.quests.QuestAdapter;
 import com.google.ar.core.examples.java.helloar.quest.quests.QuestsListFragment;
 
+import javax.inject.Inject;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
 public class MainActivity extends AppCompatActivity {
-    private Button toQuestFragmentButton;
-    private Button toAuthActivityButton;
+    @BindView(R.id.ar_fragment_btn)
+    Button toQuestFragmentButton;
+
+    @BindView(R.id.auth_activity_btn)
+    Button toAuthActivityButton;
 
     private QuestsListFragment questsListFragment;
     private ARFragment arFragment;
@@ -49,12 +52,15 @@ public class MainActivity extends AppCompatActivity {
     private ItemsListFragment itemsListFragment;
     private JournalFragment journalFragment;
     private PlaceFragment placeFragment;
-    private ActorPlayer player;
 
-    private Journal<String> journal;
+    @Inject
+    GameModule gameModule;
 
-    private Scene scene;
-    private Place place;
+    @Inject
+    QuestModule questModule;
+
+    @Inject
+    NetworkModule networkModule;
 
     private QuestAdapter.OnItemClickListener toQuestItemOnClickListener = new QuestAdapter.OnItemClickListener() {
         @Override
@@ -66,112 +72,31 @@ public class MainActivity extends AppCompatActivity {
     private ItemAdapter.OnItemClickListener chooseItemOnClickListener = new ItemAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(Item item) {
-            player.hold(item);
+            gameModule.getPlayer().hold(item);
             Toast.makeText(MainActivity.this, "You selected: " + item.getName(), Toast.LENGTH_SHORT).show();
             //TODO action to choose element
         }
     };
 
-    private View.OnClickListener toInventoryOnClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            selectFragment(itemsListFragment, itemsListFragment.TAG);
-        }
-    };
-
-    private View.OnClickListener toJournalOnClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            selectFragment(journalFragment, journalFragment.TAG);
-        }
-    };
-
-    private View.OnClickListener toAROnClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            selectFragment(arFragment, arFragment.TAG);
-        }
-    };
-
-    private View.OnClickListener toJournalClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            selectFragment(journalFragment, journalFragment.TAG);
-        }
-    };
-
-    private View.OnClickListener toPlacesClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            selectFragment(placeFragment, placeFragment.TAG);
-        }
-    };
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        App.getAppComponent().inject(this);
+
         setContentView(R.layout.activity_main);
-        journal = new Journal<>();
-        journal.addNow("First record");
-        journal.addNow("Second record");
-        journal.addNow("Third record");
-        Integer questId = 1;
+        ButterKnife.bind(this);
 
-        GameApi.setCurrentQuestId(questId);
-        GameApi.getJournals().addCurrentJournal(journal);
-        GameApi.getInventories().addCurrentInventory(new Slot(0, Player.INVENTORY, false));
-        Places places = new Places();
-        places.addCheckpoint(new Place(0, "First place", "Description")); //STUB!!!
-        GameApi.getPlacesStorage().addCurrentPlaces(places);
-
-        //removeToken(); //debug
-
-        questFragment = new QuestFragment();
-        questFragment.setOnARModeBtnClickListener(toAROnClickListener);
-        questFragment.setOnJournalClickListener(toJournalClickListener);
-        //questFragment.setJournal(journal);
-        questFragment.setOnItemClickListener(chooseItemOnClickListener);
-
-        questFragment.setOnPlacesClickListener(toPlacesClickListener);
+        // the order of calls below is important
+        setUpArFragment();
+        setUpGameModule();
+        setUpQuestFragment();
 
         questsListFragment = new QuestsListFragment();
         questsListFragment.setOnItemClickListener(toQuestItemOnClickListener);
 
-        itemsListFragment = new ItemsListFragment();
-        itemsListFragment.setOnItemClickListener(chooseItemOnClickListener);
-
-        arFragment = new ARFragment();
-        arFragment.setToInventoryOnClickListener(toInventoryOnClickListener);
-        arFragment.setToJournalOnClickListener(toJournalOnClickListener);
-
-        journalFragment = new JournalFragment();
-
         placeFragment = new PlaceFragment();
 
-        toQuestFragmentButton = findViewById(R.id.ar_fragment_btn);
-        toAuthActivityButton = findViewById(R.id.auth_activity_btn);
-        toQuestFragmentButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                selectFragment(arFragment, arFragment.TAG);
-            }
-        });
-
-        toAuthActivityButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                goToAuthActivity(view);
-            }
-        });
-
-        player = new ActorPlayer(Pose.makeTranslation(0, 0, -0.3f));
-        player.setCollider(new Collider(new Sphere(0.05f)));
-        arFragment.setPlayer(player);
-
-        scene = new Scene();
-        place = QuestService.getInteractionDemoPlace();
-        arFragment.setDecorations(scene, place);
+        toQuestFragmentButton.setOnClickListener(getSelectFragmentListener(arFragment));
     }
 
     @Override
@@ -199,15 +124,63 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    public View onCreateView(View parent, String name, Context context, AttributeSet attrs) {
-
-        return super.onCreateView(parent, name, context, attrs);
+    private void setUpQuestFragment() {
+        questFragment = new QuestFragment();
+        questFragment.setOnARModeBtnClickListener(getSelectFragmentListener(arFragment));
+        questFragment.setOnJournalClickListener(getSelectFragmentListener(journalFragment));
+        questFragment.setOnItemClickListener(chooseItemOnClickListener);
+        questFragment.setOnPlacesClickListener(getSelectFragmentListener(placeFragment));
     }
 
-    private void goToAuthActivity(View v) {
+    private void setUpGameModule() {
+        Integer questId = 1;
+        gameModule.setCurrentQuestId(questId);
+
+        Journal<String> journal = new Journal<>();
+        journal.addNow("First record");
+        journal.addNow("Second record");
+        journal.addNow("Third record");
+        gameModule.addCurrentJournal(journal);
+
+        gameModule.addCurrentInventory(new Slot(0, Player.INVENTORY, false));
+
+        Places places = new Places();
+        places.addCheckpoint(new Place(0, "First place", "Description")); //STUB!!!
+        gameModule.addCurrentPlaces(places);
+    }
+
+    private void setUpArFragment() {
+        journalFragment = new JournalFragment();
+
+        itemsListFragment = new ItemsListFragment();
+        itemsListFragment.setOnItemClickListener(chooseItemOnClickListener);
+
+        Scene scene = new Scene();
+        Place place = questModule.getInteractionDemoPlace();
+
+        arFragment = new ARFragment();
+        arFragment.setToInventoryOnClickListener(getSelectFragmentListener(itemsListFragment));
+        arFragment.setToJournalOnClickListener(getSelectFragmentListener(journalFragment));
+
+        arFragment.setDecorations(scene, place);
+    }
+
+    @OnClick(R.id.auth_activity_btn)
+    public void goToAuthActivity(View v) {
         Intent intent = new Intent(this, AuthActivity.class);
         startActivity(intent);
+    }
+
+    private <F extends Fragment> View.OnClickListener getSelectFragmentListener(final F fragment) {
+        if (fragment == null) {
+            throw new RuntimeException("tried to register null fragment");
+        }
+        return new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                selectFragment(fragment, fragment.getClass().getSimpleName());
+            }
+        };
     }
 
     private void selectFragment(Fragment fragment, String tag) {
@@ -254,7 +227,7 @@ public class MainActivity extends AppCompatActivity {
             Intent intentAuth = new Intent(this, AuthActivity.class);
             startActivity(intentAuth);
         } else {
-            Api.getInstance().setToken(jwt);
+            networkModule.setToken(jwt);
         }
     }
 

@@ -2,6 +2,7 @@ package com.google.ar.core.examples.java.helloar.quest.quests;
 
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -17,27 +18,31 @@ import com.google.ar.core.examples.java.helloar.model.Quest;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class QuestsListFragment extends Fragment {
     public static final String TAG = QuestsListFragment.class.getSimpleName();
 
+    @BindView(R.id.questsRecyclerView)
+    RecyclerView recyclerView;
+    @BindView(R.id.swipeRefreshLayout)
+    SwipeRefreshLayout swipeRefreshLayout;
+
     private QuestAdapter adapter;
-    private RecyclerView recyclerView;
-    private SwipeRefreshLayout swipeRefreshLayout;
     private QuestAdapter.OnItemClickListener onItemClickListener;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         LinearLayout view = (LinearLayout) inflater.inflate(R.layout.fragment_quests_list, container, false);
-        recyclerView = view.findViewById(R.id.recyclerView);
+        ButterKnife.bind(this, view);
 
-        LinearLayoutManager manager = new LinearLayoutManager(getActivity());
-        recyclerView.setLayoutManager(manager);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        adapter = new QuestAdapter(this, new ArrayList<Quest>(), onItemClickListener);
+       adapter = new QuestAdapter(this, new ArrayList<Quest>(), onItemClickListener);
         recyclerView.setAdapter(adapter);
 
-        swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
