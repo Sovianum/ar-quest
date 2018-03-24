@@ -89,9 +89,6 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
     @BindView(R.id.journal_btn)
     Button toJournalBtn;
 
-    @BindView(R.id.release_btn)
-    Button releaseBtn;
-
     @BindView(R.id.interact_btn)
     Button interactBtn;
 
@@ -145,7 +142,10 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         public void actualize() {
             if (needActualize) {
                 scene.getCollisions(gameModule.getPlayer().getCollider(), collidedObjects);
-                interact();
+                if (interact() == null) {   // user intended to release item
+                    gameModule.getPlayer().release();
+                }
+
                 collidedObjects.clear();
                 needActualize = false;
             }
@@ -170,12 +170,6 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
         toInventoryBtn.setOnClickListener(toInventoryOnClickListener);
         toJournalBtn.setOnClickListener(toJournalOnClickListener);
-        releaseBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                gameModule.getPlayer().release();
-            }
-        });
 
         toInventoryBtn.setOnClickListener(toInventoryOnClickListener);
         interactBtn.setOnClickListener(interactor);
@@ -215,9 +209,7 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         installRequested = false;
         interactionResultHandler = new InteractionResultHandler();
 
-        if (!snackbarAction.isStarted()) {
-            hideButtons();
-        }
+        snackbarAction.startIfNotRunning();
 
         return view;
     }
@@ -467,7 +459,18 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    ARFragment.this.interactBtn.setEnabled(closest != null);
+                    Button btn = ARFragment.this.interactBtn;
+                    if (closest != null) {
+                        btn.setText(R.string.interact_str);
+                        btn.setEnabled(true);
+                    } else if (ARFragment.this.gameModule.getPlayer().getItem() != null) {
+                        btn.setText(R.string.release_str);
+                        btn.setEnabled(true);
+                    } else {
+                        btn.setText(R.string.interact_str);
+                        btn.setEnabled(false);
+                    }
+
                 }
             });
         }
@@ -508,14 +511,12 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
     private void showButtons() {
         toInventoryBtn.setAlpha(1);
         toJournalBtn.setAlpha(1);
-        releaseBtn.setAlpha(1);
         interactBtn.setAlpha(1);
     }
 
     private void hideButtons() {
         toInventoryBtn.setAlpha(0);
         toJournalBtn.setAlpha(0);
-        releaseBtn.setAlpha(0);
         interactBtn.setAlpha(0);
     }
 
@@ -552,10 +553,10 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         });
     }
 
-    private void interact() {
+    private Collection<InteractionResult> interact() {
         final Activity activity = getActivity();
         if (activity == null) {
-            return;
+            return null;
         }
 
         collidedObjects.sort(new Comparator<SceneObject>() {
@@ -570,7 +571,7 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
         InteractiveObject closestObject = getClosestInteractive(collidedObjects);
         if (closestObject == null) {
-            return;
+            return null;
         }
 
         InteractionArgument arg = new InteractionArgument(
@@ -582,6 +583,8 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         for (InteractionResult result : results) {
             interactionResultHandler.onInteractionResult(result, activity);
         }
+
+        return results;
     }
 
     private InteractiveObject getClosestInteractive(Collection<SceneObject> objects) {
