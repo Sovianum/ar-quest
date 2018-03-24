@@ -29,6 +29,11 @@ public class InteractionResult {
         this.items = items;
     }
 
+    public InteractionResult(Type type, Slot.RepeatedItem items) {
+        this.type = type;
+        this.items = items;
+    }
+
     public Type getType() {
         return type;
     }

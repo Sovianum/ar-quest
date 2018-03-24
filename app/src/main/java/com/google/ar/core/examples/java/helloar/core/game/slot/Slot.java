@@ -96,6 +96,10 @@ public class Slot extends SceneObject {
         return true;
     }
 
+    public void remove(int itemID) {
+        items.remove(itemID);
+    }
+
     public boolean put(Item item) {
         return put(new RepeatedItem(item, 1));
     }

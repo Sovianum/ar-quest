@@ -38,11 +38,13 @@ import com.google.ar.core.examples.java.helloar.core.ar.geom.Geom;
 import com.google.ar.core.examples.java.helloar.core.game.InteractionArgument;
 import com.google.ar.core.examples.java.helloar.core.game.InteractionResult;
 import com.google.ar.core.examples.java.helloar.core.game.InteractiveObject;
+import com.google.ar.core.examples.java.helloar.core.game.Item;
 import com.google.ar.core.examples.java.helloar.core.game.Place;
+import com.google.ar.core.examples.java.helloar.core.game.Utils;
+import com.google.ar.core.examples.java.helloar.core.game.slot.Slot;
 import com.google.ar.core.examples.java.helloar.quest.game.ActorPlayer;
 import com.google.ar.core.examples.java.helloar.quest.game.DeferredClickListener;
 import com.google.ar.core.examples.java.helloar.quest.game.InteractionResultHandler;
-import com.google.ar.core.examples.java.helloar.quest.game.QuestService;
 import com.google.ar.core.examples.java.helloar.quest.game.RendererHelper;
 import com.google.ar.core.examples.java.helloar.rendering.BackgroundRenderer;
 import com.google.ar.core.exceptions.UnavailableApkTooOldException;
@@ -69,7 +71,6 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
     private Button toJournalBtn;
     private Button releaseBtn;
     private Button interactBtn;
-    private Button toQuestFragmentBtn;
     private TextView collisionText;
 
     private boolean installRequested;
@@ -134,6 +135,12 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         toJournalBtn.setOnClickListener(toJouranlOnClickListener);
 
         releaseBtn = view.findViewById(R.id.release_btn);
+        releaseBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                player.release();
+            }
+        });
 
         toInventoryBtn.setOnClickListener(toInventoryOnClickListener);
         interactBtn.setOnClickListener(interactor);
@@ -171,9 +178,20 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         surfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
 
         installRequested = false;
-        interactionResultHandler = new InteractionResultHandler(player);
+        interactionResultHandler = new InteractionResultHandler();
 
         return view;
+    }
+
+    public void setDecorations(Scene scene, Place place) {
+        this.scene = scene;
+        this.place = place;
+        rendererHelper = new RendererHelper(scene);
+        andy = place.getInteractiveObjects().get(1);
+        rose = place.getInteractiveObjects().get(2);
+        banana = place.getInteractiveObjects().get(3);
+
+        scene.load(place.getAll(), Pose.makeTranslation(0, 0, -0.7f));
     }
 
     public void setPlayer(ActorPlayer player) {
@@ -213,22 +231,12 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
         if (session == null) {
             configureSession();
-            scene = new Scene();
         }
 
         // Note that order matters - see the note in onPause(), the reverse applies here.
         session.resume();
         surfaceView.onResume();
         displayRotationHelper.onResume();
-
-        place = QuestService.getDemoPlace();
-        andy = place.getInteractiveObjects().get(1);
-        rose = place.getInteractiveObjects().get(2);
-        banana = place.getInteractiveObjects().get(3);
-
-        scene.load(place.getAll(), Pose.makeTranslation(0, 0, -0.7f));
-
-        rendererHelper = new RendererHelper(scene);
     }
 
     @Override
@@ -315,7 +323,7 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
             update(frame, camera);
             interactor.actualize();
 
-            showDebugInfo(camera);
+//            showDebugInfo(camera);
         } catch (Throwable t) {
             // Avoid crashing the application due to unhandled exceptions.
             Log.e(TAG, "Exception on the OpenGL thread", t);
@@ -413,6 +421,11 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
                 }
             });
         }
+
+        Item item = player.getItem();
+        if (item != null) {
+            rendererHelper.renderObject(frame, camera, item);
+        }
     }
 
     private void showDebugInfo(Camera camera) {
@@ -471,7 +484,7 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
         InteractionArgument arg = new InteractionArgument(
                 null,
-                null
+                Utils.singleItemCollection(new Slot.RepeatedItem(player.getItem()))
         );
         Collection<InteractionResult> results = closestObject.interact(arg);
 

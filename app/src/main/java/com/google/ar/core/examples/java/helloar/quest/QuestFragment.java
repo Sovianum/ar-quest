@@ -15,9 +15,9 @@ import android.widget.TextView;
 
 import com.google.ar.core.examples.java.helloar.GameApi;
 import com.google.ar.core.examples.java.helloar.R;
+import com.google.ar.core.examples.java.helloar.core.game.Item;
 import com.google.ar.core.examples.java.helloar.core.game.journal.Journal;
 import com.google.ar.core.examples.java.helloar.core.game.journal.TimestampRecord;
-import com.google.ar.core.examples.java.helloar.model.Item;
 import com.google.ar.core.examples.java.helloar.quest.items.ItemAdapter;
 import com.google.ar.core.examples.java.helloar.quest.place.Checkpoint;
 import com.google.ar.core.examples.java.helloar.quest.place.CheckpointsAdapter;

@@ -13,19 +13,19 @@ public class Journals {
         journals = new HashMap<>();
     }
 
-    public void addJournal(Integer id, Journal journal) {
+    public void addJournal(Integer id, Journal<String> journal) {
         journals.put(id, journal);
     }
 
-    public void addCurrentJournal(Journal journal) {
+    public void addCurrentJournal(Journal<String> journal) {
         journals.put(GameApi.getCurrentQuestId(), journal);
     }
 
-    public Journal getJournal(Integer id) {
+    public Journal<String> getJournal(Integer id) {
         return journals.get(id);
     }
 
-    public Journal getCurrentJournal() {
+    public Journal<String> getCurrentJournal() {
         return this.getJournal(GameApi.getCurrentQuestId());
     }
 }

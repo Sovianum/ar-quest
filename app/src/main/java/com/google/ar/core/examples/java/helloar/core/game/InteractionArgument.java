@@ -27,4 +27,12 @@ public class InteractionArgument {
         strings = new ArrayList<>();
         items = new ArrayList<>();
     }
+
+    public List<String> getStrings() {
+        return strings;
+    }
+
+    public Collection<Slot.RepeatedItem> getItems() {
+        return items;
+    }
 }
