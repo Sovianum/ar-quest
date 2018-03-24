@@ -36,7 +36,7 @@ android:orientation="vertical">
         android:layout_height="@dimen/spaces_login" />
 
     <TextView
-        android:id="@+id/checkpoints_txt"
+        android:id="@+id/places_txt"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/checkpoint_title"

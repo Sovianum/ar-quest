@@ -34,6 +34,7 @@ import com.google.ar.core.examples.java.helloar.quest.game.QuestService;
 import com.google.ar.core.examples.java.helloar.quest.items.ItemAdapter;
 import com.google.ar.core.examples.java.helloar.quest.items.ItemsListFragment;
 import com.google.ar.core.examples.java.helloar.quest.journal.JournalFragment;
+import com.google.ar.core.examples.java.helloar.quest.place.PlaceFragment;
 import com.google.ar.core.examples.java.helloar.quest.place.Places;
 import com.google.ar.core.examples.java.helloar.quest.quests.QuestAdapter;
 import com.google.ar.core.examples.java.helloar.quest.quests.QuestsListFragment;
@@ -47,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
     private QuestFragment questFragment;
     private ItemsListFragment itemsListFragment;
     private JournalFragment journalFragment;
+    private PlaceFragment placeFragment;
     private ActorPlayer player;
 
     private Journal<String> journal;
@@ -98,6 +100,13 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    private View.OnClickListener toPlacesClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            selectFragment(placeFragment, placeFragment.TAG);
+        }
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,6 +133,8 @@ public class MainActivity extends AppCompatActivity {
         //questFragment.setJournal(journal);
         questFragment.setOnItemClickListener(chooseItemOnClickListener);
 
+        questFragment.setOnPlacesClickListener(toPlacesClickListener);
+
         questsListFragment = new QuestsListFragment();
         questsListFragment.setOnItemClickListener(toQuestItemOnClickListener);
 
@@ -135,6 +146,8 @@ public class MainActivity extends AppCompatActivity {
         arFragment.setToJournalOnClickListener(toJournalOnClickListener);
 
         journalFragment = new JournalFragment();
+
+        placeFragment = new PlaceFragment();
 
         toQuestFragmentButton = findViewById(R.id.ar_fragment_btn);
         toAuthActivityButton = findViewById(R.id.auth_activity_btn);

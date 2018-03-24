@@ -30,19 +30,21 @@ public class QuestFragment extends Fragment {
 
     private View.OnClickListener onARModeBtnClickListener;
     private View.OnClickListener onJournalClickListener;
+    private View.OnClickListener onPlacesClickListener;
     private Button toARModeBtn;
     private TextView journalText;
+    private TextView placesText;
     private View lastJournalCard;
     TextView messageTextView;
     TextView messageDateView;
-    TextView checkpointTitleView;
-    TextView checkpointDescriptionView;
+    TextView placeTitleView;
+    TextView placeDescriptionView;
     private Journal<String> journal;
 
     private ItemAdapter itemAdapter;
     private ItemAdapter.OnItemClickListener onItemClickListener;
     private RecyclerView recyclerViewItems;
-    private RecyclerView recyclerViewCheckpoints;
+    private RecyclerView recyclerViewPlaces;
 
     private PlacesAdapter placesAdapter;
 
@@ -58,6 +60,9 @@ public class QuestFragment extends Fragment {
         journalText = view.findViewById(R.id.journal_txt);
         journalText.setOnClickListener(onJournalClickListener);
 
+        placesText = view.findViewById(R.id.places_txt);
+        placesText.setOnClickListener(onPlacesClickListener);
+
         lastJournalCard = view.findViewById(R.id.last_journal_record_card);
         messageTextView = lastJournalCard.findViewById(R.id.message_text);
         messageDateView = lastJournalCard.findViewById(R.id.message_time);
@@ -69,11 +74,11 @@ public class QuestFragment extends Fragment {
         itemAdapter = new ItemAdapter(new ArrayList<Item>(), onItemClickListener);
         recyclerViewItems.setAdapter(itemAdapter);
 
-        recyclerViewCheckpoints = view.findViewById(R.id.checkpoints_card).findViewById(R.id.recyclerView);
-        LinearLayoutManager managerCheckpoints = new LinearLayoutManager(getActivity());
-        recyclerViewCheckpoints.setLayoutManager(managerCheckpoints);
+        recyclerViewPlaces = view.findViewById(R.id.checkpoints_card).findViewById(R.id.recyclerView);
+        LinearLayoutManager managerPlaces = new LinearLayoutManager(getActivity());
+        recyclerViewPlaces.setLayoutManager(managerPlaces);
         placesAdapter = new PlacesAdapter();
-        recyclerViewCheckpoints.setAdapter(placesAdapter);
+        recyclerViewPlaces.setAdapter(placesAdapter);
 
         return view;
     }
@@ -90,6 +95,10 @@ public class QuestFragment extends Fragment {
 
     public void setOnJournalClickListener(View.OnClickListener listener) {
         this.onJournalClickListener = listener;
+    }
+
+    public void setOnPlacesClickListener(View.OnClickListener listener) {
+        this.onPlacesClickListener = listener;
     }
 
     public void setJournal() {
