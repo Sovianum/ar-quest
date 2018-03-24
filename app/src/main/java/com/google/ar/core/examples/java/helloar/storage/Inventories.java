@@ -1,7 +1,7 @@
 package com.google.ar.core.examples.java.helloar.storage;
 
+import com.google.ar.core.examples.java.helloar.GameApi;
 import com.google.ar.core.examples.java.helloar.model.Inventory;
-import com.google.ar.core.examples.java.helloar.network.Api;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +18,7 @@ public class Inventories {
     }
 
     public void addCurrentInventory(Inventory inventory) {
-        inventories.put(Api.getCurrentQuestId(), inventory);
+        inventories.put(GameApi.getCurrentQuestId(), inventory);
     }
 
 
@@ -27,6 +27,6 @@ public class Inventories {
     }
 
     public Inventory getCurrentInventory() {
-        return this.getInventory(Api.getCurrentQuestId());
+        return this.getInventory(GameApi.getCurrentQuestId());
     }
 }

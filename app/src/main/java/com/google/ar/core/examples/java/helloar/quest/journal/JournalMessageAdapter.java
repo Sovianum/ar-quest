@@ -9,10 +9,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.google.ar.core.examples.java.helloar.GameApi;
 import com.google.ar.core.examples.java.helloar.R;
 import com.google.ar.core.examples.java.helloar.core.game.journal.Journal;
 import com.google.ar.core.examples.java.helloar.core.game.journal.TimestampRecord;
-import com.google.ar.core.examples.java.helloar.network.Api;
 
 public class JournalMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public class CardViewHolder extends RecyclerView.ViewHolder {
@@ -29,7 +29,7 @@ public class JournalMessageAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     private Journal<String> journal;
 
     public JournalMessageAdapter() {
-        this.journal = Api.getJournals().getCurrentJournal();
+        this.journal = GameApi.getJournals().getCurrentJournal();
         notifyDataSetChanged();
     }
 

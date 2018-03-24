@@ -10,9 +10,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import com.google.ar.core.examples.java.helloar.GameApi;
 import com.google.ar.core.examples.java.helloar.R;
 import com.google.ar.core.examples.java.helloar.core.game.journal.Journal;
-import com.google.ar.core.examples.java.helloar.network.Api;
 
 public class JournalFragment extends Fragment {
     public static final String TAG = JournalFragment.class.getSimpleName();
@@ -42,7 +42,7 @@ public class JournalFragment extends Fragment {
     }
 
     private void refreshItems() { //stubs
-        loadItems(Api.getJournals().getCurrentJournal());
+        loadItems(GameApi.getJournals().getCurrentJournal());
     }
 
     private void loadItems(Journal journal) {

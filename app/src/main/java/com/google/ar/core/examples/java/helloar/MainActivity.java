@@ -112,15 +112,15 @@ public class MainActivity extends AppCompatActivity {
         journal.addNow("Second record");
         journal.addNow("Third record");
         Integer questId = 1;
-        Api.setCurrentQuestId(questId);
-        Api.getJournals().addCurrentJournal(journal);
+        GameApi.setCurrentQuestId(questId);
+        GameApi.getJournals().addCurrentJournal(journal);
         Inventory inventory = new Inventory();
         inventory.addItem(new Item("Меч", "Большой и страшный меч", ""));
         inventory.addItem(new Item("Щит", "Маленький и забавный щит", ""));
-        Api.getInventories().addCurrentInventory(inventory);
+        GameApi.getInventories().addCurrentInventory(inventory);
         Checkpoints checkpoints = new Checkpoints();
         checkpoints.addCheckpoint(new Checkpoint("title", "description"));
-        Api.getCheckpointsStorage().addCurrentCheckpoints(checkpoints);
+        GameApi.getCheckpointsStorage().addCurrentCheckpoints(checkpoints);
 
         //removeToken(); //debug
 

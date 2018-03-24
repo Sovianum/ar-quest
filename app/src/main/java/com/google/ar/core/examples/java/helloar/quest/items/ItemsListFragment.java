@@ -10,9 +10,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import com.google.ar.core.examples.java.helloar.GameApi;
 import com.google.ar.core.examples.java.helloar.R;
 import com.google.ar.core.examples.java.helloar.model.Item;
-import com.google.ar.core.examples.java.helloar.network.Api;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +56,7 @@ public class ItemsListFragment extends Fragment {
     }
 
     private void refreshItems() {
-        loadItems(Api.getInventories().getCurrentInventory().getItems());
+        loadItems(GameApi.getInventories().getCurrentInventory().getItems());
     }
 
 }

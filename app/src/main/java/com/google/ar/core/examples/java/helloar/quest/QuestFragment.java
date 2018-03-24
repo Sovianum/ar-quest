@@ -13,11 +13,11 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.ar.core.examples.java.helloar.GameApi;
 import com.google.ar.core.examples.java.helloar.R;
 import com.google.ar.core.examples.java.helloar.core.game.journal.Journal;
 import com.google.ar.core.examples.java.helloar.core.game.journal.TimestampRecord;
 import com.google.ar.core.examples.java.helloar.model.Item;
-import com.google.ar.core.examples.java.helloar.network.Api;
 import com.google.ar.core.examples.java.helloar.quest.items.ItemAdapter;
 import com.google.ar.core.examples.java.helloar.quest.place.Checkpoint;
 import com.google.ar.core.examples.java.helloar.quest.place.CheckpointsAdapter;
@@ -93,7 +93,7 @@ public class QuestFragment extends Fragment {
     }
 
     public void setJournal() {
-        this.journal = Api.getJournals().getCurrentJournal();
+        this.journal = GameApi.getJournals().getCurrentJournal();
     }
 
     public void refreshLastJournalRecord() {
@@ -111,11 +111,11 @@ public class QuestFragment extends Fragment {
     }
 
     private void refreshItems() {
-        loadItems(Api.getInventories().getCurrentInventory().getItems());
+        loadItems(GameApi.getInventories().getCurrentInventory().getItems());
     }
 
     private void refreshCheckpoints() {
-        loadCheckpoints(Api.getCheckpointsStorage().getCurrentCheckpoints().getCheckpoints());
+        loadCheckpoints(GameApi.getCheckpointsStorage().getCurrentCheckpoints().getCheckpoints());
     }
 
     private void loadItems(List<Item> items) {

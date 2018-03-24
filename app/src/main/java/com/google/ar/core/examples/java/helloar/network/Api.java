@@ -46,30 +46,6 @@ public class Api {
                 .client(okHttpClient)
                 .build();
         service = retrofit.create(LoaderService.class);
-
-        journals = new Journals();
-        inventories = new Inventories();
-        checkpointsStorage = new CheckpointsStorage();
-    }
-
-    public static Journals getJournals() {
-        return Api.journals;
-    }
-
-    public static Inventories getInventories() {
-        return Api.inventories;
-    }
-
-    public static CheckpointsStorage getCheckpointsStorage() {
-        return Api.checkpointsStorage;
-    }
-
-    public static void setCurrentQuestId(Integer id) {
-        Api.currentQuestId = id;
-    }
-
-    public static Integer getCurrentQuestId() {
-        return Api.currentQuestId;
     }
 
     public void

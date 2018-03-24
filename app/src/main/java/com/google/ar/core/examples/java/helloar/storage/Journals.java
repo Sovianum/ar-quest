@@ -1,7 +1,7 @@
 package com.google.ar.core.examples.java.helloar.storage;
 
+import com.google.ar.core.examples.java.helloar.GameApi;
 import com.google.ar.core.examples.java.helloar.core.game.journal.Journal;
-import com.google.ar.core.examples.java.helloar.network.Api;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +18,7 @@ public class Journals {
     }
 
     public void addCurrentJournal(Journal journal) {
-        journals.put(Api.getCurrentQuestId(), journal);
+        journals.put(GameApi.getCurrentQuestId(), journal);
     }
 
     public Journal getJournal(Integer id) {
@@ -26,6 +26,6 @@ public class Journals {
     }
 
     public Journal getCurrentJournal() {
-        return this.getJournal(Api.getCurrentQuestId());
+        return this.getJournal(GameApi.getCurrentQuestId());
     }
 }

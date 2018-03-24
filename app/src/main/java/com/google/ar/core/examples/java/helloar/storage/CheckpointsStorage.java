@@ -1,6 +1,6 @@
 package com.google.ar.core.examples.java.helloar.storage;
 
-import com.google.ar.core.examples.java.helloar.network.Api;
+import com.google.ar.core.examples.java.helloar.GameApi;
 import com.google.ar.core.examples.java.helloar.quest.place.Checkpoints;
 
 import java.util.HashMap;
@@ -18,7 +18,7 @@ public class CheckpointsStorage {
     }
 
     public void addCurrentCheckpoints(Checkpoints checkpoints) {
-        storage.put(Api.getCurrentQuestId(), checkpoints);
+        storage.put(GameApi.getCurrentQuestId(), checkpoints);
     }
 
 
@@ -27,6 +27,6 @@ public class CheckpointsStorage {
     }
 
     public Checkpoints getCurrentCheckpoints() {
-        return this.getCheckpoints(Api.getCurrentQuestId());
+        return this.getCheckpoints(GameApi.getCurrentQuestId());
     }
 }
