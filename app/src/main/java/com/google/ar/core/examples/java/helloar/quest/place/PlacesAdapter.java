@@ -8,12 +8,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.google.ar.core.examples.java.helloar.GameApi;
 import com.google.ar.core.examples.java.helloar.R;
+import com.google.ar.core.examples.java.helloar.core.game.Place;
 
-import java.util.List;
-
-public class CheckpointsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    private List<Checkpoint> items;
+public class PlacesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    private Places items;
 
     public class CardViewHolder extends RecyclerView.ViewHolder {
         TextView titleView;
@@ -26,12 +26,13 @@ public class CheckpointsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         }
     }
 
-    public CheckpointsAdapter(List<Checkpoint> items) {
-        this.items = items;
+    public PlacesAdapter() {
+        this.items = GameApi.getPlacesStorage().getCurrentPlaces();
         notifyDataSetChanged();
     }
 
-    public void setItems(List<Checkpoint> items) {
+
+    public void setItems(Places items) {
         this.items = items;
         notifyDataSetChanged();
     }
@@ -42,20 +43,20 @@ public class CheckpointsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         Context context = parent.getContext();
         int CARD_ID = R.layout.item_checkpoint_card;
         View view = LayoutInflater.from(context).inflate(CARD_ID, parent, false);
-        return new CheckpointsAdapter.CardViewHolder(view);
+        return new PlacesAdapter.CardViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        final Checkpoint item = items.get(position);
+        final Place item = items.getCheckpoints().get(position);
 
         final CardViewHolder cardHolder = (CardViewHolder) holder;
-        cardHolder.titleView.setText(item.getTitle());
+        cardHolder.titleView.setText(item.getName());
         cardHolder.descriptionView.setText(item.getDescription());
     }
 
     @Override
     public int getItemCount() {
-        return items.size();
+        return items.getCheckpoints().size();
     }
 }

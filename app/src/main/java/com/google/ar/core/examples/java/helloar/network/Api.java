@@ -6,9 +6,6 @@ import android.util.Log;
 
 import com.google.ar.core.examples.java.helloar.ListenerHandler;
 import com.google.ar.core.examples.java.helloar.NetworkError;
-import com.google.ar.core.examples.java.helloar.storage.CheckpointsStorage;
-import com.google.ar.core.examples.java.helloar.storage.Inventories;
-import com.google.ar.core.examples.java.helloar.storage.Journals;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -30,10 +27,6 @@ public class Api {
     private final LoaderService service;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private String token;
-    private static Journals journals;
-    private static Inventories inventories;
-    private static CheckpointsStorage checkpointsStorage;
-    private static Integer currentQuestId;
 
     private Api() {
         OkHttpClient okHttpClient = new OkHttpClient().newBuilder()

@@ -19,8 +19,8 @@ import com.google.ar.core.examples.java.helloar.core.game.Item;
 import com.google.ar.core.examples.java.helloar.core.game.journal.Journal;
 import com.google.ar.core.examples.java.helloar.core.game.journal.TimestampRecord;
 import com.google.ar.core.examples.java.helloar.quest.items.ItemAdapter;
-import com.google.ar.core.examples.java.helloar.quest.place.Checkpoint;
-import com.google.ar.core.examples.java.helloar.quest.place.CheckpointsAdapter;
+import com.google.ar.core.examples.java.helloar.quest.place.Places;
+import com.google.ar.core.examples.java.helloar.quest.place.PlacesAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +44,7 @@ public class QuestFragment extends Fragment {
     private RecyclerView recyclerViewItems;
     private RecyclerView recyclerViewCheckpoints;
 
-    private CheckpointsAdapter checkpointsAdapter;
+    private PlacesAdapter placesAdapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -72,8 +72,8 @@ public class QuestFragment extends Fragment {
         recyclerViewCheckpoints = view.findViewById(R.id.checkpoints_card).findViewById(R.id.recyclerView);
         LinearLayoutManager managerCheckpoints = new LinearLayoutManager(getActivity());
         recyclerViewCheckpoints.setLayoutManager(managerCheckpoints);
-        checkpointsAdapter = new CheckpointsAdapter(new ArrayList<Checkpoint>());
-        recyclerViewCheckpoints.setAdapter(checkpointsAdapter);
+        placesAdapter = new PlacesAdapter();
+        recyclerViewCheckpoints.setAdapter(placesAdapter);
 
         return view;
     }
@@ -107,15 +107,15 @@ public class QuestFragment extends Fragment {
     public void onStart() {
         super.onStart();
         refreshItems();
-        refreshCheckpoints();
+        refreshPlaces();
     }
 
     private void refreshItems() {
         loadItems(GameApi.getInventories().getCurrentInventory().getItems());
     }
 
-    private void refreshCheckpoints() {
-        loadCheckpoints(GameApi.getCheckpointsStorage().getCurrentCheckpoints().getCheckpoints());
+    private void refreshPlaces() {
+        loadPlaces(GameApi.getPlacesStorage().getCurrentPlaces());
     }
 
     private void loadItems(List<Item> items) {
@@ -124,9 +124,9 @@ public class QuestFragment extends Fragment {
         }
     }
 
-    private void loadCheckpoints(List<Checkpoint> checkpoints) {
-        if (checkpointsAdapter != null) {
-            checkpointsAdapter.setItems(checkpoints);
+    private void loadPlaces(Places places) {
+        if (placesAdapter != null) {
+            placesAdapter.setItems(places);
         }
     }
 

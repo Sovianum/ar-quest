@@ -34,8 +34,7 @@ import com.google.ar.core.examples.java.helloar.quest.game.QuestService;
 import com.google.ar.core.examples.java.helloar.quest.items.ItemAdapter;
 import com.google.ar.core.examples.java.helloar.quest.items.ItemsListFragment;
 import com.google.ar.core.examples.java.helloar.quest.journal.JournalFragment;
-import com.google.ar.core.examples.java.helloar.quest.place.Checkpoint;
-import com.google.ar.core.examples.java.helloar.quest.place.Checkpoints;
+import com.google.ar.core.examples.java.helloar.quest.place.Places;
 import com.google.ar.core.examples.java.helloar.quest.quests.QuestAdapter;
 import com.google.ar.core.examples.java.helloar.quest.quests.QuestsListFragment;
 
@@ -113,9 +112,9 @@ public class MainActivity extends AppCompatActivity {
         GameApi.setCurrentQuestId(questId);
         GameApi.getJournals().addCurrentJournal(journal);
         GameApi.getInventories().addCurrentInventory(new Slot(0, Player.INVENTORY, false));
-        Checkpoints checkpoints = new Checkpoints();
-        checkpoints.addCheckpoint(new Checkpoint("title", "description"));
-        GameApi.getCheckpointsStorage().addCurrentCheckpoints(checkpoints);
+        Places places = new Places();
+        places.addCheckpoint(new Place(0, "First place", "Description")); //STUB!!!
+        GameApi.getPlacesStorage().addCurrentPlaces(places);
 
         //removeToken(); //debug
 
