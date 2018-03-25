@@ -1,15 +1,16 @@
 package com.google.ar.core.examples.java.helloar.auth;
 
 
-import android.support.v4.app.Fragment;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.v4.app.Fragment;
 
 import com.google.ar.core.examples.java.helloar.MainActivity;
 import com.google.ar.core.examples.java.helloar.R;
 
 public class AuthFragment extends Fragment {
+
     protected void onGettingToken(String token) {
         if (getActivity() == null) {
             return;

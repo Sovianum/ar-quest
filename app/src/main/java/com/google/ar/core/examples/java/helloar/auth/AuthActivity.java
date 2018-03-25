@@ -7,6 +7,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
+import com.google.ar.core.examples.java.helloar.PermissionHelper;
 import com.google.ar.core.examples.java.helloar.R;
 
 public class AuthActivity extends AppCompatActivity {
@@ -38,6 +39,10 @@ public class AuthActivity extends AppCompatActivity {
 
         loginFragment = new LoginFragment();
         loginFragment.setOnClickListener(loginOnClickListener);
+
+        if (!PermissionHelper.hasInternetPermission(this)) {
+            PermissionHelper.requestInternetPermission(this);
+        }
 
         selectFragment(loginFragment);
     }

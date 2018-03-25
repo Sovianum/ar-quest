@@ -1,6 +1,8 @@
 package com.google.ar.core.examples.java.helloar;
 
 
+import com.google.ar.core.examples.java.helloar.auth.LoginFragment;
+import com.google.ar.core.examples.java.helloar.auth.RegistrationFragment;
 import com.google.ar.core.examples.java.helloar.network.NetworkModule;
 import com.google.ar.core.examples.java.helloar.quest.ARFragment;
 import com.google.ar.core.examples.java.helloar.quest.QuestFragment;
@@ -29,4 +31,6 @@ public interface AppComponent {
     void inject(JournalMessageAdapter adapter);
     void inject(PlaceFragment placeFragment);
     void inject(PlacesAdapter adapter);
+    void inject(LoginFragment fragment);
+    void inject(RegistrationFragment fragment);
 }

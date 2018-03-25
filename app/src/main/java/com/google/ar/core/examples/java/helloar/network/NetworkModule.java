@@ -5,18 +5,27 @@ import android.os.Looper;
 import android.util.Log;
 
 import com.google.ar.core.examples.java.helloar.ListenerHandler;
-import com.google.ar.core.examples.java.helloar.NetworkError;
+import com.google.ar.core.examples.java.helloar.model.User;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
+import java.io.IOException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
+import okhttp3.RequestBody;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+
+import static java.net.HttpURLConnection.HTTP_OK;
 
 @Module
 public class NetworkModule {
@@ -29,7 +38,10 @@ public class NetworkModule {
     private String token;
     private String baseUrl;
 
+    private final Executor executor = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    public static final String TEXT_PLAIN = "text/plain";
+    private static final Gson GSON = new GsonBuilder().create();
     private OkHttpClient okHttpClient;
     private Retrofit retrofit;
     private final LoaderService service;
@@ -67,6 +79,62 @@ public class NetworkModule {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public ListenerHandler<OnDataGetListener<ServerResponse<String>>>
+    loginUser(final OnDataGetListener<ServerResponse<String>> listener, final User user) {
+        final ListenerHandler<OnDataGetListener<ServerResponse<String>>> handler = new ListenerHandler<>(listener);
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    final String strRequestBody = GSON.toJson(user);
+                    RequestBody requestBody =
+                            RequestBody.create(MediaType.parse(TEXT_PLAIN), strRequestBody);
+                    final Response<ServerResponse<String>> response = service.loginUser(requestBody).execute();
+
+                    final ServerResponse<String> body = response.body();
+                    if (body == null) {
+                        throw new NetworkError(response.code());
+                    }
+                    if (body.getData() == null || response.code() != HTTP_OK) {
+                        throw new NetworkError(body.getErrMsg(), response.code());
+                    }
+                    invokeSuccess(handler, body);
+                } catch (IOException e) {
+                    invokeError(handler, e);
+                }
+            }
+        });
+        return handler;
+    }
+
+    public ListenerHandler<OnDataGetListener<ServerResponse<String>>>
+    registerUser(final OnDataGetListener<ServerResponse<String>> listener, final User user) {
+        final ListenerHandler<OnDataGetListener<ServerResponse<String>>> handler = new ListenerHandler<>(listener);
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    final String strRequestBody = GSON.toJson(user);
+                    RequestBody requestBody =
+                            RequestBody.create(MediaType.parse(TEXT_PLAIN), strRequestBody);
+                    final Response<ServerResponse<String>> response = service.registerUser(requestBody).execute();
+
+                    final ServerResponse<String> body = response.body();
+                    if (body == null) {
+                        throw new NetworkError(response.code());
+                    }
+                    if (body.getData() == null || response.code() != HTTP_OK) {
+                        throw new NetworkError(body.getErrMsg(), response.code());
+                    }
+                    invokeSuccess(handler, body);
+                } catch (IOException e) {
+                    invokeError(handler, e);
+                }
+            }
+        });
+        return handler;
     }
 
     private <T> void handleDefaultSuccess(
