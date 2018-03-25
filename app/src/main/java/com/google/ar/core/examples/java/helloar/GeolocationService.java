@@ -44,14 +44,8 @@ public class GeolocationService extends Service {
     private LocationListener locationListener = new LocationListener() {
         @Override
         public void onLocationChanged(Location location) {
-            System.out.println("Location before");
-            System.out.println(location.getLongitude());
-            System.out.println(location.getLatitude());
             if (lastLocation.distanceTo(location) > DISTANCE/2.0 ) { //если поменялась геопозиция
                 lastLocation = location;
-                System.out.println("Location");
-                System.out.println(location.getLongitude());
-                System.out.println(location.getLatitude());
 
                 if(isCloseToPoints(gameModule.getCurrentPlaces(), location)) {
                     showNotification("Найдена точка", String.valueOf(location.getLongitude()) +
