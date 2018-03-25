@@ -1,5 +1,7 @@
 package com.google.ar.core.examples.java.helloar.core.game;
 
+import android.location.Location;
+
 import com.google.ar.core.examples.java.helloar.core.ar.SceneObject;
 import com.google.ar.core.examples.java.helloar.core.game.slot.Slot;
 
@@ -14,6 +16,7 @@ public class Place {
     private String description;
     private Map<Integer, Slot> slots;
     private Map<Integer, InteractiveObject> interactiveObjects;
+    private Location location;
 
     public Place() {
         slots = new HashMap<>();
@@ -24,6 +27,9 @@ public class Place {
         this.id = id;
         this.name = name;
         this.description = description;
+        this.location = new Location("");
+        location.setLatitude(0.0);
+        location.setLongitude(0.0);
         slots = new HashMap<>();
         interactiveObjects = new HashMap<>();
     }
@@ -42,6 +48,14 @@ public class Place {
 
     public String getDescription() {
         return description;
+    }
+
+    public Location getLocation() {
+        return location;
+    }
+
+    public void setLocation(Location location) {
+        this.location = location;
     }
 
     public List<SceneObject> getAll() {

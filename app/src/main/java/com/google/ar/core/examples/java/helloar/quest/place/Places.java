@@ -12,7 +12,7 @@ public class Places {
         places = new ArrayList<>();
     }
 
-    public List<Place> getCheckpoints() {
+    public List<Place> getPlaces() {
         return places;
     }
 
@@ -20,9 +20,7 @@ public class Places {
         this.places = places;
     }
 
-    public List<Place> getPlaces;
-
-    public void addCheckpoint(Place item) {
+    public void addPlace(Place item) {
         places.add(item);
     }
 }

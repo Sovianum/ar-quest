@@ -33,4 +33,5 @@ public interface AppComponent {
     void inject(PlacesAdapter adapter);
     void inject(LoginFragment fragment);
     void inject(RegistrationFragment fragment);
+    void inject(GeolocationService service);
 }

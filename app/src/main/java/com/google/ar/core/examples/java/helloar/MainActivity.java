@@ -2,6 +2,8 @@ package com.google.ar.core.examples.java.helloar;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.Location;
+import android.location.LocationListener;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -40,6 +42,28 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class MainActivity extends AppCompatActivity {
+    private LocationListener onLocationChangeListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+
+        }
+
+        @Override
+        public void onStatusChanged(String s, int i, Bundle bundle) {
+
+        }
+
+        @Override
+        public void onProviderEnabled(String s) {
+
+        }
+
+        @Override
+        public void onProviderDisabled(String s) {
+
+        }
+    };
+
     @BindView(R.id.ar_fragment_btn)
     Button toQuestFragmentButton;
 
@@ -95,6 +119,8 @@ public class MainActivity extends AppCompatActivity {
         questsListFragment.setOnItemClickListener(toQuestItemOnClickListener);
 
         toQuestFragmentButton.setOnClickListener(getSelectFragmentListener(arFragment));
+
+        startService(new Intent(this, GeolocationService.class));
     }
 
     @Override
@@ -102,6 +128,17 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
         checkAuthorization();
         selectFragment(questsListFragment, questsListFragment.TAG);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        stopService(new Intent(this, GeolocationService.class));
     }
 
     @Override
@@ -121,6 +158,8 @@ public class MainActivity extends AppCompatActivity {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
     }
+
+
 
     private void setUpQuestFragment() {
         placeFragment = new PlaceFragment();
@@ -145,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
         gameModule.addCurrentInventory(new Slot(0, Player.INVENTORY, false));
 
         Places places = new Places();
-        places.addCheckpoint(new Place(0, "First place", "Description")); //STUB!!!
+        places.addPlace(new Place(0, "First place", "Description")); //STUB!!!
         gameModule.addCurrentPlaces(places);
     }
 
