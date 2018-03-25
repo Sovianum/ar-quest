@@ -53,7 +53,7 @@ public class LoginFragment extends AuthFragment {
         getStubsToken(); //debug
     }
 
-    // TODO remove or use
+    // TODO removeAll or use
     public void setLoading(boolean loading) {
         if (loading) {
             progressBar.setVisibility(View.VISIBLE);

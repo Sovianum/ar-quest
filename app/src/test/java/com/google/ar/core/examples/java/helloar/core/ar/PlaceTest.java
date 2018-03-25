@@ -2,12 +2,14 @@ package com.google.ar.core.examples.java.helloar.core.ar;
 
 
 import com.google.ar.core.Pose;
+import com.google.ar.core.examples.java.helloar.common.CollectionUtils;
 import com.google.ar.core.examples.java.helloar.core.ar.collision.Collider;
 import com.google.ar.core.examples.java.helloar.core.ar.collision.shape.Point;
 import com.google.ar.core.examples.java.helloar.core.ar.collision.shape.Sphere;
 import com.google.ar.core.examples.java.helloar.core.ar.geom.Geom;
 import com.google.ar.core.examples.java.helloar.core.game.InteractiveObject;
 import com.google.ar.core.examples.java.helloar.core.game.Place;
+import com.google.ar.core.examples.java.helloar.core.game.script.ObjectState;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -24,17 +26,26 @@ public class PlaceTest {
 
     @Before
     public void setUp() {
-        InteractiveObject root = new InteractiveObject(1, "root", "root", true);
+        InteractiveObject root = new InteractiveObject(
+                1, "root", "root"
+        );
         root.getGeom().apply(Pose.makeTranslation(0, 0, 5));
         root.setCollider(new Collider(new Point()));
+        root.setStates(CollectionUtils.listOf(ObjectState.enableObjectState(0, true, true)));
 
-        InteractiveObject child1 = new InteractiveObject(2, "child1", "child1", true);
+        InteractiveObject child1 = new InteractiveObject(
+                2, "child1", "child1"
+        );
         child1.getGeom().apply(Pose.makeTranslation(0, 0, 10));
         child1.setCollider(new Collider(new Point()));
+        child1.setStates(CollectionUtils.listOf(ObjectState.enableObjectState(0, true, true)));
 
-        InteractiveObject child2 = new InteractiveObject(3, "child2", "child2", true);
+        InteractiveObject child2 = new InteractiveObject(
+                3, "child2", "child2"
+        );
         child2.getGeom().apply(Pose.makeTranslation(0, 0, 15));
         child2.setCollider(new Collider(new Point()));
+        child2.setStates(CollectionUtils.listOf(ObjectState.enableObjectState(0, true, true)));
 
         place = new Place();
         List<InteractiveObject> objects = new ArrayList<>();

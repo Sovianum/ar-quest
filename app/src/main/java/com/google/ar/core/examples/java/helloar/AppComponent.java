@@ -17,7 +17,7 @@ import javax.inject.Singleton;
 import dagger.Component;
 
 @Singleton
-@Component(modules = {GameModule.class, QuestModule.class, NetworkModule.class})
+@Component(modules = {GameModule.class, QuestModule.class, NetworkModule.class, ContextModule.class})
 public interface AppComponent {
     void inject(MainActivity activity);
     void inject(ARFragment fragment);

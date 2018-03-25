@@ -1,7 +1,6 @@
 package com.google.ar.core.examples.java.helloar.core.game;
 
 import com.google.ar.core.examples.java.helloar.core.ar.SceneObject;
-import com.google.ar.core.examples.java.helloar.core.game.slot.Slot;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,11 +11,9 @@ public class Place {
     private int id;
     private String name;
     private String description;
-    private Map<Integer, Slot> slots;
     private Map<Integer, InteractiveObject> interactiveObjects;
 
     public Place() {
-        slots = new HashMap<>();
         interactiveObjects = new HashMap<>();
     }
 
@@ -24,7 +21,6 @@ public class Place {
         this.id = id;
         this.name = name;
         this.description = description;
-        slots = new HashMap<>();
         interactiveObjects = new HashMap<>();
     }
 
@@ -45,45 +41,13 @@ public class Place {
     }
 
     public List<SceneObject> getAll() {
-        List<SceneObject> result = new ArrayList<>(slots.size() + interactiveObjects.size());
-        result.addAll(slots.values());
+        List<SceneObject> result = new ArrayList<>(interactiveObjects.size());
         result.addAll(interactiveObjects.values());
 
-        for (Slot slot : slots.values()) {
-            result.addAll(slot.getItems());
-        }
         for (InteractiveObject obj : interactiveObjects.values()) {
             result.addAll(obj.getItems());
         }
         return result;
-    }
-
-    public Map<Integer, Slot> getSlots() {
-        return slots;
-    }
-
-    public Slot getSlot(int id) {
-        return slots.get(id);
-    }
-
-    public Map<Integer, Slot> getAccessibleSlots() {
-        Map<Integer, Slot> result = new HashMap<>();
-        for (Map.Entry<Integer, Slot> entry : slots.entrySet()) {
-            if (entry.getValue().isEnabled()) {
-                result.put(entry.getKey(), entry.getValue());
-            }
-        }
-        return result;
-    }
-
-    public void setSlots(Map<Integer, Slot> slots) {
-        this.slots = slots;
-    }
-
-    public void loadSlots(Iterable<Slot> slots) {
-        for (Slot slot : slots) {
-            this.slots.put(slot.getIdentifiable().getId(), slot);
-        }
     }
 
     public Map<Integer, InteractiveObject> getInteractiveObjects() {

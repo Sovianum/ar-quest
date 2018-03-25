@@ -1,0 +1,584 @@
+{
+  "id": 0,
+  "interactiveObjects": {
+    "1": {
+      "id": 1,
+      "name": "andy",
+      "description": "andy",
+      "items": [
+        {
+          "id": 20,
+          "name": "rose",
+          "description": "rose",
+          "modelName": "rose.obj",
+          "textureName": "rose.jpg",
+          "geom": {
+            "translation": {
+              "t": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            "rotation": {
+              "q": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            "scale": 0.001
+          },
+          "identifiable": {
+            "name": "rose",
+            "id": 20,
+            "parentID": 0,
+            "sceneID": 0
+          },
+          "enabled": false
+        }
+      ],
+      "currentStateID": 1,
+      "states": {
+        "1": {
+          "id": 1,
+          "isDefault": true,
+          "enabled": true,
+          "visible": true,
+          "collidable": true,
+          "actions": {
+            "1": {
+              "id": 1,
+              "interactionResults": [
+                {
+                  "type": "MESSAGE",
+                  "msg": "Возьми поесть у белого человека",
+                  "id": 0
+                },
+                {
+                  "type": "TRANSITIONS",
+                  "msg": "",
+                  "id": 0,
+                  "transitions": [
+                    {
+                      "targetObjectID": 1,
+                      "targetStateID": 2
+                    },
+                    {
+                      "targetObjectID": 2,
+                      "targetStateID": 1
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "conditions": {
+            "1": {
+              "itemInfoMap": {},
+              "strings": [],
+              "sourceStateID": 1
+            }
+          }
+        },
+        "2": {
+          "id": 2,
+          "isDefault": false,
+          "enabled": true,
+          "visible": true,
+          "collidable": true,
+          "actions": {
+            "1": {
+              "id": 1,
+              "interactionResults": [
+                {
+                  "type": "MESSAGE",
+                  "msg": "Отблагодари белого человека",
+                  "id": 0
+                },
+                {
+                  "type": "NEW_ITEMS",
+                  "msg": "",
+                  "items": {
+                    "item": {
+                      "id": 20,
+                      "name": "rose",
+                      "description": "rose",
+                      "modelName": "rose.obj",
+                      "textureName": "rose.jpg",
+                      "geom": {
+                        "translation": {
+                          "t": [
+                            0.0,
+                            0.0,
+                            0.0
+                          ]
+                        },
+                        "rotation": {
+                          "q": [
+                            0.0,
+                            0.0,
+                            0.0,
+                            1.0
+                          ]
+                        },
+                        "scale": 0.001
+                      },
+                      "identifiable": {
+                        "name": "rose",
+                        "id": 20,
+                        "parentID": 0,
+                        "sceneID": 0
+                      },
+                      "enabled": false
+                    },
+                    "cnt": 1
+                  },
+                  "id": 0
+                },
+                {
+                  "type": "TAKE_ITEMS",
+                  "msg": "",
+                  "items": {
+                    "item": {
+                      "id": 10,
+                      "name": "banana",
+                      "description": "banana",
+                      "modelName": "banana.obj",
+                      "textureName": "banana.jpg",
+                      "geom": {
+                        "translation": {
+                          "t": [
+                            0.0,
+                            0.0,
+                            0.0
+                          ]
+                        },
+                        "rotation": {
+                          "q": [
+                            0.0,
+                            0.0,
+                            0.0,
+                            1.0
+                          ]
+                        },
+                        "scale": 0.001
+                      },
+                      "identifiable": {
+                        "name": "banana",
+                        "id": 10,
+                        "parentID": 0,
+                        "sceneID": 0
+                      },
+                      "enabled": false
+                    },
+                    "cnt": 1
+                  },
+                  "id": 0
+                },
+                {
+                  "type": "TRANSITIONS",
+                  "msg": "",
+                  "id": 0,
+                  "transitions": [
+                    {
+                      "targetObjectID": 1,
+                      "targetStateID": 3
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "conditions": {
+            "1": {
+              "itemInfoMap": {
+                "10": {
+                  "itemID": 10,
+                  "itemCnt": 1
+                }
+              },
+              "strings": [],
+              "sourceStateID": 2
+            }
+          }
+        },
+        "3": {
+          "id": 3,
+          "isDefault": false,
+          "enabled": true,
+          "visible": true,
+          "collidable": true,
+          "actions": {
+            "1": {
+              "id": 1,
+              "interactionResults": [
+                {
+                  "type": "MESSAGE",
+                  "msg": "Мне нечего тебе сказать",
+                  "id": 0
+                }
+              ]
+            }
+          },
+          "conditions": {
+            "1": {
+              "itemInfoMap": {},
+              "strings": [],
+              "sourceStateID": 3
+            }
+          }
+        }
+      },
+      "collider": {
+        "shape": {
+          "radius": 0.3,
+          "random": {
+            "seed": 1544047444279,
+            "nextNextGaussian": 0.0,
+            "haveNextNextGaussian": false
+          }
+        },
+        "position": {
+          "translation": {
+            "t": [
+              0.0,
+              0.0,
+              -0.5
+            ]
+          },
+          "rotation": {
+            "q": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "scale": 1.0
+        },
+        "offset": {
+          "translation": {
+            "t": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "rotation": {
+            "q": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "scale": 1.0
+        },
+        "enabled": true
+      },
+      "drawable": {
+        "textureName": "andy.png",
+        "modelName": "andy.obj",
+        "enabled": true
+      },
+      "geom": {
+        "translation": {
+          "t": [
+            0.0,
+            0.0,
+            -0.5
+          ]
+        },
+        "rotation": {
+          "q": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        "scale": 1.0
+      },
+      "identifiable": {
+        "name": "andy",
+        "id": 1,
+        "parentID": 0,
+        "sceneID": 0
+      },
+      "enabled": true
+    },
+    "2": {
+      "id": 2,
+      "name": "white",
+      "description": "white",
+      "items": [
+        {
+          "id": 10,
+          "name": "banana",
+          "description": "banana",
+          "modelName": "banana.obj",
+          "textureName": "banana.jpg",
+          "geom": {
+            "translation": {
+              "t": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            "rotation": {
+              "q": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            "scale": 0.001
+          },
+          "identifiable": {
+            "name": "banana",
+            "id": 10,
+            "parentID": 0,
+            "sceneID": 0
+          },
+          "enabled": false
+        }
+      ],
+      "currentStateID": 0,
+      "states": {
+        "0": {
+          "id": 0,
+          "isDefault": true,
+          "enabled": false,
+          "visible": true,
+          "collidable": true
+        },
+        "1": {
+          "id": 1,
+          "isDefault": false,
+          "enabled": true,
+          "visible": true,
+          "collidable": true,
+          "actions": {
+            "1": {
+              "id": 1,
+              "interactionResults": [
+                {
+                  "type": "NEW_ITEMS",
+                  "msg": "",
+                  "items": {
+                    "item": {
+                      "id": 10,
+                      "name": "banana",
+                      "description": "banana",
+                      "modelName": "banana.obj",
+                      "textureName": "banana.jpg",
+                      "geom": {
+                        "translation": {
+                          "t": [
+                            0.0,
+                            0.0,
+                            0.0
+                          ]
+                        },
+                        "rotation": {
+                          "q": [
+                            0.0,
+                            0.0,
+                            0.0,
+                            1.0
+                          ]
+                        },
+                        "scale": 0.001
+                      },
+                      "identifiable": {
+                        "name": "banana",
+                        "id": 10,
+                        "parentID": 0,
+                        "sceneID": 0
+                      },
+                      "enabled": false
+                    },
+                    "cnt": 1
+                  },
+                  "id": 0
+                },
+                {
+                  "type": "MESSAGE",
+                  "msg": "Дай ему поесть",
+                  "id": 0
+                },
+                {
+                  "type": "TRANSITIONS",
+                  "msg": "",
+                  "id": 0,
+                  "transitions": [
+                    {
+                      "targetObjectID": 2,
+                      "targetStateID": 2
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "conditions": {
+            "1": {
+              "itemInfoMap": {},
+              "strings": [],
+              "sourceStateID": 1
+            }
+          }
+        },
+        "2": {
+          "id": 2,
+          "isDefault": false,
+          "enabled": true,
+          "visible": true,
+          "collidable": true,
+          "actions": {
+            "1": {
+              "id": 1,
+              "interactionResults": [
+                {
+                  "type": "MESSAGE",
+                  "msg": "Да за кого он меня принимает?!",
+                  "id": 0
+                },
+                {
+                  "type": "TRANSITIONS",
+                  "msg": "",
+                  "id": 0,
+                  "transitions": [
+                    {
+                      "targetObjectID": 2,
+                      "targetStateID": 3
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "conditions": {
+            "1": {
+              "itemInfoMap": {
+                "20": {
+                  "itemID": 20,
+                  "itemCnt": 1
+                }
+              },
+              "strings": [],
+              "sourceStateID": 2
+            }
+          }
+        },
+        "3": {
+          "id": 3,
+          "isDefault": false,
+          "enabled": true,
+          "visible": true,
+          "collidable": true,
+          "actions": {
+            "1": {
+              "id": 1,
+              "interactionResults": [
+                {
+                  "type": "MESSAGE",
+                  "msg": "Ммм?",
+                  "id": 0
+                }
+              ]
+            }
+          },
+          "conditions": {
+            "1": {
+              "itemInfoMap": {},
+              "strings": [],
+              "sourceStateID": 3
+            }
+          }
+        }
+      },
+      "collider": {
+        "shape": {
+          "radius": 0.3,
+          "random": {
+            "seed": 1544047444273,
+            "nextNextGaussian": 0.0,
+            "haveNextNextGaussian": false
+          }
+        },
+        "position": {
+          "translation": {
+            "t": [
+              0.25,
+              0.0,
+              0.0
+            ]
+          },
+          "rotation": {
+            "q": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "scale": 0.003
+        },
+        "offset": {
+          "translation": {
+            "t": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "rotation": {
+            "q": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "scale": 1.0
+        },
+        "enabled": true
+      },
+      "drawable": {
+        "textureName": "bigmax.jpg",
+        "modelName": "bigmax.obj",
+        "enabled": true
+      },
+      "geom": {
+        "translation": {
+          "t": [
+            0.25,
+            0.0,
+            0.0
+          ]
+        },
+        "rotation": {
+          "q": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        "scale": 0.003
+      },
+      "identifiable": {
+        "name": "white",
+        "id": 2,
+        "parentID": 0,
+        "sceneID": 0
+      },
+      "enabled": false
+    }
+  }
+}

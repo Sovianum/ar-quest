@@ -1,10 +1,15 @@
 package com.google.ar.core.examples.java.helloar.quest.game;
 
+import android.content.Context;
+
 import com.google.ar.core.Pose;
 import com.google.ar.core.examples.java.helloar.App;
 import com.google.ar.core.examples.java.helloar.GameModule;
+import com.google.ar.core.examples.java.helloar.common.CollectionUtils;
 import com.google.ar.core.examples.java.helloar.core.ar.collision.Collider;
+import com.google.ar.core.examples.java.helloar.core.ar.collision.shape.Shape;
 import com.google.ar.core.examples.java.helloar.core.ar.collision.shape.Sphere;
+import com.google.ar.core.examples.java.helloar.core.ar.drawable.IDrawable;
 import com.google.ar.core.examples.java.helloar.core.ar.drawable.TextureDrawable;
 import com.google.ar.core.examples.java.helloar.core.game.Action;
 import com.google.ar.core.examples.java.helloar.core.game.InteractionArgument;
@@ -13,12 +18,27 @@ import com.google.ar.core.examples.java.helloar.core.game.InteractiveObject;
 import com.google.ar.core.examples.java.helloar.core.game.Item;
 import com.google.ar.core.examples.java.helloar.core.game.ItemlessAction;
 import com.google.ar.core.examples.java.helloar.core.game.Place;
-import com.google.ar.core.examples.java.helloar.common.CollectionUtils;
+import com.google.ar.core.examples.java.helloar.core.game.script.ActionCondition;
+import com.google.ar.core.examples.java.helloar.core.game.script.ObjectState;
+import com.google.ar.core.examples.java.helloar.core.game.script.ScriptAction;
 import com.google.ar.core.examples.java.helloar.core.game.slot.Slot;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import javax.inject.Inject;
@@ -32,6 +52,9 @@ public class QuestModule {
     @Inject
     GameModule gameModule;
 
+    @Inject
+    Context context;
+
     @Provides
     @Singleton
     public QuestModule provideQuestModule() {
@@ -39,19 +62,251 @@ public class QuestModule {
         return this;
     }
 
-    public Place getInteractionDemoPlace() {
-        InteractiveObject andy = new InteractiveObject(1, "andy", "andy", true);
+    public Place getNewStyleInteractionDemoPlaceFromScript() {
+        InputStream in;
+        try {
+            in = context.getAssets().open("scripts/inter_place.json");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        Reader reader = new InputStreamReader(in);
+
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.registerTypeAdapter(
+                Shape.class,
+                new JsonDeserializer<Shape>() {
+                    @Override
+                    public Shape deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+                        return new Sphere(
+                                json.getAsJsonObject().get("radius").getAsFloat()
+                        );
+                    }
+                }
+        );
+        gsonBuilder.registerTypeAdapter(
+                IDrawable.class,
+                new JsonDeserializer<IDrawable>() {
+                    @Override
+                    public IDrawable deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+                        JsonObject jsonObject = json.getAsJsonObject();
+                        return new TextureDrawable(
+                                jsonObject.get("modelName").getAsString(),
+                                jsonObject.get("textureName").getAsString()
+                        );
+                    }
+                }
+        );
+        gsonBuilder.registerTypeAdapter(
+                Item.class,
+                new JsonDeserializer<Item>() {
+                    @Override
+                    public Item deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+                        JsonObject jsonObject = json.getAsJsonObject();
+                        Item item = new Item(
+                                jsonObject.get("id").getAsInt(),
+                                jsonObject.get("name").getAsString(),
+                                jsonObject.get("description").getAsString(),
+                                jsonObject.get("modelName").getAsString(),
+                                jsonObject.get("textureName").getAsString()
+                        );
+                        item.getGeom().setScale(jsonObject.get("geom").getAsJsonObject().get("scale").getAsFloat());
+                        return item;
+                    }
+                }
+        );
+
+        Gson gson = gsonBuilder.create();
+        Place place = gson.fromJson(reader, Place.class);
+
+        for (Map.Entry<Integer, InteractiveObject> entry : place.getInteractiveObjects().entrySet()) {
+            InteractiveObject obj = entry.getValue();
+            obj.setAction(obj.getActionFromStates());
+        }
+
+        return place;
+    }
+
+    public Place getNewStyleInteractionDemoPlace() {
+        final Item rose = new Item(20, "rose", "rose","rose.obj", "rose.jpg");
+        rose.getGeom().setScale(0.001f);
+        final Item banana = new Item(10, "banana", "banana","banana.obj", "banana.jpg");
+        banana.getGeom().setScale(0.001f);
+
+        InteractiveObject andy = new InteractiveObject(
+                1, "andy", "andy",
+                CollectionUtils.singleItemList(rose)
+        );
         andy.setDrawable(new TextureDrawable("andy.obj", "andy.png"));
         andy.getGeom().apply(Pose.makeTranslation(0, 0, -0.5f));
         andy.setCollider(new Collider(new Sphere(0.3f)));
 
-        final InteractiveObject whiteGuy = new InteractiveObject(2, "white", "white", false);
+        ObjectState andyState1 = new ObjectState(1, true);
+        andyState1.setActions(CollectionUtils.listOf(
+                new ScriptAction(
+                        1,
+                        CollectionUtils.listOf(
+                                InteractionResult.messageResult("Возьми поесть у белого человека"),
+                                InteractionResult.transitionsResult(
+                                        CollectionUtils.listOf(
+                                                new ScriptAction.StateTransition(1, 2),
+                                                new ScriptAction.StateTransition(2, 1)
+                                        )
+                                )
+                        )
+                )
+        ));
+        andyState1.setConditions(ActionCondition.makeConditionMap(
+                CollectionUtils.singleItemList(1),
+                CollectionUtils.singleItemList(
+                        new ActionCondition(1)
+                )
+        ));
+
+        ObjectState andyState2 = new ObjectState(2, false);
+        andyState2.setActions(CollectionUtils.listOf(
+                new ScriptAction(
+                        1,
+                        CollectionUtils.listOf(
+                                InteractionResult.messageResult("Отблагодари белого человека"),
+                                InteractionResult.newItemsResult(new Slot.RepeatedItem(rose)),
+                                InteractionResult.takeItemsResult(new Slot.RepeatedItem(banana)),
+                                InteractionResult.transitionsResult(
+                                        CollectionUtils.listOf(
+                                                new ScriptAction.StateTransition(1, 3)
+                                        )
+                                )
+                        )
+                )
+        ));
+        andyState2.setConditions(ActionCondition.makeConditionMap(
+                CollectionUtils.singleItemList(1),
+                CollectionUtils.singleItemList(
+                        new ActionCondition(
+                                CollectionUtils.singleItemList(
+                                        new ActionCondition.ItemInfo(banana.getId(), 1)
+                                ),
+                                2
+                        )
+                )
+        ));
+
+        ObjectState andyState3 = new ObjectState(3, false);
+        andyState3.setActions(CollectionUtils.listOf(
+                new ScriptAction(
+                        1,
+                        CollectionUtils.listOf(
+                                InteractionResult.messageResult("Мне нечего тебе сказать")
+                        )
+                )
+        ));
+        andyState3.setConditions(ActionCondition.makeConditionMap(
+                CollectionUtils.singleItemList(1),
+                CollectionUtils.singleItemList(new ActionCondition(3))
+        ));
+
+        andy.setStates(CollectionUtils.listOf(andyState1, andyState2, andyState3));
+
+
+        final InteractiveObject whiteGuy = new InteractiveObject(
+                2, "white", "white",
+                CollectionUtils.singleItemList(banana)
+        );
         whiteGuy.setDrawable(new TextureDrawable("bigmax.obj", "bigmax.jpg"));
-        whiteGuy.getGeom().apply(Pose.makeTranslation(2.5f, 0, -0.5f)).setScale(0.003f);
+        whiteGuy.getGeom().apply(Pose.makeTranslation(0.25f, 0, 0f)).setScale(0.003f);
         whiteGuy.setCollider(new Collider(new Sphere(0.3f)));
+        whiteGuy.setStates(CollectionUtils.listOf(ObjectState.enableObjectState(0, true, false)));
+
+        ObjectState guyState0 = new ObjectState(0, true);
+        guyState0.setEnabled(false);
+
+        ObjectState guyState1 = new ObjectState(1, false);
+        guyState1.setActions(CollectionUtils.listOf(
+                new ScriptAction(
+                        1,
+                        CollectionUtils.listOf(
+                                InteractionResult.newItemsResult(new Slot.RepeatedItem(banana)),
+                                InteractionResult.messageResult("Дай ему поесть"),
+                                InteractionResult.transitionsResult(CollectionUtils.listOf(
+                                        new ScriptAction.StateTransition(2, 2)
+                                ))
+                        )
+                )
+        ));
+        guyState1.setConditions(ActionCondition.makeConditionMap(
+                CollectionUtils.listOf(1),
+                CollectionUtils.listOf(new ActionCondition(1))
+        ));
+
+        ObjectState guyState2= new ObjectState(2, false);
+        guyState2.setActions(CollectionUtils.listOf(
+                new ScriptAction(
+                        1,
+                        CollectionUtils.listOf(
+                                InteractionResult.messageResult("Да за кого он меня принимает?!"),
+                                InteractionResult.transitionsResult(CollectionUtils.listOf(
+                                        new ScriptAction.StateTransition(2, 3)
+                                ))
+                        )
+                )
+        ));
+        guyState2.setConditions(ActionCondition.makeConditionMap(
+                CollectionUtils.listOf(1),
+                CollectionUtils.listOf(new ActionCondition(
+                        CollectionUtils.listOf(
+                                new ActionCondition.ItemInfo(rose.getId(), 1)
+                        ),
+                        2
+                ))
+        ));
+
+        ObjectState guyState3 = new ObjectState(3, false);
+        guyState3.setActions(CollectionUtils.listOf(
+                new ScriptAction(
+                        1,
+                        CollectionUtils.listOf(
+                                InteractionResult.messageResult("Ммм?")
+                        )
+                )
+        ));
+        guyState3.setConditions(ActionCondition.makeConditionMap(
+                CollectionUtils.listOf(1),
+                CollectionUtils.listOf(new ActionCondition(3))
+        ));
+
+        whiteGuy.setStates(CollectionUtils.listOf(guyState0, guyState1, guyState2, guyState3));
+
+        andy.setAction(andy.getActionFromStates());
+        whiteGuy.setAction(whiteGuy.getActionFromStates());
+        Place place = new Place();
+        place.loadInteractiveObjects(CollectionUtils.listOf(andy, whiteGuy));
+
+        return place;
+    }
+
+    public Place getInteractionDemoPlace() {
+        final Item rose = new Item(20, "rose", "rose","rose.obj", "rose.jpg");
+        final Item banana = new Item(10, "banana", "banana","banana.obj", "banana.jpg");
+
+        InteractiveObject andy = new InteractiveObject(
+                1, "andy", "andy",
+                CollectionUtils.singleItemList(rose)
+        );
+        andy.setDrawable(new TextureDrawable("andy.obj", "andy.png"));
+        andy.getGeom().apply(Pose.makeTranslation(0, 0, 0f));
+        andy.setCollider(new Collider(new Sphere(0.3f)));
+        andy.setStates(CollectionUtils.listOf(ObjectState.enableObjectState(0, true, true)));
+
+        final InteractiveObject whiteGuy = new InteractiveObject(
+                2, "white", "white",
+                CollectionUtils.singleItemList(banana)
+        );
+        whiteGuy.setDrawable(new TextureDrawable("bigmax.obj", "bigmax.jpg"));
+        whiteGuy.getGeom().apply(Pose.makeTranslation(0.25f, 0, 0f)).setScale(0.003f);
+        whiteGuy.setCollider(new Collider(new Sphere(0.3f)));
+        whiteGuy.setStates(CollectionUtils.listOf(ObjectState.enableObjectState(0, true, false)));
 
         andy.setAction(new Action() {
-            private final Item rose = new Item(20, "rose", "rose","rose.obj", "rose.jpg");
             private final List<Collection<InteractionResult>> resultTransitions = getResultTransitions();
             private int cnt = 0;
 
@@ -68,18 +323,13 @@ public class QuestModule {
                         Item innerItem = item.getItem();
                         if (innerItem != null && Objects.equals(innerItem.getName(), "banana")) {
                             item.getItem().setEnabled(false);
-                            gameModule.getCurrentInventory().remove(10);
+                            gameModule.getCurrentInventory().removeAll(10);
                             return resultTransitions.get(cnt++);
                         }
                     }
-                    return CollectionUtils.singleItemCollection(new InteractionResult(InteractionResult.Type.MESSAGE, "Где еда?"));
+                    return CollectionUtils.singleItemList(InteractionResult.messageResult("Где еда?"));
                 }
-                return CollectionUtils.singleItemCollection(new InteractionResult(InteractionResult.Type.MESSAGE, "Мне нечего тебе сказать"));
-            }
-
-            @Override
-            public Collection<Item> getItems() {
-                return CollectionUtils.singleItemCollection(rose);
+                return CollectionUtils.singleItemList(InteractionResult.messageResult("Мне нечего тебе сказать"));
             }
 
             private List<Collection<InteractionResult>> getResultTransitions() {
@@ -87,8 +337,7 @@ public class QuestModule {
 
                 Collection<InteractionResult> transition1 = new ArrayList<>();
                 transition1.add(
-                        new InteractionResult(
-                                InteractionResult.Type.MESSAGE,
+                        InteractionResult.messageResult(
                                 "Возьми поесть у белого человека"
                         )
                 );
@@ -96,14 +345,12 @@ public class QuestModule {
 
                 Collection<InteractionResult> transition2 = new ArrayList<>();
                 transition2.add(
-                        new InteractionResult(
-                                InteractionResult.Type.MESSAGE,
+                        InteractionResult.messageResult(
                                 "Отблагодари белого человека"
                         )
                 );
                 transition2.add(
-                        new InteractionResult(
-                                InteractionResult.Type.NEW_ITEMS,
+                        InteractionResult.newItemsResult(
                                 new Slot.RepeatedItem(rose)
                         )
                 );
@@ -114,7 +361,6 @@ public class QuestModule {
         });
 
         whiteGuy.setAction(new Action() {
-            private final Item banana = new Item(10, "banana", "banana","banana.obj", "banana.jpg");
             private final List<Collection<InteractionResult>> transitions = getResultTransitions();
             private int cnt = 0;
 
@@ -128,17 +374,12 @@ public class QuestModule {
                     for (Slot.RepeatedItem item : argument.getItems()) {
                         if (item.getItem().getName().equals("rose")) {
                             item.getItem().setEnabled(false);
-                            gameModule.getCurrentInventory().remove(20);
+                            gameModule.getCurrentInventory().removeAll(20);
                             return transitions.get(cnt++);
                         }
                     }
                 }
-                return CollectionUtils.singleItemCollection(new InteractionResult(InteractionResult.Type.MESSAGE, "Ммм?"));
-            }
-
-            @Override
-            public Collection<Item> getItems() {
-                return CollectionUtils.singleItemCollection(banana);
+                return CollectionUtils.singleItemList(InteractionResult.messageResult("Ммм?"));
             }
 
             private List<Collection<InteractionResult>> getResultTransitions() {
@@ -146,14 +387,12 @@ public class QuestModule {
 
                 Collection<InteractionResult> transition1 = new ArrayList<>();
                 transition1.add(
-                        new InteractionResult(
-                                InteractionResult.Type.MESSAGE,
+                        InteractionResult.messageResult(
                                 "Дай ему поесть"
                         )
                 );
                 transition1.add(
-                        new InteractionResult(
-                                InteractionResult.Type.NEW_ITEMS,
+                        InteractionResult.newItemsResult(
                                 new Slot.RepeatedItem(banana)
                         )
                 );
@@ -161,8 +400,7 @@ public class QuestModule {
 
                 Collection<InteractionResult> transition2 = new ArrayList<>();
                 transition2.add(
-                        new InteractionResult(
-                                InteractionResult.Type.MESSAGE,
+                        InteractionResult.messageResult(
                                 "Да за кого он меня принимает?!"
                         )
                 );
@@ -181,13 +419,24 @@ public class QuestModule {
     }
 
     public Place getAppearenceDemoPlace() {
-        InteractiveObject andy = new InteractiveObject(1, "andy", "andy", true);
+        InteractiveObject andy = new InteractiveObject(
+                1, "andy", "andy"
+
+        );
         andy.setDrawable(new TextureDrawable("andy.obj", "andy.png"));
         andy.getGeom().apply(Pose.makeTranslation(0, 0, 0f));
         andy.setCollider(new Collider(new Sphere(0.3f)));
+        andy.setStates(CollectionUtils.listOf(ObjectState.enableObjectState(0, true, true)));
 
-        final InteractiveObject rose = new InteractiveObject(2, "rose", "rose", false);
-        final InteractiveObject banana = new InteractiveObject(3, "banana", "banana", false);
+        final InteractiveObject rose = new InteractiveObject(
+                2, "rose", "rose"
+        );
+        rose.setStates(CollectionUtils.listOf(ObjectState.enableObjectState(0, true, false)));
+
+        final InteractiveObject banana = new InteractiveObject(
+                3, "banana", "banana"
+        );
+        banana.setStates(CollectionUtils.listOf(ObjectState.enableObjectState(0, true, false)));
 
 
         andy.setAction(new Action() {
@@ -198,25 +447,16 @@ public class QuestModule {
                 rose.setEnabled(true);
                 Collection<InteractionResult> results = new ArrayList<>();
                 results.add(
-                        new InteractionResult(
-                                InteractionResult.Type.MESSAGE,
+                        InteractionResult.messageResult(
                                 "You interacted andy; now rose is available"
                         )
                 );
                 results.add(
-                        new InteractionResult(
-                                InteractionResult.Type.NEW_ITEMS,
-                                "Andy presented you a toy",
+                        InteractionResult.newItemsResult(
                                 new Slot.RepeatedItem(toy)
                         )
                 );
                 return results;
-            }
-
-            @Override
-            public Collection<Item> getItems() {
-                toy.getGeom().setScale(0.001f);
-                return CollectionUtils.singleItemCollection(toy);
             }
         });
 
@@ -228,8 +468,7 @@ public class QuestModule {
             @Override
             public Collection<InteractionResult> act(InteractionArgument argument) {
                 banana.setEnabled(true);
-                return CollectionUtils.singleItemCollection(new InteractionResult(
-                        InteractionResult.Type.MESSAGE,
+                return CollectionUtils.singleItemList(InteractionResult.messageResult(
                         "You interacted rose; now banana is available"
                 ));
             }
@@ -242,8 +481,7 @@ public class QuestModule {
         banana.setAction(new ItemlessAction() {
             @Override
             public Collection<InteractionResult> act(InteractionArgument argument) {
-                return CollectionUtils.singleItemCollection(new InteractionResult(
-                        InteractionResult.Type.MESSAGE,
+                return CollectionUtils.singleItemList(InteractionResult.messageResult(
                         "You interacted banana"
                 ));
             }
