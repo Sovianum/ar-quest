@@ -1,8 +1,10 @@
 package com.google.ar.core.examples.java.helloar;
 
 import com.google.ar.core.Pose;
+import com.google.ar.core.examples.java.helloar.core.ar.Scene;
 import com.google.ar.core.examples.java.helloar.core.ar.collision.Collider;
 import com.google.ar.core.examples.java.helloar.core.ar.collision.shape.Sphere;
+import com.google.ar.core.examples.java.helloar.core.game.Place;
 import com.google.ar.core.examples.java.helloar.core.game.journal.Journal;
 import com.google.ar.core.examples.java.helloar.core.game.slot.Slot;
 import com.google.ar.core.examples.java.helloar.quest.game.ActorPlayer;
@@ -23,7 +25,7 @@ public class GameModule {
     private PlacesStorage placesStorage;
     private Integer currentQuestId;
     private ActorPlayer player;
-
+    private Scene scene;
 
     public GameModule() {
         journals = new Journals();
@@ -32,6 +34,7 @@ public class GameModule {
 
         player = new ActorPlayer(Pose.makeTranslation(0, 0, -0.3f));
         player.setCollider(new Collider(new Sphere(0.05f)));
+        scene = new Scene();
     }
 
     @Provides
@@ -84,7 +87,24 @@ public class GameModule {
         return placesStorage.getPlaces(getCurrentQuestId());
     }
 
+    public Place getCurrentPlace() {
+        return player.getPlace();
+    }
+
+    public void setCurrentPlace(Place place) {
+        player.setPlace(place);
+
+    }
+
     public Integer getCurrentQuestId() {
         return currentQuestId;
+    }
+
+    public Scene getScene() {
+        return scene;
+    }
+
+    public void setScene(Scene scene) {
+        this.scene = scene;
     }
 }

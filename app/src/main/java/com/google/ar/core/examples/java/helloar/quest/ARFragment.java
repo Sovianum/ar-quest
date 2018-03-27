@@ -38,7 +38,6 @@ import com.google.ar.core.examples.java.helloar.PermissionHelper;
 import com.google.ar.core.examples.java.helloar.R;
 import com.google.ar.core.examples.java.helloar.common.CollectionUtils;
 import com.google.ar.core.examples.java.helloar.common.ContinuousAction;
-import com.google.ar.core.examples.java.helloar.core.ar.Scene;
 import com.google.ar.core.examples.java.helloar.core.ar.SceneObject;
 import com.google.ar.core.examples.java.helloar.core.ar.geom.Geom;
 import com.google.ar.core.examples.java.helloar.core.game.InteractionArgument;
@@ -115,9 +114,6 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
     private DisplayRotationHelper displayRotationHelper;
 
     private final BackgroundRenderer backgroundRenderer = new BackgroundRenderer();
-
-    private Scene scene;
-    private Place place;
     private RendererHelper rendererHelper;
 
     private View.OnClickListener toInventoryOnClickListener;
@@ -130,7 +126,7 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         @Override
         public void actualize() {
             if (needActualize) {
-                scene.getCollisions(gameModule.getPlayer().getCollider(), collidedObjects);
+                gameModule.getScene().getCollisions(gameModule.getPlayer().getCollider(), collidedObjects);
                 if (interact() == null) {   // user intended to release item
                     gameModule.getPlayer().release();
                 }
@@ -179,14 +175,15 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
         snackbarAction.startIfNotRunning();
 
+
         return view;
     }
 
-    public void setDecorations(Scene scene, Place place) {
-        this.scene = scene;
-        this.place = place;
-        gameModule.getPlayer().setPlace(place);
-        rendererHelper = new RendererHelper(scene);
+    public void setDecorations(Place place) {
+        rendererHelper = new RendererHelper(gameModule.getScene());
+        if (place != null) {
+            gameModule.setCurrentPlace(place);
+        }
     }
 
     public void setToInventoryOnClickListener(View.OnClickListener listener) {
@@ -245,6 +242,12 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
     }
 
     @Override
+    public void onStop() {
+        super.onStop();
+
+    }
+
+    @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (!PermissionHelper.hasPermissions(getActivity())) {
             Toast.makeText(getActivity(), "Camera permission is needed to run this application", Toast.LENGTH_LONG)
@@ -261,6 +264,10 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         backgroundRenderer.createOnGlThread(/*context=*/ getActivity());
 
         try {
+            Place place = gameModule.getCurrentPlace();
+            if (place == null) {
+                return;
+            }
             rendererHelper.allocateRenderers(getActivity(), place);
         } catch (IOException e) {
             Log.e(TAG, "Failed to read obj file");
@@ -295,15 +302,18 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
             Camera camera = frame.getCamera();
 
             if (camera.getTrackingState() == TrackingState.TRACKING) {
-                if (!scene.isLoaded()) {
+                if (!gameModule.getScene().isLoaded()) {
                     snackbarAction.startIfNotRunning();
                     Pose planeOrigin = getPlaneOrigin(frame);
                     if (planeOrigin != null) {
-                        scene.load(place.getAll(), planeOrigin);
+                        Place place = gameModule.getCurrentPlace();
+                        if (place != null) {
+                            gameModule.getScene().load(place.getAll(), planeOrigin);
+                        }
                     }
                 } else {
                     snackbarAction.stopIfRunning();
-                    scene.update(session);
+                    gameModule.getScene().update(session);
                 }
             }
 
@@ -315,7 +325,7 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
                 return;
             }
 
-            if (scene.isLoaded()) { // prevent drawing before scene loaded
+            if (gameModule.getScene().isLoaded()) { // prevent drawing before scene loaded
                 update(frame, camera);
             }
             interactor.actualize();
@@ -412,9 +422,13 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
     }
 
     private void update(Frame frame, Camera camera) {
+        Place place = gameModule.getCurrentPlace();
+        if (place == null) {
+            return;
+        }
         rendererHelper.renderScene(frame, camera, place);
         gameModule.getPlayer().update(camera.getPose());
-        Collection<SceneObject> collided = scene.getCollisions(gameModule.getPlayer().getCollider());
+        Collection<SceneObject> collided = gameModule.getScene().getCollisions(gameModule.getPlayer().getCollider());
         final InteractiveObject closest = getClosestInteractive(collided);
 
         Activity activity = getActivity();
@@ -519,6 +533,10 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
     }
 
     private InteractiveObject getClosestInteractive(Collection<SceneObject> objects) {
+        Place place = gameModule.getCurrentPlace();
+        if (place == null) {
+            return null;
+        }
         for (SceneObject object : objects) {
             InteractiveObject got = place.getInteractiveObject(object.getIdentifiable().getId());
             if (got != null) {

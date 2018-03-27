@@ -27,6 +27,11 @@ public class Scene extends Tree<SceneObject> {
         loaded = true;
     }
 
+    public void clear() {
+        loaded = false;
+        super.clear();
+    }
+
     // it is assumed that parent id is always less than child id
     public void load(final List<SceneObject> sceneObjects, Pose origin) {
         sceneObjects.sort(new Comparator<SceneObject>() {

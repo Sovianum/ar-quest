@@ -16,7 +16,6 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.ar.core.examples.java.helloar.auth.AuthActivity;
-import com.google.ar.core.examples.java.helloar.core.ar.Scene;
 import com.google.ar.core.examples.java.helloar.core.game.Item;
 import com.google.ar.core.examples.java.helloar.core.game.Place;
 import com.google.ar.core.examples.java.helloar.core.game.Player;
@@ -200,15 +199,13 @@ public class MainActivity extends AppCompatActivity {
         itemsListFragment = new ItemsListFragment();
         itemsListFragment.setOnItemClickListener(chooseItemOnClickListener);
 
-        Scene scene = new Scene();
-//        Place place = questModule.getInteractionDemoPlace();
         Place place = questModule.getNewStyleInteractionDemoPlaceFromScript();
 
         arFragment = new ARFragment();
         arFragment.setToInventoryOnClickListener(getSelectFragmentListener(itemsListFragment));
         arFragment.setToJournalOnClickListener(getSelectFragmentListener(journalFragment));
 
-        arFragment.setDecorations(scene, place);
+        arFragment.setDecorations(place);
     }
 
     @OnClick(R.id.auth_activity_btn)
