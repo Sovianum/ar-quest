@@ -21,10 +21,6 @@ public class Scene extends Tree<SceneObject> {
         anchorMap = new HashMap<>();
     }
 
-    public Map<Integer, Anchor> getAnchorMap() {
-        return anchorMap;
-    }
-
     // it is assumed that parent id is always less than child id
     public void load(final List<SceneObject> sceneObjects) {
         load(sceneObjects, Pose.IDENTITY);

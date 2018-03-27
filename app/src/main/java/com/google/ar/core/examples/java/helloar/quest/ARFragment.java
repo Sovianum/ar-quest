@@ -315,7 +315,9 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
                 return;
             }
 
-            update(frame, camera);
+            if (scene.isLoaded()) { // prevent drawing before scene loaded
+                update(frame, camera);
+            }
             interactor.actualize();
 
         } catch (Throwable t) {
