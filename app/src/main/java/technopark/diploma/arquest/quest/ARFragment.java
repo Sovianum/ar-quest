@@ -178,14 +178,9 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         interactionResultHandler = new InteractionResultHandler();
 
         snackbarAction.startIfNotRunning();
-        return view;
-    }
 
-    public void setDecorations(Place place) {
-        if (place != null) {
-            gameModule.setCurrentPlace(place);
-        }
         rendererHelper = new RendererHelper(gameModule, fileModule);
+        return view;
     }
 
     public void setToInventoryOnClickListener(View.OnClickListener listener) {
@@ -245,8 +240,12 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
     @Override
     public void onStop() {
+        try {
+            gameModule.saveCurrentState();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         super.onStop();
-
     }
 
     @Override

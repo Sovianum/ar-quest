@@ -1,6 +1,6 @@
 package technopark.diploma.arquest.core.game.slot;
 
-import technopark.diploma.arquest.core.ar.drawable.IDrawable;
+import technopark.diploma.arquest.core.ar.drawable.TextureDrawable;
 import technopark.diploma.arquest.core.game.Item;
 import technopark.diploma.arquest.common.CollectionUtils;
 
@@ -29,10 +29,10 @@ public class SingleItemSlot extends Slot {
     }
 
     @Override
-    public IDrawable getDrawable() {
+    public TextureDrawable getDrawable() {
         if (items.size() == 0) {
             return null;
         }
-        return CollectionUtils.first(items.values()).getItem();
+        return CollectionUtils.first(items.values()).getItem().getDrawable();
     }
 }

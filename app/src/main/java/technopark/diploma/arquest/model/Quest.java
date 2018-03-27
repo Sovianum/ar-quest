@@ -1,8 +1,5 @@
 package technopark.diploma.arquest.model;
 
-import android.location.Location;
-
-import technopark.diploma.arquest.core.game.Place;
 import com.google.common.collect.Lists;
 
 import java.util.Comparator;
@@ -10,13 +7,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import technopark.diploma.arquest.core.game.Place;
+
 public class Quest {
     private int id;
     private String title;
     private String description;
     private float rating;
     private Map<Integer, Place> placeMap;
-    private Map<Location, Integer> placeIdMap;
 
     public Quest(int id, String title, String description, float rating) {
         this.id = id;
@@ -24,12 +22,10 @@ public class Quest {
         this.description = description;
         this.rating = rating;
         placeMap = new HashMap<>();
-        placeIdMap = new HashMap<>();
     }
 
     public void addPlace(Place place) {
         placeMap.put(place.getId(), place);
-        placeIdMap.put(place.getLocation(), place.getId());
     }
 
     public int getId() {
@@ -50,10 +46,6 @@ public class Quest {
 
     public float getRating() {
         return rating;
-    }
-
-    public Map<Location, Integer> getPlaceIdMap() {
-        return placeIdMap;
     }
 
     public Map<Integer, Place> getPlaceMap() {

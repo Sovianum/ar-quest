@@ -12,7 +12,7 @@ public class Inventories {
         inventories = new HashMap<>();
     }
 
-    public void addInventory(Integer id, Slot inventory) {
+    public void setInventory(Integer id, Slot inventory) {
         inventories.put(id, inventory);
     }
 

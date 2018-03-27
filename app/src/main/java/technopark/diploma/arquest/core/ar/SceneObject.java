@@ -1,14 +1,14 @@
 package technopark.diploma.arquest.core.ar;
 
 import technopark.diploma.arquest.core.ar.collision.Collider;
-import technopark.diploma.arquest.core.ar.drawable.IDrawable;
+import technopark.diploma.arquest.core.ar.drawable.TextureDrawable;
 import technopark.diploma.arquest.core.ar.enabled.Enabled;
 import technopark.diploma.arquest.core.ar.geom.Geom;
 import technopark.diploma.arquest.core.ar.identifiable.Identifiable;
 
 public class SceneObject extends Enabled {
     private Collider collider;
-    private IDrawable drawable;
+    private TextureDrawable drawable;
     private Geom geom;
     private Identifiable identifiable;
 
@@ -25,11 +25,11 @@ public class SceneObject extends Enabled {
         this.collider.setPosition(this.geom);
     }
 
-    public IDrawable getDrawable() {
+    public TextureDrawable getDrawable() {
         return drawable;
     }
 
-    public void setDrawable(IDrawable drawable) {
+    public void setDrawable(TextureDrawable drawable) {
         this.drawable = drawable;
     }
 

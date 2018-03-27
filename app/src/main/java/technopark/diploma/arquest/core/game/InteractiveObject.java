@@ -1,18 +1,18 @@
 package technopark.diploma.arquest.core.game;
 
 
-import technopark.diploma.arquest.common.CollectionUtils;
-import technopark.diploma.arquest.core.ar.SceneObject;
-import technopark.diploma.arquest.core.ar.collision.Collider;
-import technopark.diploma.arquest.core.ar.drawable.IDrawable;
-import technopark.diploma.arquest.core.ar.identifiable.Identifiable;
-import technopark.diploma.arquest.core.game.script.ObjectState;
-import technopark.diploma.arquest.core.game.script.ScriptAction;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
+import technopark.diploma.arquest.common.CollectionUtils;
+import technopark.diploma.arquest.core.ar.SceneObject;
+import technopark.diploma.arquest.core.ar.collision.Collider;
+import technopark.diploma.arquest.core.ar.drawable.TextureDrawable;
+import technopark.diploma.arquest.core.ar.identifiable.Identifiable;
+import technopark.diploma.arquest.core.game.script.ObjectState;
+import technopark.diploma.arquest.core.game.script.ScriptAction;
 
 public class InteractiveObject extends SceneObject {
     private final int id;
@@ -113,7 +113,7 @@ public class InteractiveObject extends SceneObject {
 
     private void updateState(ObjectState state) {
         currentStateID = state.getId();
-        IDrawable drawable = getDrawable();
+        TextureDrawable drawable = getDrawable();
         if (drawable != null) {
             drawable.setEnabled(state.isVisible());
         }

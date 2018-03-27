@@ -1,9 +1,9 @@
 package technopark.diploma.arquest.storage;
 
-import technopark.diploma.arquest.core.game.journal.Journal;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import technopark.diploma.arquest.core.game.journal.Journal;
 
 public class Journals {
     private Map<Integer, Journal<String>> journals;
@@ -12,7 +12,7 @@ public class Journals {
         journals = new HashMap<>();
     }
 
-    public void addJournal(Integer id, Journal<String> journal) {
+    public void setJournal(Integer id, Journal<String> journal) {
         journals.put(id, journal);
     }
 

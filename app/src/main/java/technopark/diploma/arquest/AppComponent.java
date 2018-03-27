@@ -1,6 +1,9 @@
 package technopark.diploma.arquest;
 
 
+import javax.inject.Singleton;
+
+import dagger.Component;
 import technopark.diploma.arquest.auth.LoginFragment;
 import technopark.diploma.arquest.auth.RegistrationFragment;
 import technopark.diploma.arquest.network.NetworkModule;
@@ -16,10 +19,6 @@ import technopark.diploma.arquest.quest.place.PlacesAdapter;
 import technopark.diploma.arquest.quest.quests.QuestsListFragment;
 import technopark.diploma.arquest.storage.fs.FileModule;
 
-import javax.inject.Singleton;
-
-import dagger.Component;
-
 @Singleton
 @Component(modules = {
         GameModule.class, QuestModule.class,
@@ -27,6 +26,7 @@ import dagger.Component;
         CommonModule.class, FileModule.class,
 })
 public interface AppComponent {
+    void inject(GameModule gameModule);
     void inject(MainActivity activity);
     void inject(ARFragment fragment);
     void inject(QuestFragment fragment);

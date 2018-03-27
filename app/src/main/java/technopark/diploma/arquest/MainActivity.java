@@ -15,6 +15,14 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Toast;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
+import javax.inject.Inject;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import technopark.diploma.arquest.auth.AuthActivity;
 import technopark.diploma.arquest.core.game.Item;
 import technopark.diploma.arquest.core.game.Place;
@@ -29,14 +37,6 @@ import technopark.diploma.arquest.quest.items.ItemsListFragment;
 import technopark.diploma.arquest.quest.journal.JournalFragment;
 import technopark.diploma.arquest.quest.place.PlaceFragment;
 import technopark.diploma.arquest.quest.quests.QuestsListFragment;
-
-import java.io.FileNotFoundException;
-
-import javax.inject.Inject;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 public class MainActivity extends AppCompatActivity {
     private LocationListener onLocationChangeListener = new LocationListener() {
@@ -93,7 +93,12 @@ public class MainActivity extends AppCompatActivity {
     private QuestsListFragment.OnQuestReactor startQuestCallback = new QuestsListFragment.OnQuestReactor() {
         @Override
         public void onQuestReact(final Quest quest) {
-            gameModule.setCurrentQuest(quest);
+            try {
+                gameModule.loadQuestState(quest.getId());
+            } catch (IOException e) {
+                e.printStackTrace();
+                gameModule.setCurrentQuest(quest);
+            }
             gameModule.getScene().clear();
             MainActivity.this.runOnUiThread(new Runnable() {
                 @Override
@@ -124,6 +129,14 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+
+//        try {
+//            gameModule.setCurrentQuest(questModule.getQuests().get(0));
+//            gameModule.saveCurrentState();
+//            gameModule.loadQuestState(1);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
         // the order of calls below is important
         try {
@@ -198,13 +211,9 @@ public class MainActivity extends AppCompatActivity {
         itemsListFragment = new ItemsListFragment();
         itemsListFragment.setOnItemClickListener(chooseItemOnClickListener);
 
-        Place place = questModule.getNewStyleInteractionDemoPlaceFromScript();
-
         arFragment = new ARFragment();
         arFragment.setToInventoryOnClickListener(getSelectFragmentListener(itemsListFragment));
         arFragment.setToJournalOnClickListener(getSelectFragmentListener(journalFragment));
-
-        arFragment.setDecorations(place);
     }
 
     @OnClick(R.id.auth_activity_btn)

@@ -1,6 +1,15 @@
 package technopark.diploma.arquest;
 
 import com.google.ar.core.Pose;
+import com.google.gson.Gson;
+
+import java.io.IOException;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import dagger.Module;
+import dagger.Provides;
 import technopark.diploma.arquest.core.ar.Scene;
 import technopark.diploma.arquest.core.ar.collision.Collider;
 import technopark.diploma.arquest.core.ar.collision.shape.Sphere;
@@ -12,11 +21,8 @@ import technopark.diploma.arquest.model.Quest;
 import technopark.diploma.arquest.quest.game.ActorPlayer;
 import technopark.diploma.arquest.storage.Inventories;
 import technopark.diploma.arquest.storage.Journals;
-
-import javax.inject.Singleton;
-
-import dagger.Module;
-import dagger.Provides;
+import technopark.diploma.arquest.storage.fs.FileModule;
+import technopark.diploma.arquest.storage.fs.QuestDir;
 
 @Module
 public class GameModule {
@@ -25,6 +31,12 @@ public class GameModule {
     private ActorPlayer player;
     private Scene scene;
     private Quest currentQuest;
+
+    @Inject
+    Gson gson;
+
+    @Inject
+    FileModule fileModule;
 
     public GameModule() {
         journals = new Journals();
@@ -38,7 +50,8 @@ public class GameModule {
     @Provides
     @Singleton
     public GameModule provideGameModule() {
-        return new GameModule();
+        App.getAppComponent().inject(this);
+        return this;
     }
 
     public Quest getCurrentQuest() {
@@ -53,12 +66,50 @@ public class GameModule {
         this.currentQuest = currentQuest;
 
         if (journals.getJournal(currentQuest.getId()) == null) {
-            journals.addJournal(currentQuest.getId(), new Journal<String>());
+            journals.setJournal(currentQuest.getId(), new Journal<String>());
         }
 
         if (inventories.getInventory(currentQuest.getId()) == null) {
-            inventories.addInventory(currentQuest.getId(), new Slot(0, Player.INVENTORY, false));
+            inventories.setInventory(currentQuest.getId(), new Slot(0, Player.INVENTORY, false));
         }
+    }
+
+    public boolean saveCurrentState() throws IOException {
+        QuestDir questDir = fileModule.getQuestDir(currentQuest.getId());
+        questDir.saveJournal(getCurrentJournal(), gson);
+        questDir.saveInventory(getCurrentInventory(), gson);
+        questDir.saveQuestState(currentQuest, gson);
+        questDir.savePlayerState(player, gson);
+        return true;
+    }
+
+    public boolean loadQuestState(int questID) throws IOException {
+        QuestDir questDir = fileModule.getQuestDir(questID);
+        Journal<String> journalState = questDir.loadJournal(gson);
+        if (journalState == null) {
+            return false;
+        }
+
+        Slot inventoryState = questDir.loadInventory(gson);
+        if (inventoryState == null) {
+            return false;
+        }
+
+        Quest questState = questDir.loadQuestState(gson);
+        if (questState == null) {
+            return false;
+        }
+
+        ActorPlayer playerState = questDir.loadActorPlayer(gson);
+        if (playerState == null) {
+            return false;
+        }
+
+        journals.setJournal(questID, journalState);
+        inventories.setInventory(questID, inventoryState);
+        player = playerState;
+        currentQuest = questState;
+        return true;
     }
 
     public ActorPlayer getPlayer() {

@@ -2,7 +2,7 @@ package technopark.diploma.arquest.core.ar.drawable;
 
 import technopark.diploma.arquest.core.ar.enabled.Enabled;
 
-public class TextureDrawable extends Enabled implements IDrawable {
+public class TextureDrawable extends Enabled {
     private String textureName;
     private String modelName;
 
@@ -11,12 +11,10 @@ public class TextureDrawable extends Enabled implements IDrawable {
         this.modelName = modelName;
     }
 
-    @Override
     public String getTextureName() {
         return textureName;
     }
 
-    @Override
     public String getModelName() {
         return modelName;
     }

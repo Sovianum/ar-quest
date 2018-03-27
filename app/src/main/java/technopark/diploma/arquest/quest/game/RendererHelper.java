@@ -12,7 +12,7 @@ import java.util.Map;
 import technopark.diploma.arquest.GameModule;
 import technopark.diploma.arquest.core.ar.Scene;
 import technopark.diploma.arquest.core.ar.SceneObject;
-import technopark.diploma.arquest.core.ar.drawable.IDrawable;
+import technopark.diploma.arquest.core.ar.drawable.TextureDrawable;
 import technopark.diploma.arquest.core.game.Place;
 import technopark.diploma.arquest.rendering.ObjectRenderer;
 import technopark.diploma.arquest.storage.fs.FileModule;
@@ -59,7 +59,7 @@ public class RendererHelper {
         for (SceneObject sceneObject : place.getAll()) {
             String name = sceneObject.getIdentifiable().getName();
             if (!renderers.containsKey(name)) {
-                IDrawable drawable = sceneObject.getDrawable();
+                TextureDrawable drawable = sceneObject.getDrawable();
                 ObjectRenderer objectRenderer = new ObjectRenderer();
                 objectRenderer.setMaterialProperties(0.0f, 3.5f, 1.0f, 6.0f);
                 QuestDir questDir = fileModule.getQuestDir(gameModule.getCurrentQuest().getId());

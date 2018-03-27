@@ -2,12 +2,12 @@ package technopark.diploma.arquest.core.game;
 
 import android.location.Location;
 
-import technopark.diploma.arquest.core.ar.SceneObject;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import technopark.diploma.arquest.core.ar.SceneObject;
 
 public class Place {
     private int id;
@@ -17,7 +17,7 @@ public class Place {
     private Location location;
 
     public Place() {
-        interactiveObjects = new HashMap<>();
+        this(0, "", "");
     }
 
     public Place(int id, String name, String description) {
@@ -51,6 +51,9 @@ public class Place {
     }
 
     public void setLocation(Location location) {
+        if (location == null) {
+            return;
+        }
         this.location = location;
     }
 

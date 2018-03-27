@@ -3,6 +3,8 @@ package technopark.diploma.arquest.storage.fs;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import com.google.common.io.ByteStreams;
+import com.google.common.io.Files;
 import com.google.gson.Gson;
 
 import java.io.File;
@@ -20,6 +22,7 @@ import de.javagl.obj.ObjReader;
 import technopark.diploma.arquest.core.game.journal.Journal;
 import technopark.diploma.arquest.core.game.slot.Slot;
 import technopark.diploma.arquest.model.Quest;
+import technopark.diploma.arquest.quest.game.ActorPlayer;
 
 public class QuestDir extends File {
     public static final String ASSETS_DIR = "assets";
@@ -28,6 +31,7 @@ public class QuestDir extends File {
     public static final String JOURNAL_SAVE = "journal.json";
     public static final String INVENTORY_SAVE = "inventory.json";
     public static final String QUEST_SAVE = "quest.json";
+    public static final String PLAYER_SAVE = "player.json";
 
     private File saveDir;
     private File assetDir;
@@ -81,14 +85,22 @@ public class QuestDir extends File {
     }
 
     public Quest loadQuest(Gson gson) throws FileNotFoundException {
-        return readFromJson(Quest.class, this, SCRIPT_NAME, gson);
+        return readFromJson(Quest.class, this, QUEST_SAVE, gson);
     }
 
-    public void saveQuestSave(Quest quest, Gson gson) throws IOException {
+    public void savePlayerState(ActorPlayer player, Gson gson) throws IOException {
+        writeToJson(player, saveDir, PLAYER_SAVE, gson);
+    }
+
+    public ActorPlayer loadActorPlayer(Gson gson) throws FileNotFoundException {
+        return readFromJson(ActorPlayer.class, saveDir, PLAYER_SAVE, gson);
+    }
+
+    public void saveQuestState(Quest quest, Gson gson) throws IOException {
         writeToJson(quest, saveDir, QUEST_SAVE, gson);
     }
 
-    public Quest loadQuestSave(Gson gson) throws FileNotFoundException {
+    public Quest loadQuestState(Gson gson) throws FileNotFoundException {
         return readFromJson(Quest.class, saveDir, QUEST_SAVE, gson);
     }
 
@@ -114,17 +126,23 @@ public class QuestDir extends File {
             return null;
         }
         InputStream in = new FileInputStream(file);
+
         Reader reader = new InputStreamReader(in);
         return gson.fromJson(reader, klass);
     }
 
     private <T> void writeToJson(T obj, File parent, String name, Gson gson) throws IOException {
         File file = new File(parent, name);
-        OutputStream out = new FileOutputStream(file);
-        out.write(gson.toJson(obj).getBytes());
+        Files.write(gson.toJson(obj).getBytes(), file);
     }
 
     private static String getAssetFullName(String name) {
         return ASSETS_DIR + "/" + name;
+    }
+
+    private String getSaveFileContent(String name) throws IOException {
+        File file = new File(saveDir, name);
+        InputStream in = new FileInputStream(file);
+        return new String(ByteStreams.toByteArray(in));
     }
 }
