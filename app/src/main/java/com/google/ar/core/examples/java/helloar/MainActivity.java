@@ -6,13 +6,15 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.ar.core.examples.java.helloar.auth.AuthActivity;
@@ -40,7 +42,6 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 public class MainActivity extends AppCompatActivity {
     private LocationListener onLocationChangeListener = new LocationListener() {
@@ -65,11 +66,8 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    @BindView(R.id.ar_fragment_btn)
-    Button toQuestFragmentButton;
-
-    @BindView(R.id.auth_activity_btn)
-    Button toAuthActivityButton;
+    @BindView(R.id.bottom_navigation)
+    BottomNavigationView bottomNavigationView;
 
     private QuestsListFragment questsListFragment;
     private ARFragment arFragment;
@@ -123,7 +121,24 @@ public class MainActivity extends AppCompatActivity {
         questsListFragment = new QuestsListFragment();
         questsListFragment.setOnItemClickListener(toQuestItemOnClickListener);
 
-        toQuestFragmentButton.setOnClickListener(getSelectFragmentListener(arFragment));
+        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+
+                switch (item.getItemId()) {
+                    case R.id.action_quests:
+                        selectFragment(questsListFragment, QuestsListFragment.TAG, false);
+                        break;
+                    case R.id.action_current_quest:
+                        selectFragment(questFragment, QuestFragment.TAG, false);
+                        break;
+                    case R.id.action_ar:
+                        selectFragment(arFragment, ARFragment.TAG, false);
+                        break;
+                }
+                return false;
+            }
+        });
 
         startService(new Intent(this, GeolocationService.class));
 
@@ -174,6 +189,7 @@ public class MainActivity extends AppCompatActivity {
         questFragment.setOnJournalClickListener(getSelectFragmentListener(journalFragment));
         questFragment.setOnItemClickListener(chooseItemOnClickListener);
         questFragment.setOnPlacesClickListener(getSelectFragmentListener(placeFragment));
+        questFragment.setOnInventoryClickListener(getSelectFragmentListener(itemsListFragment));
     }
 
     private void setUpGameModule() {
@@ -208,7 +224,6 @@ public class MainActivity extends AppCompatActivity {
         arFragment.setDecorations(place);
     }
 
-    @OnClick(R.id.auth_activity_btn)
     public void goToAuthActivity(View v) {
         Intent intent = new Intent(this, AuthActivity.class);
         startActivity(intent);

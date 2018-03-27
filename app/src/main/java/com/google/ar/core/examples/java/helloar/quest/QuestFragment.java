@@ -39,6 +39,9 @@ public class QuestFragment extends Fragment {
     @BindView(R.id.journal_txt)
     TextView journalText;
 
+    @BindView(R.id.inventory_txt)
+    TextView inventoryText;
+
     @BindView(R.id.places_txt)
     TextView placesText;
 
@@ -60,6 +63,7 @@ public class QuestFragment extends Fragment {
     private View.OnClickListener onARModeBtnClickListener;
     private View.OnClickListener onJournalClickListener;
     private View.OnClickListener onPlacesClickListener;
+    private View.OnClickListener onInventoryClickListener;
 
     private ItemAdapter itemAdapter;
     private PlacesAdapter placesAdapter;
@@ -86,6 +90,9 @@ public class QuestFragment extends Fragment {
             placesText.setOnClickListener(onPlacesClickListener);
         }
         refreshLastJournalRecord();
+        if (onInventoryClickListener != null) {
+            inventoryText.setOnClickListener(onInventoryClickListener);
+        }
 
         LinearLayoutManager manager = new LinearLayoutManager(getActivity());
         recyclerViewItems.setLayoutManager(manager);
@@ -126,6 +133,14 @@ public class QuestFragment extends Fragment {
             placesText.setOnClickListener(onPlacesClickListener);
         }
     }
+
+    public void setOnInventoryClickListener(View.OnClickListener listener) {
+        this.onInventoryClickListener = listener;
+        if (inventoryText != null) {
+            inventoryText.setOnClickListener(onInventoryClickListener);
+        }
+    }
+
 
     public void refreshLastJournalRecord() {
         final Journal<String> journal = gameModule.getCurrentJournal();

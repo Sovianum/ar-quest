@@ -49,6 +49,11 @@
     <string name="show_more_str"><u>Подробнее</u></string>
     <string name="hide_str"><u>Скрыть</u></string>
 
+    <string name="ar_menu_bottom_str">AR</string>
+    <string name="quest_menu_bottom_str">Квесты</string>
+    <string name="current_quest_menu_bottom_str">Текущий</string>
+    <string name="settings_menu_bottom_str">Настройки</string>
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="interact_str">Act</string>
