@@ -3,9 +3,6 @@ package technopark.diploma.arquest.storage.fs;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
-import technopark.diploma.arquest.core.game.journal.Journal;
-import technopark.diploma.arquest.core.game.slot.Slot;
-import technopark.diploma.arquest.model.Quest;
 import com.google.gson.Gson;
 
 import java.io.File;
@@ -20,6 +17,9 @@ import java.io.Reader;
 
 import de.javagl.obj.Obj;
 import de.javagl.obj.ObjReader;
+import technopark.diploma.arquest.core.game.journal.Journal;
+import technopark.diploma.arquest.core.game.slot.Slot;
+import technopark.diploma.arquest.model.Quest;
 
 public class QuestDir extends File {
     public static final String ASSETS_DIR = "assets";
@@ -35,6 +35,8 @@ public class QuestDir extends File {
     public QuestDir(File parent, int id) throws IOException {
         super(parent, String.valueOf(id));
         if (exists()) {
+            assetDir = new File(this, ASSETS_DIR);
+            saveDir = new File(this, SAVE_DIR);
             return;
         }
         if (!mkdir()) {

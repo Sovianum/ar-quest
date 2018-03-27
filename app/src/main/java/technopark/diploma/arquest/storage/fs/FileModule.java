@@ -32,6 +32,10 @@ public class FileModule {
         }
     }
 
+    public boolean clear() {
+        return clear(questsDir);
+    }
+
     // gets or creates quest data directory
     public QuestDir getQuestDir(int questID) throws IOException {
         return new QuestDir(questsDir, questID);
@@ -39,5 +43,35 @@ public class FileModule {
 
     public boolean hasQuestInfo(int questID) {
         return new File(questsDir, String.valueOf(questID)).exists();
+    }
+
+    private static boolean clear(File directory) {
+        if (directory == null) {
+            return false;
+        }
+        if (!directory.exists()) {
+            return true;
+        }
+        if (!directory.isDirectory()) {
+            return directory.delete();
+        }
+
+        String[] list = directory.list();
+
+        if (list != null) {
+            for (String aList : list) {
+                File entry = new File(directory, aList);
+                if (entry.isDirectory()) {
+                    if (!clear(entry)) {
+                        return false;
+                    }
+                } else {
+                    if (!entry.delete()) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return directory.delete();
     }
 }

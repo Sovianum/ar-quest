@@ -31,6 +31,23 @@ import com.google.ar.core.Pose;
 import com.google.ar.core.Session;
 import com.google.ar.core.Trackable;
 import com.google.ar.core.TrackingState;
+import com.google.ar.core.exceptions.UnavailableApkTooOldException;
+import com.google.ar.core.exceptions.UnavailableArcoreNotInstalledException;
+import com.google.ar.core.exceptions.UnavailableSdkTooOldException;
+import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL10;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import technopark.diploma.arquest.App;
 import technopark.diploma.arquest.DisplayRotationHelper;
 import technopark.diploma.arquest.GameModule;
@@ -50,23 +67,7 @@ import technopark.diploma.arquest.quest.game.DeferredClickListener;
 import technopark.diploma.arquest.quest.game.InteractionResultHandler;
 import technopark.diploma.arquest.quest.game.RendererHelper;
 import technopark.diploma.arquest.rendering.BackgroundRenderer;
-import com.google.ar.core.exceptions.UnavailableApkTooOldException;
-import com.google.ar.core.exceptions.UnavailableArcoreNotInstalledException;
-import com.google.ar.core.exceptions.UnavailableSdkTooOldException;
-import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.opengles.GL10;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import technopark.diploma.arquest.storage.fs.FileModule;
 
 public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
     public static final String TAG = ARFragment.class.getSimpleName();
@@ -89,6 +90,9 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
     @Inject
     GameModule gameModule;
+
+    @Inject
+    FileModule fileModule;
 
     ContinuousAction snackbarAction = new ContinuousAction(
             new Runnable() {
@@ -174,16 +178,14 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         interactionResultHandler = new InteractionResultHandler();
 
         snackbarAction.startIfNotRunning();
-
-
         return view;
     }
 
     public void setDecorations(Place place) {
-        rendererHelper = new RendererHelper(gameModule.getScene());
         if (place != null) {
             gameModule.setCurrentPlace(place);
         }
+        rendererHelper = new RendererHelper(gameModule, fileModule);
     }
 
     public void setToInventoryOnClickListener(View.OnClickListener listener) {

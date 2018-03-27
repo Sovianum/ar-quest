@@ -4,15 +4,19 @@ import android.content.Context;
 
 import com.google.ar.core.Camera;
 import com.google.ar.core.Frame;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import technopark.diploma.arquest.GameModule;
 import technopark.diploma.arquest.core.ar.Scene;
 import technopark.diploma.arquest.core.ar.SceneObject;
 import technopark.diploma.arquest.core.ar.drawable.IDrawable;
 import technopark.diploma.arquest.core.game.Place;
 import technopark.diploma.arquest.rendering.ObjectRenderer;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import technopark.diploma.arquest.storage.fs.FileModule;
+import technopark.diploma.arquest.storage.fs.QuestDir;
 
 public class RendererHelper {
     private final float[] anchorMatrix = new float[16];
@@ -20,10 +24,14 @@ public class RendererHelper {
     private final float[] projmtx = new float[16];
     private Map<String, ObjectRenderer> renderers;
     private Scene scene;
+    private GameModule gameModule;
+    private FileModule fileModule;
     private float lightIntensity;
 
-    public RendererHelper(Scene scene) {
-        this.scene = scene;
+    public RendererHelper(GameModule gameModule, FileModule fileModule) {
+        this.scene = gameModule.getScene();
+        this.gameModule = gameModule;
+        this.fileModule = fileModule;
     }
 
     public Map<String, ObjectRenderer> getRenderers() {
@@ -54,7 +62,12 @@ public class RendererHelper {
                 IDrawable drawable = sceneObject.getDrawable();
                 ObjectRenderer objectRenderer = new ObjectRenderer();
                 objectRenderer.setMaterialProperties(0.0f, 3.5f, 1.0f, 6.0f);
-                objectRenderer.createOnGlThread(context, drawable.getModelName(), drawable.getTextureName());
+                QuestDir questDir = fileModule.getQuestDir(gameModule.getCurrentQuest().getId());
+                objectRenderer.createOnGlThread(
+                        context,
+                        questDir.loadObjAsset(drawable.getModelName()),
+                        questDir.loadBitmapAsset(drawable.getTextureName())
+                );
                 renderers.put(name, objectRenderer);
             }
         }
