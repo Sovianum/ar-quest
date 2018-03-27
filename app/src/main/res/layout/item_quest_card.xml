@@ -53,6 +53,18 @@
                 android:paddingEnd="8dp"
                 />
 
+            <TextView
+                android:id="@+id/start_quest_view"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end|bottom"
+                android:text="@string/start_quest_str"
+                android:textColor="@color/white"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                />
+
         </LinearLayout>
 
         <RatingBar

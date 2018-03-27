@@ -60,4 +60,5 @@
     <string name="journal_updated_str">Your journal updated:</string>
     <string name="inventory_updated_str">You received %d instances of %s</string>
     <string name="direct_camera_to_floor_str">Наведите камеру на землю</string>
+    <string name="start_quest_str"><u>Начать!</u></string>
 </resources>

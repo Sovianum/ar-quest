@@ -20,9 +20,7 @@ import android.widget.Toast;
 import com.google.ar.core.examples.java.helloar.auth.AuthActivity;
 import com.google.ar.core.examples.java.helloar.core.game.Item;
 import com.google.ar.core.examples.java.helloar.core.game.Place;
-import com.google.ar.core.examples.java.helloar.core.game.Player;
 import com.google.ar.core.examples.java.helloar.core.game.journal.Journal;
-import com.google.ar.core.examples.java.helloar.core.game.slot.Slot;
 import com.google.ar.core.examples.java.helloar.model.Quest;
 import com.google.ar.core.examples.java.helloar.network.NetworkModule;
 import com.google.ar.core.examples.java.helloar.quest.ARFragment;
@@ -32,8 +30,6 @@ import com.google.ar.core.examples.java.helloar.quest.items.ItemAdapter;
 import com.google.ar.core.examples.java.helloar.quest.items.ItemsListFragment;
 import com.google.ar.core.examples.java.helloar.quest.journal.JournalFragment;
 import com.google.ar.core.examples.java.helloar.quest.place.PlaceFragment;
-import com.google.ar.core.examples.java.helloar.quest.place.Places;
-import com.google.ar.core.examples.java.helloar.quest.quests.QuestAdapter;
 import com.google.ar.core.examples.java.helloar.quest.quests.QuestsListFragment;
 
 import java.io.FileNotFoundException;
@@ -85,10 +81,28 @@ public class MainActivity extends AppCompatActivity {
     @Inject
     NetworkModule networkModule;
 
-    private QuestAdapter.OnItemClickListener toQuestItemOnClickListener = new QuestAdapter.OnItemClickListener() {
+    private QuestsListFragment.OnQuestReactor showQuestInfoCallback = new QuestsListFragment.OnQuestReactor() {
         @Override
-        public void onItemClick(Quest item) {
-            selectFragment(questFragment, questFragment.TAG);
+        public void onQuestReact(Quest quest) {
+            selectFragment(questFragment, QuestFragment.TAG);
+        }
+    };
+
+    private QuestsListFragment.OnQuestReactor startQuestCallback = new QuestsListFragment.OnQuestReactor() {
+        @Override
+        public void onQuestReact(final Quest quest) {
+            gameModule.setCurrentQuest(quest);
+            gameModule.getScene().clear();
+            MainActivity.this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(
+                            MainActivity.this,
+                            "Вы выбрали квест " + quest.getTitle(),
+                            Toast.LENGTH_SHORT
+                    ).show();
+                }
+            });
         }
     };
 
@@ -119,7 +133,8 @@ public class MainActivity extends AppCompatActivity {
         setUpQuestFragment();
 
         questsListFragment = new QuestsListFragment();
-        questsListFragment.setOnItemClickListener(toQuestItemOnClickListener);
+        questsListFragment.setQuestCardClickedListener(showQuestInfoCallback);
+        questsListFragment.setStartQuestCallback(startQuestCallback);
 
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
@@ -130,31 +145,21 @@ public class MainActivity extends AppCompatActivity {
                         selectFragment(questsListFragment, QuestsListFragment.TAG, false);
                         break;
                     case R.id.action_current_quest:
-                        selectFragment(questFragment, QuestFragment.TAG, false);
+                        goToCurrentQuest();
                         break;
                     case R.id.action_ar:
-                        selectFragment(arFragment, ARFragment.TAG, false);
+                        goARFragment();
                         break;
                 }
                 return false;
             }
         });
 
+
         startService(new Intent(this, GeolocationService.class));
 
         checkAuthorization();
         selectFragment(questsListFragment, QuestsListFragment.TAG, false);
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
     }
 
     @Override
@@ -193,20 +198,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setUpGameModule() {
-        Integer questId = 1;
-        gameModule.setCurrentQuestId(questId);
-
         Journal<String> journal = new Journal<>();
         journal.addNow("First record");
         journal.addNow("Second record");
         journal.addNow("Third record");
-        gameModule.addCurrentJournal(journal);
+//        gameModule.addCurrentJournal(journal);
 
-        gameModule.addCurrentInventory(new Slot(0, Player.INVENTORY, false));
+//        gameModule.addCurrentInventory(new Slot(0, Player.INVENTORY, false));
 
-        Places places = new Places();
-        places.addPlace(new Place(0, "First place", "Description")); //STUB!!!
-        gameModule.addCurrentPlaces(places);
+//        Places places = new Places();
+//        places.addPlace(new Place(0, "First place", "Description")); //STUB!!!
+//        gameModule.addCurrentPlaces(places);
     }
 
     private void setUpArFragment() throws FileNotFoundException {
@@ -227,6 +229,26 @@ public class MainActivity extends AppCompatActivity {
     public void goToAuthActivity(View v) {
         Intent intent = new Intent(this, AuthActivity.class);
         startActivity(intent);
+    }
+
+    public void goARFragment() {
+        if (gameModule.getCurrentQuest() == null) {
+            Toast.makeText(this, "Сначала выбери квест", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Place currentPlace = gameModule.getCurrentQuest().getPlaceMap().values().iterator().next();
+        gameModule.setCurrentPlace(currentPlace);
+        selectFragment(arFragment, ARFragment.TAG);
+    }
+
+    public void goToCurrentQuest() {
+        if (gameModule.getCurrentQuest() == null) {
+            Toast.makeText(this, "Сначала выбери квест", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Place currentPlace = gameModule.getCurrentQuest().getPlaceMap().values().iterator().next();
+        gameModule.setCurrentPlace(currentPlace);
+        selectFragment(questFragment, QuestFragment.TAG);
     }
 
     private <F extends Fragment> View.OnClickListener getSelectFragmentListener(final F fragment) {

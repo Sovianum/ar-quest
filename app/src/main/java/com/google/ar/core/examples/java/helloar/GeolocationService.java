@@ -17,7 +17,9 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.google.ar.core.examples.java.helloar.core.game.Place;
-import com.google.ar.core.examples.java.helloar.quest.place.Places;
+import com.google.ar.core.examples.java.helloar.model.Quest;
+
+import java.util.Collection;
 
 import javax.inject.Inject;
 
@@ -47,7 +49,12 @@ public class GeolocationService extends Service {
             if (lastLocation.distanceTo(location) > DISTANCE/2.0 ) { //если поменялась геопозиция
                 lastLocation = location;
 
-                if(isCloseToPoints(gameModule.getCurrentPlaces(), location)) {
+                Quest currentQuest = gameModule.getCurrentQuest();
+                if (currentQuest == null) {
+                    return;
+                }
+                Collection<Place> currentQuestPlaces = currentQuest.getAvailablePlaces();
+                if(isCloseToPoints(currentQuestPlaces, location)) {
                     showNotification("Найдена точка", String.valueOf(location.getLongitude()) +
                             ", " + location.getLatitude());
                     gameModule.getCurrentJournal().addNow("Найдена контрольная точка " +
@@ -165,8 +172,8 @@ public class GeolocationService extends Service {
         }
     }
 
-    boolean isCloseToPoints(Places places, Location location) {
-        for(Place place: places.getPlaces()) {
+    boolean isCloseToPoints(Collection<Place> places, Location location) {
+        for(Place place: places) {
             if (isClose(place.getLocation(), location)) {
                 searchedPlace = place;
                 return true;

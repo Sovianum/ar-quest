@@ -1,6 +1,7 @@
 package com.google.ar.core.examples.java.helloar.quest.quests;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +18,15 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    public static QuestAdapter.OnItemClickListener itemClickListenerFromReactor(final QuestsListFragment.OnQuestReactor reactor) {
+        return new QuestAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(Quest item) {
+                reactor.onQuestReact(item);
+            }
+        };
+    }
+
     private List<Quest> quests;
     private QuestsListFragment fragment;
 
@@ -24,7 +34,8 @@ public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         void onItemClick(Quest item);
     }
 
-    private final OnItemClickListener onItemClickListener;
+    private final QuestsListFragment.OnQuestReactor onItemClickListener;
+    private final QuestsListFragment.OnQuestReactor startQuestClickListener;
 
     public class CardViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.title_txt)
@@ -33,6 +44,8 @@ public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         TextView descriptionView;
         @BindView(R.id.expander_view)
         TextView expanderView;
+        @BindView(R.id.start_quest_view)
+        TextView startQuestTextView;
         @BindView(R.id.ratingBar_quest)
         RatingBar ratingBar;
 
@@ -54,14 +67,19 @@ public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         }
     }
 
-    public QuestAdapter(QuestsListFragment fragment, List<Quest> quests, OnItemClickListener listener) {
+    public QuestAdapter(
+            QuestsListFragment fragment, List<Quest> quests,
+            QuestsListFragment.OnQuestReactor onItemClickListener,
+            QuestsListFragment.OnQuestReactor startQuestClickListener
+    ) {
         this.fragment = fragment;
         this.quests = quests;
-        this.onItemClickListener = listener;
+        this.onItemClickListener = onItemClickListener;
+        this.startQuestClickListener = startQuestClickListener;
         notifyDataSetChanged();
     }
 
-    public void serItems(List<Quest> quests) {
+    public void setItems(List<Quest> quests) {
         this.quests = quests;
         notifyDataSetChanged();
     }
@@ -75,7 +93,7 @@ public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         final Quest quest = quests.get(position);
 
         final CardViewHolder cardHolder = (CardViewHolder) holder;
@@ -95,8 +113,14 @@ public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 }
             }
         });
+        cardHolder.startQuestTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startQuestClickListener.onQuestReact(quest);
+            }
+        });
 
-        cardHolder.bind(quest, onItemClickListener);
+        cardHolder.bind(quest, itemClickListenerFromReactor(onItemClickListener));
     }
 
     @Override

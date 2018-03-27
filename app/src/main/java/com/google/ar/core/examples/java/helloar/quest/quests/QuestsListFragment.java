@@ -12,16 +12,24 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import com.google.ar.core.examples.java.helloar.App;
 import com.google.ar.core.examples.java.helloar.R;
 import com.google.ar.core.examples.java.helloar.model.Quest;
+import com.google.ar.core.examples.java.helloar.quest.game.QuestModule;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class QuestsListFragment extends Fragment {
+    public interface OnQuestReactor {
+        void onQuestReact(Quest quest);
+    }
+
     public static final String TAG = QuestsListFragment.class.getSimpleName();
 
     @BindView(R.id.questsRecyclerView)
@@ -30,17 +38,25 @@ public class QuestsListFragment extends Fragment {
     SwipeRefreshLayout swipeRefreshLayout;
 
     private QuestAdapter adapter;
-    private QuestAdapter.OnItemClickListener onItemClickListener;
+    private OnQuestReactor questCardClickedListener;
+    private OnQuestReactor startQuestListener;
+
+    @Inject
+    QuestModule questModule;
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         LinearLayout view = (LinearLayout) inflater.inflate(R.layout.fragment_quests_list, container, false);
         ButterKnife.bind(this, view);
+        App.getAppComponent().inject(this);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-       adapter = new QuestAdapter(this, new ArrayList<Quest>(), onItemClickListener);
+        adapter = new QuestAdapter(
+                this, new ArrayList<Quest>(),
+                questCardClickedListener,
+                startQuestListener
+        );
         recyclerView.setAdapter(adapter);
 
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -66,25 +82,13 @@ public class QuestsListFragment extends Fragment {
     }
 
     public void refreshItems() {
-        List<Quest> quests = new ArrayList<>();
-        Quest quest = new Quest("Название квеста", "Lorem Ipsum - это текст- рыба, часто используемый в печати и вэб-дизайне.\n" +
-                "             Lorem Ipsum является стандартной рыбой для текстов на латинице с начала XVI века.\n" +
-                "             В то время некий безымянный печатник создал большую коллекцию размеров и форм шрифтов,\n" +
-                "             используя Lorem Ipsum для распечатки образцов", 4.5f);
-        quests.add(quest);
-        quests.add(quest);
-        quests.add(quest);
-        quests.add(quest);
-        quests.add(quest);
-        quests.add(quest);
-
-        loadItems(quests);
+        loadItems(questModule.getQuests());
         setRefreshing(false);
     }
 
     public void loadItems(List<Quest> quests) {
         if (adapter != null) {
-            adapter.serItems(quests);
+            adapter.setItems(quests);
         }
     }
 
@@ -94,10 +98,11 @@ public class QuestsListFragment extends Fragment {
         }
     }
 
-    public void setOnItemClickListener(QuestAdapter.OnItemClickListener listener) {
-        this.onItemClickListener = listener;
+    public void setQuestCardClickedListener(OnQuestReactor listener) {
+        this.questCardClickedListener = listener;
     }
 
-
-
+    public void setStartQuestCallback(OnQuestReactor listener) {
+        this.startQuestListener = listener;
+    }
 }
