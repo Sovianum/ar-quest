@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
     private QuestsListFragment.OnQuestReactor showQuestInfoCallback = new QuestsListFragment.OnQuestReactor() {
         @Override
         public void onQuestReact(Quest quest) {
-            selectFragment(questFragment, QuestFragment.TAG);
+            goToCurrentQuest();
         }
     };
 
@@ -163,7 +163,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        selectFragmentByView(questsListFragment, QuestsListFragment.TAG);
+    }
+
+    @Override
     protected void onDestroy() {
+        System.out.println("Destroy activity");
         stopService(new Intent(this, GeolocationService.class));
         super.onDestroy();
     }
@@ -183,6 +190,21 @@ public class MainActivity extends AppCompatActivity {
                                     | View.SYSTEM_UI_FLAG_FULLSCREEN
                                     | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        //if (getSupportFragmentManager().getBackStackEntryCount() > 0 ) {
+        //    getSupportFragmentManager().popBackStackImmediate();
+        //}
+        if (getSupportFragmentManager().getBackStackEntryCount() > 1) {
+            super.onBackPressed();
+        } else {
+            Intent startMain = new Intent(Intent.ACTION_MAIN);
+            startMain.addCategory(Intent.CATEGORY_HOME);
+            startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(startMain);
         }
     }
 
@@ -267,33 +289,45 @@ public class MainActivity extends AppCompatActivity {
         selectFragment(fragment, tag, true);
     }
 
-    private void selectFragment(Fragment fragment, String tag, boolean needTransaction) {
+    private void selectFragmentByView(Fragment fragment, String tag) {
+        selectFragment(fragment, tag, false);
+    }
+
+    private void selectFragment(Fragment fragment, String tag, boolean fromNav) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         int index = fragmentManager.getBackStackEntryCount() - 1;
-        if (fragment.isAdded()) {
-            return;
-        }
 
-        boolean needPut = true;
-        Fragment lastFragment;
+        boolean needAdd = true;
         if (index >= 0) {
-            FragmentManager.BackStackEntry backEntry = fragmentManager.getBackStackEntryAt(index);
-            String lastTag = backEntry.getName();
-            lastFragment = fragmentManager.findFragmentByTag(lastTag);
-
-            needPut = lastFragment != fragment;
-        }
-
-        if (needPut) {
-            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            fragmentTransaction.replace(R.id.main_fragment_container, fragment, tag);
-
-            if (needTransaction) {
-                fragmentTransaction.addToBackStack(tag);
+            if (isFragmentInBackstack(fragmentManager,tag)) {
+                fragmentManager.popBackStackImmediate(tag, 0);
+                needAdd = false;
             }
-            fragmentTransaction.commit();
-            fragmentManager.executePendingTransactions();
         }
+
+        //if (fromNav) {
+        //    for (int entry = 0; entry < fragmentManager.getBackStackEntryCount(); entry++) {
+        //        fragmentManager.popBackStack();
+        //    }
+        //}
+
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.main_fragment_container, fragment, tag);
+
+        if (needAdd) {
+            fragmentTransaction.addToBackStack(tag);
+        }
+        fragmentTransaction.commit();
+        fragmentManager.executePendingTransactions();
+    }
+
+    private static boolean isFragmentInBackstack(final FragmentManager fragmentManager, final String fragmentTagName) {
+        for (int entry = 0; entry < fragmentManager.getBackStackEntryCount(); entry++) {
+            if (fragmentTagName.equals(fragmentManager.getBackStackEntryAt(entry).getName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void checkAuthorization() {

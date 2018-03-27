@@ -144,10 +144,14 @@ public class QuestFragment extends Fragment {
 
     public void refreshLastJournalRecord() {
         final Journal<String> journal = gameModule.getCurrentJournal();
-        TimestampRecord<String> lastMessage =  journal.getRecords().get(journal.getRecords().size() - 1);
-        messageTextView.setText(lastMessage.getData());
-        messageDateView.setText(DateFormat.format("dd-MM-yyyy (HH:mm:ss)",
-                lastMessage.getTime()));
+        try {
+            TimestampRecord<String> lastMessage = journal.getRecords().get(journal.getRecords().size() - 1);
+            messageTextView.setText(lastMessage.getData());
+            messageDateView.setText(DateFormat.format("dd-MM-yyyy (HH:mm:ss)",
+                    lastMessage.getTime()));
+        } catch (ArrayIndexOutOfBoundsException e) {
+
+        }
     }
 
     @Override
