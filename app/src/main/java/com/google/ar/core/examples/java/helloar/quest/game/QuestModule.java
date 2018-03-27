@@ -22,6 +22,7 @@ import com.google.ar.core.examples.java.helloar.core.game.script.ActionCondition
 import com.google.ar.core.examples.java.helloar.core.game.script.ObjectState;
 import com.google.ar.core.examples.java.helloar.core.game.script.ScriptAction;
 import com.google.ar.core.examples.java.helloar.core.game.slot.Slot;
+import com.google.ar.core.examples.java.helloar.model.Quest;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
@@ -37,6 +38,7 @@ import java.io.Reader;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -60,6 +62,33 @@ public class QuestModule {
     public QuestModule provideQuestModule() {
         App.getAppComponent().inject(this);
         return this;
+    }
+
+    public List<Quest> getQuests() {
+        Quest q1 = new Quest(
+                2,
+                "Демо-квест взаимодействие с персонажами",
+                "Это демонстрационный квест из одного места." +
+                        "Здесь вы можете опробовать взаимодействие с виртуальным объектами", 3
+        );
+        q1.addPlace(getAppearanceDemoPlace());
+
+        Quest q2 = new Quest(
+                1,
+                "Демо-квест инвентарь + загрузка из скрипта",
+                "Это демонстрационный квест из одного места, загружаемый из сценария." +
+                        "Здесь вы можете опробовать работу с инвентарем.", 3
+        );
+        q2.addPlace(getNewStyleInteractionDemoPlaceFromScript());
+
+        List<Quest> result = CollectionUtils.listOf(q1, q2);
+        result.sort(new Comparator<Quest>() {
+            @Override
+            public int compare(Quest o1, Quest o2) {
+                return o1.getId() - o2.getId();
+            }
+        });
+        return result;
     }
 
     public Place getNewStyleInteractionDemoPlaceFromScript() {
@@ -418,7 +447,7 @@ public class QuestModule {
         return place;
     }
 
-    public Place getAppearenceDemoPlace() {
+    public Place getAppearanceDemoPlace() {
         InteractiveObject andy = new InteractiveObject(
                 1, "andy", "andy"
 

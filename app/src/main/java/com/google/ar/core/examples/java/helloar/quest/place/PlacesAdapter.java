@@ -50,7 +50,7 @@ public class PlacesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        final Place place = gameModule.getCurrentPlaces().getPlaces().get(position);
+        final Place place = gameModule.getCurrentQuest().getAvailablePlaces().get(position);
 
         final CardViewHolder cardHolder = (CardViewHolder) holder;
         cardHolder.titleView.setText(place.getName());
@@ -59,6 +59,6 @@ public class PlacesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     @Override
     public int getItemCount() {
-        return gameModule.getCurrentPlaces().getPlaces().size();
+        return gameModule.getCurrentQuest().getAvailablePlaces().size();
     }
 }

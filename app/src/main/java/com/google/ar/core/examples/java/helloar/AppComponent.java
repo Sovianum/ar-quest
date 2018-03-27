@@ -13,6 +13,7 @@ import com.google.ar.core.examples.java.helloar.quest.journal.JournalFragment;
 import com.google.ar.core.examples.java.helloar.quest.journal.JournalMessageAdapter;
 import com.google.ar.core.examples.java.helloar.quest.place.PlaceFragment;
 import com.google.ar.core.examples.java.helloar.quest.place.PlacesAdapter;
+import com.google.ar.core.examples.java.helloar.quest.quests.QuestsListFragment;
 
 import javax.inject.Singleton;
 
@@ -24,6 +25,7 @@ public interface AppComponent {
     void inject(MainActivity activity);
     void inject(ARFragment fragment);
     void inject(QuestFragment fragment);
+    void inject(QuestsListFragment fragment);
     void inject(InteractionResultHandler handler);
     void inject(QuestModule service);
     void inject(ItemsListFragment fragment);
