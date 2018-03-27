@@ -1,0 +1,52 @@
+package technopark.diploma.arquest.quest.game;
+
+import com.google.ar.core.Pose;
+import technopark.diploma.arquest.core.game.Item;
+import technopark.diploma.arquest.core.game.Place;
+import technopark.diploma.arquest.core.game.Player;
+
+public class ActorPlayer extends Player {
+    private Pose displace;
+    private Item item;
+    private Place place;
+
+    public ActorPlayer(Pose displace) {
+        this.displace = displace;
+    }
+
+    public Item getItem() {
+        if (item == null) {
+            return Item.VOID;
+        }
+        item.getGeom().applyGlobal(getGeom().getPose());
+        return item;
+    }
+
+    public void update(Pose pose) {
+        getGeom().applyGlobal(pose.compose(displace));
+    }
+
+    public void hold(Item item) {
+        if (item == null) {
+            return;
+        }
+        this.item = item;
+        this.item.setEnabled(true);
+    }
+
+    public void release() {
+        if (item == null) {
+            return;
+        }
+        item.setEnabled(false);
+        item = null;
+    }
+
+    public Place getPlace() {
+        return place;
+    }
+
+    public void setPlace(Place place) {
+        this.place = place;
+    }
+}

@@ -15,7 +15,7 @@
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.google.ar.core.examples.java.helloar">
+    package="technopark.diploma.arquest">
 
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -31,7 +31,7 @@
         android:required="true" />
 
     <application
-        android:name=".App"
+        android:name="technopark.diploma.arquest.App"
         android:allowBackup="false"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
@@ -39,7 +39,7 @@
         android:usesCleartextTraffic="false"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
-            android:name=".MainActivity"
+            android:name="technopark.diploma.arquest.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/Theme.AppCompat.NoActionBar">
             <intent-filter>
@@ -57,11 +57,11 @@
             android:value="required" />
 
         <activity
-            android:name=".auth.AuthActivity"
+            android:name="technopark.diploma.arquest.auth.AuthActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
 
         <service
-            android:name=".GeolocationService"
+            android:name="technopark.diploma.arquest.GeolocationService"
             android:enabled="true"
             android:exported="true"
             android:permission="" />
