@@ -128,6 +128,9 @@ public class QuestFragment extends Fragment {
 
     public void refreshLastJournalRecord() {
         final Journal<String> journal = gameModule.getCurrentJournal();
+        if (journal.getRecords().isEmpty()) {
+            return;
+        }
         TimestampRecord<String> lastMessage =  journal.getRecords().get(journal.getRecords().size() - 1);
         messageTextView.setText(lastMessage.getData());
         messageDateView.setText(DateFormat.format("dd-MM-yyyy (HH:mm:ss)",
