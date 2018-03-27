@@ -4,6 +4,7 @@ import android.app.Application;
 
 import com.google.ar.core.examples.java.helloar.network.NetworkModule;
 import com.google.ar.core.examples.java.helloar.network.ServerInfo;
+import com.google.ar.core.examples.java.helloar.storage.fs.FileModule;
 
 public class App extends Application {
 
@@ -22,6 +23,8 @@ public class App extends Application {
                 gameModule(new GameModule()).
                 networkModule(new NetworkModule(ServerInfo.BACKEND_URL)).
                 contextModule(new ContextModule(this)).
+                commonModule(new CommonModule()).
+                fileModule(new FileModule(this)).
                 build();
     }
 }

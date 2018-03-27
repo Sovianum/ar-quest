@@ -14,13 +14,18 @@ import com.google.ar.core.examples.java.helloar.quest.journal.JournalMessageAdap
 import com.google.ar.core.examples.java.helloar.quest.place.PlaceFragment;
 import com.google.ar.core.examples.java.helloar.quest.place.PlacesAdapter;
 import com.google.ar.core.examples.java.helloar.quest.quests.QuestsListFragment;
+import com.google.ar.core.examples.java.helloar.storage.fs.FileModule;
 
 import javax.inject.Singleton;
 
 import dagger.Component;
 
 @Singleton
-@Component(modules = {GameModule.class, QuestModule.class, NetworkModule.class, ContextModule.class})
+@Component(modules = {
+        GameModule.class, QuestModule.class,
+        NetworkModule.class, ContextModule.class,
+        CommonModule.class, FileModule.class,
+})
 public interface AppComponent {
     void inject(MainActivity activity);
     void inject(ARFragment fragment);

@@ -7,9 +7,7 @@ import com.google.ar.core.examples.java.helloar.App;
 import com.google.ar.core.examples.java.helloar.GameModule;
 import com.google.ar.core.examples.java.helloar.common.CollectionUtils;
 import com.google.ar.core.examples.java.helloar.core.ar.collision.Collider;
-import com.google.ar.core.examples.java.helloar.core.ar.collision.shape.Shape;
 import com.google.ar.core.examples.java.helloar.core.ar.collision.shape.Sphere;
-import com.google.ar.core.examples.java.helloar.core.ar.drawable.IDrawable;
 import com.google.ar.core.examples.java.helloar.core.ar.drawable.TextureDrawable;
 import com.google.ar.core.examples.java.helloar.core.game.Action;
 import com.google.ar.core.examples.java.helloar.core.game.InteractionArgument;
@@ -23,19 +21,13 @@ import com.google.ar.core.examples.java.helloar.core.game.script.ObjectState;
 import com.google.ar.core.examples.java.helloar.core.game.script.ScriptAction;
 import com.google.ar.core.examples.java.helloar.core.game.slot.Slot;
 import com.google.ar.core.examples.java.helloar.model.Quest;
+import com.google.ar.core.examples.java.helloar.storage.fs.FileModule;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -55,7 +47,13 @@ public class QuestModule {
     GameModule gameModule;
 
     @Inject
+    Gson gson;
+
+    @Inject
     Context context;
+
+    @Inject
+    FileModule fileModule;
 
     @Provides
     @Singleton
@@ -100,52 +98,6 @@ public class QuestModule {
         }
 
         Reader reader = new InputStreamReader(in);
-
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(
-                Shape.class,
-                new JsonDeserializer<Shape>() {
-                    @Override
-                    public Shape deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-                        return new Sphere(
-                                json.getAsJsonObject().get("radius").getAsFloat()
-                        );
-                    }
-                }
-        );
-        gsonBuilder.registerTypeAdapter(
-                IDrawable.class,
-                new JsonDeserializer<IDrawable>() {
-                    @Override
-                    public IDrawable deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-                        JsonObject jsonObject = json.getAsJsonObject();
-                        return new TextureDrawable(
-                                jsonObject.get("modelName").getAsString(),
-                                jsonObject.get("textureName").getAsString()
-                        );
-                    }
-                }
-        );
-        gsonBuilder.registerTypeAdapter(
-                Item.class,
-                new JsonDeserializer<Item>() {
-                    @Override
-                    public Item deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-                        JsonObject jsonObject = json.getAsJsonObject();
-                        Item item = new Item(
-                                jsonObject.get("id").getAsInt(),
-                                jsonObject.get("name").getAsString(),
-                                jsonObject.get("description").getAsString(),
-                                jsonObject.get("modelName").getAsString(),
-                                jsonObject.get("textureName").getAsString()
-                        );
-                        item.getGeom().setScale(jsonObject.get("geom").getAsJsonObject().get("scale").getAsFloat());
-                        return item;
-                    }
-                }
-        );
-
-        Gson gson = gsonBuilder.create();
         Place place = gson.fromJson(reader, Place.class);
 
         for (Map.Entry<Integer, InteractiveObject> entry : place.getInteractiveObjects().entrySet()) {
