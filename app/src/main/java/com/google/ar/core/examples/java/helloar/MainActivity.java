@@ -123,6 +123,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
+        BottomNavigationViewHelper.disableShiftMode(bottomNavigationView);
+
         // the order of calls below is important
         try {
             setUpArFragment();
@@ -150,6 +152,10 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.action_ar:
                         goARFragment();
                         break;
+
+                    case R.id.action_settings:
+
+                        break;
                 }
                 return false;
             }
@@ -171,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         System.out.println("Destroy activity");
-        stopService(new Intent(this, GeolocationService.class));
+        //stopService(new Intent(this, GeolocationService.class));
         super.onDestroy();
     }
 
@@ -294,6 +300,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void selectFragment(Fragment fragment, String tag, boolean fromNav) {
+        if (tag.equals(ARFragment.TAG)) {
+            bottomNavigationView.setVisibility(View.GONE);
+        } else {
+            bottomNavigationView.setVisibility(View.VISIBLE);
+        }
         FragmentManager fragmentManager = getSupportFragmentManager();
         int index = fragmentManager.getBackStackEntryCount() - 1;
 

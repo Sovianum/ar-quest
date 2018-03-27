@@ -244,7 +244,7 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
     @Override
     public void onStop() {
         super.onStop();
-
+        snackbarAction.stopIfRunning();
     }
 
     @Override

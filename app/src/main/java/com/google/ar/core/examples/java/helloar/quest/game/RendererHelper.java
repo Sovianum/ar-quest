@@ -54,7 +54,7 @@ public class RendererHelper {
                 IDrawable drawable = sceneObject.getDrawable();
                 ObjectRenderer objectRenderer = new ObjectRenderer();
                 objectRenderer.setMaterialProperties(0.0f, 3.5f, 1.0f, 6.0f);
-                objectRenderer.createOnGlThread(context, drawable.getModelName(), drawable.getTextureName());
+                //objectRenderer.createOnGlThread(context, drawable.getModelName(), drawable.getTextureName());
                 renderers.put(name, objectRenderer);
             }
         }
