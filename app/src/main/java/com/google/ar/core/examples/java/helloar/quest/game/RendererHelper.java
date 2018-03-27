@@ -2,7 +2,6 @@ package com.google.ar.core.examples.java.helloar.quest.game;
 
 import android.content.Context;
 
-import com.google.ar.core.Anchor;
 import com.google.ar.core.Camera;
 import com.google.ar.core.Frame;
 import com.google.ar.core.examples.java.helloar.core.ar.Scene;
@@ -80,11 +79,7 @@ public class RendererHelper {
         if (renderer == null) {
             return;
         }
-        Anchor anchor = scene.getAnchorMap().get(sceneObject.getIdentifiable().getSceneID());
-        if (anchor == null) {
-            return;
-        }
-        anchor.getPose().toMatrix(anchorMatrix, 0);
+        sceneObject.getGeom().getPose().toMatrix(anchorMatrix, 0);
         renderer.updateModelMatrix(anchorMatrix, sceneObject.getGeom().getScale());
         renderer.draw(viewmtx, projmtx, lightIntensity);
     }

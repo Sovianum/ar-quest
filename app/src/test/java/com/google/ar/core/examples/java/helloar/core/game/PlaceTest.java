@@ -1,6 +1,7 @@
 package com.google.ar.core.examples.java.helloar.core.game;
 
 import com.google.ar.core.examples.java.helloar.common.CollectionUtils;
+import com.google.ar.core.examples.java.helloar.core.game.script.ObjectState;
 import com.google.ar.core.examples.java.helloar.core.game.slot.Slot;
 
 import org.junit.Before;
@@ -38,16 +39,18 @@ public class PlaceTest {
 
         inventory = new Slot(0, "inv", true);
 
-        inter1 = new InteractiveObject(1, "name1", "descr1", true);
+        inter1 = new InteractiveObject(1, "name1", "descr1");
+        inter1.setStates(CollectionUtils.listOf(ObjectState.enableObjectState(0, true, true)));
         inter1.setAction(new ItemlessAction() {
             @Override
             public Collection<InteractionResult> act(InteractionArgument argument) {
                 inter2.setEnabled(true);
-                return CollectionUtils.singleItemCollection(new InteractionResult(InteractionResult.Type.JOURNAL_RECORD, "open inter2"));
+                return CollectionUtils.singleItemList(InteractionResult.journalRecordResult("open inter2"));
             }
         });
 
-        inter2 = new InteractiveObject(2, "name2", "descr2", false);
+        inter2 = new InteractiveObject(2, "name2", "descr2");
+        inter2.setStates(CollectionUtils.listOf(ObjectState.enableObjectState(0, true, false)));
         inter2.setAction(new ItemlessAction() {
             @Override
             public Collection<InteractionResult> act(InteractionArgument argument) {
@@ -55,34 +58,28 @@ public class PlaceTest {
                     if (r.getItem().getId() == 1) {
                         r.dropAll();
                         slot2.setEnabled(true);
-                        return CollectionUtils.singleItemCollection(
-                                new InteractionResult(InteractionResult.Type.JOURNAL_RECORD, "open slot2")
+                        return CollectionUtils.singleItemList(
+                                InteractionResult.journalRecordResult("open slot2")
                         );
                     }
                 }
-                return CollectionUtils.singleItemCollection(
-                        new InteractionResult(InteractionResult.Type.MESSAGE, "failed to interact")
+                return CollectionUtils.singleItemList(
+                        InteractionResult.messageResult("failed to interact")
                 );
             }
         });
-
-        Map<Integer, Slot> slots = new HashMap<>();
-        slots.put(slot1.getId(), slot1);
-        slots.put(slot2.getId(), slot2);
 
         Map<Integer, InteractiveObject> interactives = new HashMap<>();
         interactives.put(inter1.getId(), inter1);
         interactives.put(inter2.getId(), inter2);
 
         place = new Place();
-        place.setSlots(slots);
         place.setInteractiveObjects(interactives);
     }
 
     @Test
     public void testScenario() {
         assertEquals(1, place.getAccessibleInteractiveObjects().size());
-        assertEquals(1, place.getAccessibleSlots().size());
 
         Collection<InteractionResult> results1 = place.getAccessibleInteractiveObjects().get(1).interact(null);
         assertEquals(1, results1.size());
@@ -95,19 +92,16 @@ public class PlaceTest {
         InteractionArgument badEmptyArgument = new InteractionArgument();
         Collection<InteractionResult> badResults1 = inter2.interact(badEmptyArgument);
         assertEquals(InteractionResult.Type.MESSAGE, CollectionUtils.first(badResults1).type);
-        assertEquals(1, place.getAccessibleSlots().size());
         assertEquals(1, slot1.getItemCnt(1));
 
-        InteractionArgument badItemArgument = InteractionArgument.itemArg(CollectionUtils.singleItemCollection(new Slot.RepeatedItem(item2)));
+        InteractionArgument badItemArgument = InteractionArgument.itemArg(CollectionUtils.singleItemList(new Slot.RepeatedItem(item2)));
         Collection<InteractionResult> badResults2 = inter2.interact(badItemArgument);
         assertEquals(InteractionResult.Type.MESSAGE, CollectionUtils.first(badResults2).type);
-        assertEquals(1, place.getAccessibleSlots().size());
         assertEquals(1, slot1.getItemCnt(1));
 
-        InteractionArgument goodArgument = InteractionArgument.itemArg(CollectionUtils.singleItemCollection(slot1.getRepeatedItems().get(1)));
+        InteractionArgument goodArgument = InteractionArgument.itemArg(CollectionUtils.singleItemList(slot1.getRepeatedItems().get(1)));
         Collection<InteractionResult> goodResults = inter2.interact(goodArgument);
         assertEquals(InteractionResult.Type.JOURNAL_RECORD, CollectionUtils.first(goodResults).type);
-        assertEquals(2, place.getAccessibleSlots().size());
         assertEquals(0, slot1.getItemCnt(1));
     }
 }

@@ -21,6 +21,7 @@ public class App extends Application {
                 builder().
                 gameModule(new GameModule()).
                 networkModule(new NetworkModule(ServerInfo.BACKEND_URL)).
+                contextModule(new ContextModule(this)).
                 build();
     }
 }

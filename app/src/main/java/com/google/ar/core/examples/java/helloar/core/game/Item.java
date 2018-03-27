@@ -5,6 +5,9 @@ import com.google.ar.core.examples.java.helloar.core.ar.drawable.IDrawable;
 import com.google.ar.core.examples.java.helloar.core.ar.identifiable.Identifiable;
 
 public class Item extends SceneObject implements IDrawable {
+    public static final int VOID_ID = -1;
+    public static final Item VOID = new Item(VOID_ID, "void", "", "", "");
+
     private final int id;
     private final String name;
     private final String description;

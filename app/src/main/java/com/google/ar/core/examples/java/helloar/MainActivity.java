@@ -35,6 +35,8 @@ import com.google.ar.core.examples.java.helloar.quest.place.Places;
 import com.google.ar.core.examples.java.helloar.quest.quests.QuestAdapter;
 import com.google.ar.core.examples.java.helloar.quest.quests.QuestsListFragment;
 
+import java.io.FileNotFoundException;
+
 import javax.inject.Inject;
 
 import butterknife.BindView;
@@ -111,7 +113,11 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         // the order of calls below is important
-        setUpArFragment();
+        try {
+            setUpArFragment();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
         setUpGameModule();
         setUpQuestFragment();
 
@@ -188,14 +194,15 @@ public class MainActivity extends AppCompatActivity {
         gameModule.addCurrentPlaces(places);
     }
 
-    private void setUpArFragment() {
+    private void setUpArFragment() throws FileNotFoundException {
         journalFragment = new JournalFragment();
 
         itemsListFragment = new ItemsListFragment();
         itemsListFragment.setOnItemClickListener(chooseItemOnClickListener);
 
         Scene scene = new Scene();
-        Place place = questModule.getInteractionDemoPlace();
+//        Place place = questModule.getInteractionDemoPlace();
+        Place place = questModule.getNewStyleInteractionDemoPlaceFromScript();
 
         arFragment = new ARFragment();
         arFragment.setToInventoryOnClickListener(getSelectFragmentListener(itemsListFragment));

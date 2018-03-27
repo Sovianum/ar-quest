@@ -11,9 +11,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.Display;
-import android.view.GestureDetector;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -38,17 +36,16 @@ import com.google.ar.core.examples.java.helloar.DisplayRotationHelper;
 import com.google.ar.core.examples.java.helloar.GameModule;
 import com.google.ar.core.examples.java.helloar.PermissionHelper;
 import com.google.ar.core.examples.java.helloar.R;
+import com.google.ar.core.examples.java.helloar.common.CollectionUtils;
 import com.google.ar.core.examples.java.helloar.common.ContinuousAction;
 import com.google.ar.core.examples.java.helloar.core.ar.Scene;
 import com.google.ar.core.examples.java.helloar.core.ar.SceneObject;
-import com.google.ar.core.examples.java.helloar.core.ar.collision.shape.Sphere;
 import com.google.ar.core.examples.java.helloar.core.ar.geom.Geom;
 import com.google.ar.core.examples.java.helloar.core.game.InteractionArgument;
 import com.google.ar.core.examples.java.helloar.core.game.InteractionResult;
 import com.google.ar.core.examples.java.helloar.core.game.InteractiveObject;
 import com.google.ar.core.examples.java.helloar.core.game.Item;
 import com.google.ar.core.examples.java.helloar.core.game.Place;
-import com.google.ar.core.examples.java.helloar.common.CollectionUtils;
 import com.google.ar.core.examples.java.helloar.core.game.slot.Slot;
 import com.google.ar.core.examples.java.helloar.quest.game.DeferredClickListener;
 import com.google.ar.core.examples.java.helloar.quest.game.InteractionResultHandler;
@@ -64,7 +61,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
 
 import javax.inject.Inject;
 import javax.microedition.khronos.egl.EGLConfig;
@@ -115,21 +111,14 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
     private boolean installRequested;
 
     private Session session;
-    private GestureDetector gestureDetector;
     private Snackbar messageSnackbar;
     private DisplayRotationHelper displayRotationHelper;
 
     private final BackgroundRenderer backgroundRenderer = new BackgroundRenderer();
 
-    // Tap handling and UI.
-    private final ArrayBlockingQueue<MotionEvent> queuedSingleTaps = new ArrayBlockingQueue<>(16);
-
     private Scene scene;
     private Place place;
     private RendererHelper rendererHelper;
-    private InteractiveObject andy;
-    private InteractiveObject rose;
-    private InteractiveObject banana;
 
     private View.OnClickListener toInventoryOnClickListener;
 
@@ -159,12 +148,16 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
     private View.OnClickListener toJournalOnClickListener;
 
+    public ARFragment() {
+        super();
+        App.getAppComponent().inject(this);
+    }
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         RelativeLayout view = (RelativeLayout) inflater.inflate(R.layout.fragment_ar, container, false);
         ButterKnife.bind(this, view);
-        App.getAppComponent().inject(this);
 
         displayRotationHelper = new DisplayRotationHelper(getActivity());
 
@@ -173,31 +166,6 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
         toInventoryBtn.setOnClickListener(toInventoryOnClickListener);
         interactBtn.setOnClickListener(interactor);
-
-        // Set up tap listener.
-        gestureDetector =
-                new GestureDetector(
-                        getActivity(),
-                        new GestureDetector.SimpleOnGestureListener() {
-                            @Override
-                            public boolean onSingleTapUp(MotionEvent e) {
-                                onSingleTap(e);
-                                return true;
-                            }
-
-                            @Override
-                            public boolean onDown(MotionEvent e) {
-                                return true;
-                            }
-                        });
-
-        surfaceView.setOnTouchListener(
-                new View.OnTouchListener() {
-                    @Override
-                    public boolean onTouch(View v, MotionEvent event) {
-                        return gestureDetector.onTouchEvent(event);
-                    }
-                });
 
         // Set up renderer.
         surfaceView.setPreserveEGLContextOnPause(true);
@@ -217,10 +185,8 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
     public void setDecorations(Scene scene, Place place) {
         this.scene = scene;
         this.place = place;
+        gameModule.getPlayer().setPlace(place);
         rendererHelper = new RendererHelper(scene);
-        andy = place.getInteractiveObjects().get(1);
-        rose = place.getInteractiveObjects().get(2);
-        banana = place.getInteractiveObjects().get(3);
     }
 
     public void setToInventoryOnClickListener(View.OnClickListener listener) {
@@ -285,11 +251,6 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
                     .show();
             getActivity().finish();
         }
-    }
-
-    private void onSingleTap(MotionEvent e) {
-        // Queue tap if there is space. Tap is lost if queue is full.
-        queuedSingleTaps.offer(e);
     }
 
     @Override
@@ -463,7 +424,8 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
                     if (closest != null) {
                         btn.setText(R.string.interact_str);
                         btn.setEnabled(true);
-                    } else if (ARFragment.this.gameModule.getPlayer().getItem() != null) {
+                    } else if (ARFragment.this.gameModule.getPlayer().getItem() != null &&
+                            ARFragment.this.gameModule.getPlayer().getItem().getId() != Item.VOID_ID) {
                         btn.setText(R.string.release_str);
                         btn.setEnabled(true);
                     } else {
@@ -520,39 +482,6 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         interactBtn.setAlpha(0);
     }
 
-    private void showDebugInfo(Camera camera) {
-        Collection<SceneObject> collided = scene.getCollisions(gameModule.getPlayer().getCollider());
-        StringBuilder s = new StringBuilder("Camera: " + camera.getPose().toString() + "\n");
-
-        Anchor andyAnchor = scene.getAnchorMap().get(andy.getIdentifiable().getSceneID());
-        if (andyAnchor != null) {
-            s.append("Andy: " + andyAnchor.getPose().toString() + " " + getColliderRadius(andy) + "\n");
-        }
-
-        Anchor roseAnchor = scene.getAnchorMap().get(rose.getIdentifiable().getSceneID());
-        if (roseAnchor != null) {
-            s.append("Rose: " + roseAnchor.getPose().toString() + " " + getColliderRadius(rose) + "\n");
-        }
-
-        Anchor bananaAnchor = scene.getAnchorMap().get(banana.getIdentifiable().getSceneID());
-        if (bananaAnchor != null) {
-            s.append("Banana: " + bananaAnchor.getPose().toString() + " " + getColliderRadius(banana) + "\n");
-        }
-
-        s.append("Collided: ");
-        for (SceneObject sceneObject : collided) {
-            s.append(sceneObject.getIdentifiable().getName()).append(" ");
-        }
-
-        final String str = s.toString();
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                collisionText.setText(str);
-            }
-        });
-    }
-
     private Collection<InteractionResult> interact() {
         final Activity activity = getActivity();
         if (activity == null) {
@@ -576,7 +505,7 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
         InteractionArgument arg = new InteractionArgument(
                 null,
-                CollectionUtils.singleItemCollection(new Slot.RepeatedItem(gameModule.getPlayer().getItem()))
+                CollectionUtils.singleItemList(new Slot.RepeatedItem(gameModule.getPlayer().getItem()))
         );
         Collection<InteractionResult> results = closestObject.interact(arg);
 
@@ -595,11 +524,5 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
             }
         }
         return null;
-    }
-
-    private static String getColliderRadius(SceneObject sceneObject) {
-        return String.valueOf(
-                ((Sphere) sceneObject.getCollider().getShape()).getRadius()
-        );
     }
 }

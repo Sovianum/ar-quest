@@ -8,7 +8,7 @@ import java.util.Collection;
 public class Point implements Shape {
     @Override
     public Collection<Pose> generateBoundaryPoints(int cnt) {
-        return CollectionUtils.singleItemCollection(Pose.IDENTITY);
+        return CollectionUtils.singleItemList(Pose.IDENTITY);
     }
 
     @Override

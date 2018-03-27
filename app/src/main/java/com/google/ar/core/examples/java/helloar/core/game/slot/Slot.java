@@ -19,7 +19,7 @@ public class Slot extends SceneObject {
             this.cnt = 1;
         }
 
-        RepeatedItem(Item item, int cnt) {
+        public RepeatedItem(Item item, int cnt) {
             this.item = item;
             this.cnt = cnt;
         }
@@ -96,7 +96,19 @@ public class Slot extends SceneObject {
         return true;
     }
 
-    public void remove(int itemID) {
+    public boolean remove(int itemID, int itemCnt) {
+        RepeatedItem item = items.get(itemID);
+        if (item == null || item.getCnt() < itemCnt) {
+            return false;
+        }
+        item.drop(itemCnt);
+        if (item.empty()) {
+            items.remove(itemID);
+        }
+        return true;
+    }
+
+    public void removeAll(int itemID) {
         items.remove(itemID);
     }
 

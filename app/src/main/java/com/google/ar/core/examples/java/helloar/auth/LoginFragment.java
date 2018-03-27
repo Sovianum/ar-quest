@@ -121,6 +121,7 @@ public class LoginFragment extends AuthFragment {
         //handler = networkModule.getInstance().loginUser(onDataGetListener, user);
     }
 
+    // TODO removeAll or use
     public void setLoading(boolean loading) {
         if (loading) {
             progressBar.setVisibility(View.VISIBLE);

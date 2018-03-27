@@ -48,6 +48,10 @@ public class Scene extends Tree<SceneObject> {
         for (SceneObject obj : sceneObjects) {
             int parentID = obj.getIdentifiable().getParentID();
             obj.getGeom().apply(origin);
+            Collider collider = obj.getCollider();
+            if (collider != null) {
+                collider.setPosition(obj.getGeom());
+            }
 
             if (parentID > 0) {
                 int parentSceneID = sceneObjects.get(index.get(parentID)).getIdentifiable().getSceneID();
