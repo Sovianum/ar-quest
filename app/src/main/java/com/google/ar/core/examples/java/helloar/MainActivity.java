@@ -115,6 +115,13 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    private View.OnClickListener onCloseARClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            onBackPressed();
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -204,6 +211,7 @@ public class MainActivity extends AppCompatActivity {
         //if (getSupportFragmentManager().getBackStackEntryCount() > 0 ) {
         //    getSupportFragmentManager().popBackStackImmediate();
         //}
+        showBottomNavigation();
         if (getSupportFragmentManager().getBackStackEntryCount() > 1) {
             super.onBackPressed();
         } else {
@@ -252,6 +260,8 @@ public class MainActivity extends AppCompatActivity {
         arFragment.setToJournalOnClickListener(getSelectFragmentListener(journalFragment));
 
         arFragment.setDecorations(place);
+
+        arFragment.setCloseOnClickListener(onCloseARClickListener);
     }
 
     public void goToAuthActivity(View v) {
@@ -300,11 +310,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void selectFragment(Fragment fragment, String tag, boolean fromNav) {
-        if (tag.equals(ARFragment.TAG)) {
-            bottomNavigationView.setVisibility(View.GONE);
-        } else {
-            bottomNavigationView.setVisibility(View.VISIBLE);
-        }
+        showOrHideBottomNavigation(tag);
         FragmentManager fragmentManager = getSupportFragmentManager();
         int index = fragmentManager.getBackStackEntryCount() - 1;
 
@@ -330,6 +336,18 @@ public class MainActivity extends AppCompatActivity {
         }
         fragmentTransaction.commit();
         fragmentManager.executePendingTransactions();
+    }
+
+    private void showOrHideBottomNavigation(String tag) {
+        if (tag.equals(ARFragment.TAG)) {
+            bottomNavigationView.setVisibility(View.GONE);
+        } else {
+            bottomNavigationView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void showBottomNavigation() {
+        bottomNavigationView.setVisibility(View.VISIBLE);
     }
 
     private static boolean isFragmentInBackstack(final FragmentManager fragmentManager, final String fragmentTagName) {

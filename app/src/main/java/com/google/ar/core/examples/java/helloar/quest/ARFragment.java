@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -87,6 +88,9 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
     @BindView(R.id.interact_btn)
     Button interactBtn;
 
+    @BindView(R.id.close_btn)
+    ImageButton closeBtn;
+
     @Inject
     GameModule gameModule;
 
@@ -143,6 +147,7 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
     };
 
     private View.OnClickListener toJournalOnClickListener;
+    private View.OnClickListener closeOnClickListener;
 
     public ARFragment() {
         super();
@@ -162,6 +167,8 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
         toInventoryBtn.setOnClickListener(toInventoryOnClickListener);
         interactBtn.setOnClickListener(interactor);
+
+        closeBtn.setOnClickListener(closeOnClickListener);
 
         // Set up renderer.
         surfaceView.setPreserveEGLContextOnPause(true);
@@ -544,5 +551,9 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
             }
         }
         return null;
+    }
+
+    public void setCloseOnClickListener(View.OnClickListener closeOnClickListener) {
+        this.closeOnClickListener = closeOnClickListener;
     }
 }
