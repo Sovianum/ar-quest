@@ -127,13 +127,15 @@ public class MainActivity extends AppCompatActivity {
         toQuestFragmentButton.setOnClickListener(getSelectFragmentListener(arFragment));
 
         startService(new Intent(this, GeolocationService.class));
+
+        checkAuthorization();
+        selectFragment(questsListFragment, QuestsListFragment.TAG, false);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        checkAuthorization();
-        selectFragment(questsListFragment, questsListFragment.TAG);
+
     }
 
     @Override
@@ -143,8 +145,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         stopService(new Intent(this, GeolocationService.class));
+        super.onDestroy();
     }
 
     @Override
@@ -164,8 +166,6 @@ public class MainActivity extends AppCompatActivity {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
     }
-
-
 
     private void setUpQuestFragment() {
         placeFragment = new PlaceFragment();
@@ -230,38 +230,36 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void selectFragment(Fragment fragment, String tag) {
+        selectFragment(fragment, tag, true);
+    }
+
+    private void selectFragment(Fragment fragment, String tag, boolean needTransaction) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         int index = fragmentManager.getBackStackEntryCount() - 1;
+        if (fragment.isAdded()) {
+            return;
+        }
 
         boolean needPut = true;
-        boolean needRemove = false;
-
-        Fragment lastFragment = null;
+        Fragment lastFragment;
         if (index >= 0) {
             FragmentManager.BackStackEntry backEntry = fragmentManager.getBackStackEntryAt(index);
             String lastTag = backEntry.getName();
             lastFragment = fragmentManager.findFragmentByTag(lastTag);
 
-            if (lastFragment == fragment) {
-                needPut = false;
-                needRemove = false;
-            } else {
-                needPut = true;
-                needRemove = true;
-            }
+            needPut = lastFragment != fragment;
         }
 
-        if (needPut || needRemove) {
+        if (needPut) {
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            if (needRemove && lastFragment != null) {
-                fragmentTransaction.remove(lastFragment);
+            fragmentTransaction.replace(R.id.main_fragment_container, fragment, tag);
+
+            if (needTransaction) {
+                fragmentTransaction.addToBackStack(tag);
             }
-            fragmentTransaction.add(R.id.main_fragment_container, fragment, tag);
-            fragmentTransaction.addToBackStack(tag);
             fragmentTransaction.commit();
+            fragmentManager.executePendingTransactions();
         }
-
-
     }
 
     private void checkAuthorization() {
