@@ -31,6 +31,8 @@
     <string name="password_hint">password</string>
     <string name="confirm_password_hint">password</string>
     <string name="login_btn">Авторизоваться</string>
+    <string name="logout_btn">Выйти</string>
+    <string name="stop_service_btn">Остановить отслеживание</string>
     <string name="register_btn">Зарегистрироваться</string>
     <string name="text_login_from_register">Нет аккаунта? Зарегистрироваться.</string>
     <string name="text_register_from_login">Уже зарегистрированы? Авторизоваться.</string>

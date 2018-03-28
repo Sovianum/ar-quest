@@ -6,4 +6,5 @@
     <color name="white">#FFFFFF</color>
     <color name="iconColor">#000dff</color>
     <color name="bottomNavBarColor">#66000000</color>
+    <color name="red">#FF0000</color>
 </resources>

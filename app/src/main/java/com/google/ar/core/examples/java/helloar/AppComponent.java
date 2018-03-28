@@ -14,6 +14,7 @@ import com.google.ar.core.examples.java.helloar.quest.journal.JournalMessageAdap
 import com.google.ar.core.examples.java.helloar.quest.place.PlaceFragment;
 import com.google.ar.core.examples.java.helloar.quest.place.PlacesAdapter;
 import com.google.ar.core.examples.java.helloar.quest.quests.QuestsListFragment;
+import com.google.ar.core.examples.java.helloar.settings.SettingsFragment;
 
 import javax.inject.Singleton;
 
@@ -35,5 +36,6 @@ public interface AppComponent {
     void inject(PlacesAdapter adapter);
     void inject(LoginFragment fragment);
     void inject(RegistrationFragment fragment);
+    void inject(SettingsFragment fragment);
     void inject(GeolocationService service);
 }

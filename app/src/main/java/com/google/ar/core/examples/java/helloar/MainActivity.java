@@ -31,6 +31,7 @@ import com.google.ar.core.examples.java.helloar.quest.items.ItemsListFragment;
 import com.google.ar.core.examples.java.helloar.quest.journal.JournalFragment;
 import com.google.ar.core.examples.java.helloar.quest.place.PlaceFragment;
 import com.google.ar.core.examples.java.helloar.quest.quests.QuestsListFragment;
+import com.google.ar.core.examples.java.helloar.settings.SettingsFragment;
 
 import java.io.FileNotFoundException;
 
@@ -71,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
     private ItemsListFragment itemsListFragment;
     private JournalFragment journalFragment;
     private PlaceFragment placeFragment;
+    private SettingsFragment settingsFragment;
 
     @Inject
     GameModule gameModule;
@@ -122,6 +124,14 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    private View.OnClickListener onLogoutClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            removeToken();
+            checkAuthorization();
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -161,12 +171,15 @@ public class MainActivity extends AppCompatActivity {
                         break;
 
                     case R.id.action_settings:
-
+                        selectFragment(settingsFragment, SettingsFragment.TAG, false);
                         break;
                 }
                 return false;
             }
         });
+
+        settingsFragment = new SettingsFragment();
+        settingsFragment.setOnLogoutClickListener(onLogoutClickListener);
 
 
         startService(new Intent(this, GeolocationService.class));
