@@ -22,6 +22,7 @@ public class App extends Application {
                 gameModule(new GameModule()).
                 networkModule(new NetworkModule(ServerInfo.BACKEND_URL)).
                 contextModule(new ContextModule(this)).
+                hintModule(new HintModule()).
                 build();
     }
 }

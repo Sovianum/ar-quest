@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.google.ar.core.examples.java.helloar.App;
+import com.google.ar.core.examples.java.helloar.HintModule;
 import com.google.ar.core.examples.java.helloar.R;
 import com.google.ar.core.examples.java.helloar.model.Quest;
 import com.google.ar.core.examples.java.helloar.quest.game.QuestModule;
@@ -43,6 +44,9 @@ public class QuestsListFragment extends Fragment {
 
     @Inject
     QuestModule questModule;
+
+    @Inject
+    HintModule hintModule;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

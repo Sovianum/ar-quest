@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="start_ar_hint" type="id" />
+    <item name="select_quest_hint_name" type="id" />
+    <item name="find_floor_hint" type="id" />
+</resources>

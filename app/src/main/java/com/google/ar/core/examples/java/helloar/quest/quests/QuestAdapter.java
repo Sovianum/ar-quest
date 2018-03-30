@@ -9,10 +9,17 @@ import android.view.ViewGroup;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
+import com.github.amlcurran.showcaseview.ShowcaseView;
+import com.github.amlcurran.showcaseview.targets.Target;
+import com.github.amlcurran.showcaseview.targets.ViewTarget;
+import com.google.ar.core.examples.java.helloar.App;
+import com.google.ar.core.examples.java.helloar.HintModule;
 import com.google.ar.core.examples.java.helloar.R;
 import com.google.ar.core.examples.java.helloar.model.Quest;
 
 import java.util.List;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -37,6 +44,9 @@ public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private final QuestsListFragment.OnQuestReactor onItemClickListener;
     private final QuestsListFragment.OnQuestReactor startQuestClickListener;
 
+    @Inject
+    HintModule hintModule;
+
     public class CardViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.title_txt)
         TextView titleView;
@@ -49,12 +59,20 @@ public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         @BindView(R.id.ratingBar_quest)
         RatingBar ratingBar;
 
+        @Inject
+        HintModule hintModule;
+
+        @Inject
+        Context context;
+
         int defaultMaxLines;
 
         CardViewHolder(final View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
             defaultMaxLines = descriptionView.getMaxLines();
+            App.getAppComponent().inject(this);
+
         }
 
         public void bind(final Quest item, final OnItemClickListener onItemClickListener) {
@@ -62,6 +80,15 @@ public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 @Override
                 public void onClick(View view) {
                     onItemClickListener.onItemClick(item);
+                }
+            });
+
+            hintModule.addHint(R.id.select_quest_hint_name, new HintModule.NoCompleteHint() {
+                @Override
+                public void setUpHint(ShowcaseView sv) {
+                    sv.setContentText(context.getString(R.string.select_quest_hint_str));
+                    Target target = new ViewTarget(startQuestTextView);
+                    sv.setTarget(target);
                 }
             });
         }
@@ -72,10 +99,12 @@ public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             QuestsListFragment.OnQuestReactor onItemClickListener,
             QuestsListFragment.OnQuestReactor startQuestClickListener
     ) {
+        App.getAppComponent().inject(this);
         this.fragment = fragment;
         this.quests = quests;
         this.onItemClickListener = onItemClickListener;
         this.startQuestClickListener = startQuestClickListener;
+        hintModule.requestHint(R.id.select_quest_hint_name);
         notifyDataSetChanged();
     }
 
@@ -117,6 +146,7 @@ public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             @Override
             public void onClick(View v) {
                 startQuestClickListener.onQuestReact(quest);
+                hintModule.showHintOnce(R.id.start_ar_hint);
             }
         });
 

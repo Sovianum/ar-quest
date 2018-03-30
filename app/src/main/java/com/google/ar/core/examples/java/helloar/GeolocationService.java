@@ -183,6 +183,9 @@ public class GeolocationService extends Service {
     }
 
     boolean isClose(Location location1, Location location2) {
-        return location2.distanceTo(location1) <= DISTANCE;
+        if (location2 != null && location1 != null) {
+            return location2.distanceTo(location1) <= DISTANCE;
+        }
+        return false;
     }
 }

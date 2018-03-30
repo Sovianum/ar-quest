@@ -35,6 +35,7 @@ import com.google.ar.core.TrackingState;
 import com.google.ar.core.examples.java.helloar.App;
 import com.google.ar.core.examples.java.helloar.DisplayRotationHelper;
 import com.google.ar.core.examples.java.helloar.GameModule;
+import com.google.ar.core.examples.java.helloar.HintModule;
 import com.google.ar.core.examples.java.helloar.PermissionHelper;
 import com.google.ar.core.examples.java.helloar.R;
 import com.google.ar.core.examples.java.helloar.common.CollectionUtils;
@@ -93,6 +94,9 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
     @Inject
     GameModule gameModule;
+
+    @Inject
+    HintModule hintModule;
 
     ContinuousAction snackbarAction = new ContinuousAction(
             new Runnable() {
@@ -182,7 +186,6 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
         snackbarAction.startIfNotRunning();
 
-
         return view;
     }
 
@@ -232,6 +235,8 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         session.resume();
         surfaceView.onResume();
         displayRotationHelper.onResume();
+
+        hintModule.showHint(R.id.find_floor_hint);
     }
 
     @Override
