@@ -279,7 +279,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showGreeting() {
-        //if (isFirstLaunch()) {
+        if (isFirstLaunch()) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setMessage(R.string.greeting_message)
                     .setTitle(R.string.greeting_title)
@@ -294,7 +294,8 @@ public class MainActivity extends AppCompatActivity {
 
             alertDialog = builder.create();
             alertDialog.show();
-        //}
+            setFirstLaunch(false);
+        }
     }
 
     private void checkPermission() {
@@ -308,7 +309,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean isFirstLaunch() {
         SharedPreferences prefs = PreferenceManager
                 .getDefaultSharedPreferences(getApplicationContext());
-        return prefs.getBoolean(getString(R.string.first_launch), false);
+        return prefs.getBoolean(getString(R.string.first_launch), true);
     }
 
     private void setFirstLaunch(boolean isFirstLauch) {
