@@ -67,4 +67,8 @@
     <string name="select_quest_hint_name">StartQuestRequest</string>
     <string name="start_ar_str">Чтобы перейти в режим дополненной реальности, нажмите на эту кнопку</string>
     <string name="find_floor_str">Наведите камеру на пол</string>
+    <string name="act_btn_hint_str">
+        Подойдите ближе к виртуальному объекту. Кнопка станет активной, и вы сможете
+        провести взаимодействие с объектом.
+    </string>
 </resources>
