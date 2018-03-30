@@ -330,13 +330,15 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
             if (camera.getTrackingState() == TrackingState.TRACKING) {
                 if (!gameModule.getScene().isLoaded()) {
                     snackbarAction.startIfNotRunning();
-                    Pose planeOrigin = getPlaneOrigin(frame);
-                    if (planeOrigin != null) {
-                        Place place = gameModule.getCurrentPlace();
-                        if (place != null) {
-                            gameModule.getScene().load(place.getAll(), planeOrigin);
-                        }
-                    }
+//                    Pose planeOrigin = getPlaneOrigin(frame);
+//                    if (planeOrigin != null) {
+//                        Place place = gameModule.getCurrentPlace();
+//                        if (place != null) {
+//                            gameModule.getScene().load(place.getAll(), planeOrigin);
+//                        }
+//                    }
+                    Place place = gameModule.getCurrentPlace();
+                    gameModule.getScene().load(place.getAll(), Pose.IDENTITY);
                 } else {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
