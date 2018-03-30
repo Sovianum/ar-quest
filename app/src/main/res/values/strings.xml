@@ -71,7 +71,7 @@
     <string name="greeting_title">Привет!</string>
     <string name="greeting_message">Добро пожаловать в ARQuest - приложение, где квесты представлены в дополненной реальности.
     Для работы приложения требуются разрешения на использование камеры и геоданных.</string>
-    <string name="non_permission_title">Ошибка</string>
+    <string name="non_permission_title">Необходимы разрешения</string>
     <string name="non_permission_message">Для выбора квестов разрешите приложению использовать камеру и геолокацию</string>
     <string name="non_camera_permission_message">Для выбора квестов разрешите приложению использовать камеру</string>
     <string name="non_geo_permission_message">Для выбора квестов разрешите приложению использовать геолокацию</string>

@@ -259,22 +259,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (!PermissionHelper.hasPermissions(this)) {
-            //Toast.makeText(this, "Camera permission is needed to run this application", Toast.LENGTH_LONG)
-            //        .show();
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage(R.string.non_permission_message)
-                    .setTitle(R.string.non_permission_title)
-                    .setCancelable(false)
-                    .setNeutralButton(android.R.string.ok,
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    dialog.cancel();
-                                    checkPermission();
-                                }
-                            });
-
-            alertDialog = builder.create();
-            alertDialog.show();
+            showNoPermission();
         }
     }
 
@@ -288,20 +273,37 @@ public class MainActivity extends AppCompatActivity {
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
                                     dialog.cancel();
-                                    checkPermission();
+                                    checkAndRequestPermissions();
                                 }
                             });
 
             alertDialog = builder.create();
             alertDialog.show();
             setFirstLaunch(false);
+        } else if (!PermissionHelper.hasPermissions(this)) {
+            showNoPermission();
         }
     }
 
-    private void checkPermission() {
-        if (PermissionHelper.hasPermissions(this)) {
+    private void showNoPermission() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.non_permission_message)
+                .setTitle(R.string.non_permission_title)
+                .setCancelable(false)
+                .setNeutralButton(android.R.string.ok,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                                checkAndRequestPermissions();
+                            }
+                        });
 
-        } else {
+        alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    private void checkAndRequestPermissions() {
+        if (!PermissionHelper.hasPermissions(this)) {
             PermissionHelper.requestPermissions(this);
         }
     }
