@@ -25,6 +25,7 @@
     <string name="auth_activity_btn">Auth Activity</string>
     <string name="ar_activity_btn">AR Fragment</string>
     <string name="json_web_token">jwt</string>
+    <string name="first_launch">isFirstLaunch</string>
     <string name="login_title">Авторизация</string>
     <string name="register_title">Регистрация</string>
     <string name="login_hint">login</string>
@@ -67,4 +68,13 @@
     <string name="select_quest_hint_name">StartQuestRequest</string>
     <string name="start_ar_str">Чтобы перейти в режим дополненной реальности, нажмите на эту кнопку</string>
     <string name="find_floor_str">Наведите камеру на пол</string>
+    <string name="greeting_title">Привет!</string>
+    <string name="greeting_message">Добро пожаловать в ARQuest - приложение, где квесты представлены в дополненной реальности.
+    Для работы приложения требуются разрешения на использование камеры и геоданных.</string>
+    <string name="non_permission_title">Ошибка</string>
+    <string name="non_permission_message">Для выбора квестов разрешите приложению использовать камеру и геолокацию</string>
+    <string name="non_camera_permission_message">Для выбора квестов разрешите приложению использовать камеру</string>
+    <string name="non_geo_permission_message">Для выбора квестов разрешите приложению использовать геолокацию</string>
+
+
 </resources>

@@ -1,5 +1,6 @@
 package com.google.ar.core.examples.java.helloar;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
@@ -11,6 +12,7 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.view.View;
@@ -137,6 +139,8 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    private AlertDialog alertDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -189,13 +193,14 @@ public class MainActivity extends AppCompatActivity {
 
         startService(new Intent(this, GeolocationService.class));
 
-        checkAuthorization();
+        //checkAuthorization(); //commented for focus group testing
         selectFragment(questsListFragment, QuestsListFragment.TAG, false);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+        showGreeting();
         hintModule.setActivity(this);
         selectFragmentByView(questsListFragment, QuestsListFragment.TAG);
 
@@ -249,6 +254,69 @@ public class MainActivity extends AppCompatActivity {
             startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(startMain);
         }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (!PermissionHelper.hasPermissions(this)) {
+            //Toast.makeText(this, "Camera permission is needed to run this application", Toast.LENGTH_LONG)
+            //        .show();
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage(R.string.non_permission_message)
+                    .setTitle(R.string.non_permission_title)
+                    .setCancelable(false)
+                    .setNeutralButton(android.R.string.ok,
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    dialog.cancel();
+                                    checkPermission();
+                                }
+                            });
+
+            alertDialog = builder.create();
+            alertDialog.show();
+        }
+    }
+
+    private void showGreeting() {
+        //if (isFirstLaunch()) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage(R.string.greeting_message)
+                    .setTitle(R.string.greeting_title)
+                    .setCancelable(true)
+                    .setNeutralButton(android.R.string.ok,
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    dialog.cancel();
+                                    checkPermission();
+                                }
+                            });
+
+            alertDialog = builder.create();
+            alertDialog.show();
+        //}
+    }
+
+    private void checkPermission() {
+        if (PermissionHelper.hasPermissions(this)) {
+
+        } else {
+            PermissionHelper.requestPermissions(this);
+        }
+    }
+
+    private boolean isFirstLaunch() {
+        SharedPreferences prefs = PreferenceManager
+                .getDefaultSharedPreferences(getApplicationContext());
+        return prefs.getBoolean(getString(R.string.first_launch), false);
+    }
+
+    private void setFirstLaunch(boolean isFirstLauch) {
+        SharedPreferences.Editor editor = PreferenceManager
+                .getDefaultSharedPreferences(getApplicationContext()).edit();
+
+        editor.putBoolean(getString(R.string.first_launch), isFirstLauch);
+        editor.apply();
     }
 
     private void setUpQuestFragment() {
