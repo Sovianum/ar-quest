@@ -17,6 +17,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import com.github.amlcurran.showcaseview.ShowcaseView;
+import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.google.ar.core.examples.java.helloar.auth.AuthActivity;
 import com.google.ar.core.examples.java.helloar.core.game.Item;
 import com.google.ar.core.examples.java.helloar.core.game.Place;
@@ -82,6 +84,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Inject
     NetworkModule networkModule;
+
+    @Inject
+    HintModule hintModule;
 
     private QuestsListFragment.OnQuestReactor showQuestInfoCallback = new QuestsListFragment.OnQuestReactor() {
         @Override
@@ -191,7 +196,18 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        hintModule.setActivity(this);
         selectFragmentByView(questsListFragment, QuestsListFragment.TAG);
+
+        hintModule.addHint(R.id.start_ar_hint, new HintModule.NoCompleteHint() {
+            @Override
+            public void setUpHint(ShowcaseView sv) {
+                sv.setTarget(new ViewTarget(
+                        bottomNavigationView.findViewById(R.id.action_ar)
+                ));
+                sv.setContentText(getString(R.string.start_ar_str));
+            }
+        });
     }
 
     @Override

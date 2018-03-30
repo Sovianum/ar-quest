@@ -13,6 +13,7 @@ import com.google.ar.core.examples.java.helloar.quest.journal.JournalFragment;
 import com.google.ar.core.examples.java.helloar.quest.journal.JournalMessageAdapter;
 import com.google.ar.core.examples.java.helloar.quest.place.PlaceFragment;
 import com.google.ar.core.examples.java.helloar.quest.place.PlacesAdapter;
+import com.google.ar.core.examples.java.helloar.quest.quests.QuestAdapter;
 import com.google.ar.core.examples.java.helloar.quest.quests.QuestsListFragment;
 import com.google.ar.core.examples.java.helloar.settings.SettingsFragment;
 
@@ -21,8 +22,10 @@ import javax.inject.Singleton;
 import dagger.Component;
 
 @Singleton
-@Component(modules = {GameModule.class, QuestModule.class, NetworkModule.class, ContextModule.class})
+@Component(modules = {GameModule.class, QuestModule.class, NetworkModule.class, ContextModule.class, HintModule.class})
 public interface AppComponent {
+    void inject(QuestAdapter adapter);
+    void inject(QuestAdapter.CardViewHolder holder);
     void inject(MainActivity activity);
     void inject(ARFragment fragment);
     void inject(QuestFragment fragment);
