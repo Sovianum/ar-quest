@@ -23,17 +23,12 @@ public class HintModule {
     public interface Hint {
         void setUpHint(ShowcaseView sv);
 
-        Runnable getOnCompleteAction();
+        void onComplete();
     }
 
     public static abstract class NoCompleteHint implements Hint {
         @Override
-        public Runnable getOnCompleteAction() {
-            return new Runnable() {
-                @Override
-                public void run() {}
-            };
-        }
+        public void onComplete() {}
     }
 
     private ShowcaseView sv;
@@ -99,8 +94,15 @@ public class HintModule {
     }
 
     public void showHint(int hintName) {
+        Hint hint = setUpHint(hintName);
+        if (hint != null) {
+            sv.show();
+        }
+    }
+
+    private Hint setUpHint(int hintName) {
         if (sv == null) {
-            return;
+            return null;
         }
         final Hint hint = hintMap.get(hintName);
         if (hint != null) {
@@ -108,7 +110,7 @@ public class HintModule {
             sv.setOnShowcaseEventListener(new OnShowcaseEventListener() {
                 @Override
                 public void onShowcaseViewHide(ShowcaseView showcaseView) {
-                    hint.getOnCompleteAction().run();
+                    hint.onComplete();
                 }
 
                 @Override
@@ -126,7 +128,8 @@ public class HintModule {
 
                 }
             });
-            sv.show();
+            return hint;
         }
+        return null;
     }
 }

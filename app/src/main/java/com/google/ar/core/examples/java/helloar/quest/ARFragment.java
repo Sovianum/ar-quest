@@ -21,6 +21,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.amlcurran.showcaseview.ShowcaseView;
+import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.google.ar.core.Anchor;
 import com.google.ar.core.ArCoreApk;
 import com.google.ar.core.Camera;
@@ -186,6 +188,20 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
         snackbarAction.startIfNotRunning();
 
+        hintModule.addHint(123, new HintModule.Hint() {
+            @Override
+            public void setUpHint(ShowcaseView sv) {
+                sv.setContentText(getString(R.string.act_btn_hint_str));
+                sv.setTarget(new ViewTarget(interactBtn));
+                pauseGLRendering();
+            }
+
+            @Override
+            public void onComplete() {
+                resumeGLRendering();
+            }
+        });
+
         return view;
     }
 
@@ -235,8 +251,6 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         session.resume();
         surfaceView.onResume();
         displayRotationHelper.onResume();
-
-        hintModule.showHint(R.id.find_floor_hint);
     }
 
     @Override
@@ -316,14 +330,22 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
             if (camera.getTrackingState() == TrackingState.TRACKING) {
                 if (!gameModule.getScene().isLoaded()) {
                     snackbarAction.startIfNotRunning();
-                    Pose planeOrigin = getPlaneOrigin(frame);
-                    if (planeOrigin != null) {
-                        Place place = gameModule.getCurrentPlace();
-                        if (place != null) {
-                            gameModule.getScene().load(place.getAll(), planeOrigin);
-                        }
-                    }
+//                    Pose planeOrigin = getPlaneOrigin(frame);
+//                    if (planeOrigin != null) {
+//                        Place place = gameModule.getCurrentPlace();
+//                        if (place != null) {
+//                            gameModule.getScene().load(place.getAll(), planeOrigin);
+//                        }
+//                    }
+                    Place place = gameModule.getCurrentPlace();
+                    gameModule.getScene().load(place.getAll(), Pose.IDENTITY);
                 } else {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            hintModule.showHintOnce(123);
+                        }
+                    });
                     snackbarAction.stopIfRunning();
                     gameModule.getScene().update(session);
                 }
@@ -346,6 +368,22 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
             // Avoid crashing the application due to unhandled exceptions.
             Log.e(TAG, "Exception on the OpenGL thread", t);
         }
+    }
+
+    public void setCloseOnClickListener(View.OnClickListener closeOnClickListener) {
+        this.closeOnClickListener = closeOnClickListener;
+    }
+
+    private void pauseGLRendering() {
+        // order is important
+        displayRotationHelper.onPause();
+        surfaceView.onPause();
+    }
+
+    private void resumeGLRendering() {
+        // order is important
+        surfaceView.onResume();
+        displayRotationHelper.onResume();
     }
 
     private void showSnackbarMessage(String message, boolean finishOnDismiss) {
@@ -558,7 +596,5 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         return null;
     }
 
-    public void setCloseOnClickListener(View.OnClickListener closeOnClickListener) {
-        this.closeOnClickListener = closeOnClickListener;
-    }
+
 }

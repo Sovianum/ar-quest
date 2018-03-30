@@ -75,6 +75,9 @@
     <string name="non_permission_message">Для выбора квестов разрешите приложению использовать камеру и геолокацию</string>
     <string name="non_camera_permission_message">Для выбора квестов разрешите приложению использовать камеру</string>
     <string name="non_geo_permission_message">Для выбора квестов разрешите приложению использовать геолокацию</string>
-
+    <string name="act_btn_hint_str">
+        Подойдите ближе к виртуальному объекту. Кнопка станет активной, и вы сможете
+        провести взаимодействие с объектом.
+    </string>
 
 </resources>
