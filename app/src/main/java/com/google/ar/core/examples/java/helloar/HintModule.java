@@ -4,9 +4,12 @@ package com.google.ar.core.examples.java.helloar;
 import android.app.Activity;
 import android.content.Context;
 import android.view.MotionEvent;
+import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 
 import com.github.amlcurran.showcaseview.OnShowcaseEventListener;
 import com.github.amlcurran.showcaseview.ShowcaseView;
+import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.google.ar.core.examples.java.helloar.common.CustomViewUtils;
 
 import java.util.HashMap;
@@ -65,12 +68,23 @@ public class HintModule {
     }
 
     public void setActivity(Activity activity) {
+        RelativeLayout.LayoutParams lps = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+// This aligns button to the bottom left side of screen
+        lps.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+        lps.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+// Set margins to the button, we add 16dp margins here
+        int margin = ((Number) (activity.getResources().getDisplayMetrics().density * 16)).intValue();
+        lps.setMargins(margin, margin, margin, margin * 5);
+
+        ViewTarget target = new ViewTarget(R.id.hint_end_button, activity);
         sv = new ShowcaseView.Builder(activity)
                 .withMaterialShowcase()
                 .setContentTitle("Помощь при прохождении")
                 .setShowcaseEventListener(OnShowcaseEventListener.NONE)
                 .setStyle(R.style.CustomShowcaseTheme2)
                 .build();
+// Set declared button position to ShowcaseView
+        sv.setButtonPosition(lps);
         CustomViewUtils.disableAllTouches(sv);
         this.activity = activity;
     }

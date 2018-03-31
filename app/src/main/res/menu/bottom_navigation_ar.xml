@@ -19,11 +19,11 @@
         android:icon="@drawable/ic_camera_alt_black_24dp"
         android:title="@string/ar_menu_bottom_str"
         app:showAsAction="ifRoom" />
-    <item
+    <!--<item
         android:id="@+id/action_settings"
         android:enabled="true"
         android:icon="@drawable/ic_settings_applications_black_24dp"
         android:title="@string/settings_menu_bottom_str"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="ifRoom" />-->
 
 </menu>
