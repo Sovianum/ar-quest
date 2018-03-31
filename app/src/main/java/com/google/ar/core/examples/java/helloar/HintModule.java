@@ -43,6 +43,7 @@ public class HintModule {
     private Set<Integer> hintRequests;
     private Set<Integer> finishedHints;
     private Activity activity;
+    private boolean enabled;
 
     @Provides
     @Singleton
@@ -54,14 +55,15 @@ public class HintModule {
         hintMap = new HashMap<>();
         hintRequests = new HashSet<>();
         finishedHints = new HashSet<>();
-    }
-
-    public ShowcaseView getSV() {
-        return sv;
+        enabled = false;
     }
 
     public void requestHint(int hintID) {
-        hintRequests.add(hintID);
+        if (enabled && hintMap.containsKey(hintID)) {
+            showHintOnce(hintID);
+        } else {
+            hintRequests.add(hintID);
+        }
     }
 
     public void setActivity(Activity activity) {
@@ -71,6 +73,7 @@ public class HintModule {
                 .setShowcaseEventListener(OnShowcaseEventListener.NONE)
                 .setStyle(R.style.CustomShowcaseTheme2)
                 .build();
+        sv.hide();
         CustomViewUtils.disableAllTouches(sv);
         this.activity = activity;
     }
@@ -79,22 +82,25 @@ public class HintModule {
         sv = null;
     }
 
-    public void addAndShow(Hint hint) {
-        hint.setUpHint(sv);
-        sv.show();
+    public void clearHintShowHistory() {
+        hintRequests.clear();
+        finishedHints.clear();
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public void replaceHint(int id, Hint hint) {
+        addHint(id, hint, true);
     }
 
     public void addHint(int id, Hint hint) {
-        if (finishedHints.contains(id)) {
-            return;
-        }
-        hintMap.put(id, hint);
-        if (hintRequests.contains(id)) {
-            hint.setUpHint(sv);
-            sv.show();
-            hintRequests.remove(id);  // hint should be run only once
-            finishedHints.add(id);
-        }
+        addHint(id, hint, false);
     }
 
     public void clearHints() {
@@ -102,15 +108,16 @@ public class HintModule {
     }
 
     public void showHintOnce(int hintID) {
-        if (finishedHints.contains(hintID)) {
+        if (!enabled || finishedHints.contains(hintID)) {
             return;
         }
         showHint(hintID);
-        hintMap.remove(hintID);
         finishedHints.add(hintID);
     }
 
-    public void showHint(int hintID) {
+    private void showHint(int hintID) {
+        if (!enabled) return;
+
         Hint hint = setUpHint(hintID);
         if (hint != null) {
             sv.show();
@@ -148,5 +155,17 @@ public class HintModule {
             return hint;
         }
         return null;
+    }
+
+    private void addHint(int id, Hint hint, boolean needReplace) {
+        if (finishedHints.contains(id)) {
+            return;
+        }
+        if (needReplace || !hintMap.containsKey(id)) {
+            hintMap.put(id, hint);
+        }
+        if (hintRequests.contains(id)) {
+            showHintOnce(id);
+        }
     }
 }

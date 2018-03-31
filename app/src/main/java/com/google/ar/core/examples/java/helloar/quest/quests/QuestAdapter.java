@@ -18,7 +18,9 @@ import com.google.ar.core.examples.java.helloar.HintModule;
 import com.google.ar.core.examples.java.helloar.R;
 import com.google.ar.core.examples.java.helloar.model.Quest;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -37,6 +39,8 @@ public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
     private List<Quest> quests;
     private QuestsListFragment fragment;
+
+    private Map<Integer, Integer> questItemMap = new HashMap<>();
 
     public interface OnItemClickListener {
         void onItemClick(Quest item);
@@ -81,16 +85,6 @@ public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                     onItemClickListener.onItemClick(item);
                 }
             });
-
-            hintModule.addHint(R.id.select_quest_hint_name, new HintModule.NoCompleteHint() {
-                @Override
-                public void setUpHint(ShowcaseView sv) {
-                    sv.setContentText(context.getString(R.string.select_quest_hint_str));
-                    //Target target = new ViewTarget(startQuestTextView);
-                    Target target = new ViewTarget(startQuestButton);
-                    sv.setTarget(target);
-                }
-            });
         }
     }
 
@@ -104,7 +98,6 @@ public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         this.quests = quests;
         this.onItemClickListener = onItemClickListener;
         this.startQuestClickListener = startQuestClickListener;
-        hintModule.requestHint(R.id.select_quest_hint_name);
         notifyDataSetChanged();
     }
 
@@ -155,11 +148,45 @@ public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             }
         });
 
+        questItemMap.put(quest.getId(), position);
         cardHolder.bind(quest, itemClickListenerFromReactor(onItemClickListener));
+
+        setUpHint();
     }
 
     @Override
     public int getItemCount() {
         return quests.size();
+    }
+
+    private void setUpHint() {
+        final View startView;
+        try {
+            int firstQuestItemPosition = questItemMap.get(1);
+            startView = fragment
+                    .recyclerView
+                    .getLayoutManager()
+                    .findViewByPosition(firstQuestItemPosition)
+                    .findViewById(R.id.start_quest_btn);
+        } catch (NullPointerException e) {
+            return;
+        }
+
+        int[] pos = new int[2];
+        startView.getLocationInWindow(pos);
+
+        hintModule.replaceHint(R.id.select_quest_hint_name, new HintModule.NoCompleteHint() {
+            @Override
+            public void setUpHint(ShowcaseView sv) {
+                sv.setContentText(context.getString(R.string.select_quest_hint_str));
+                //Target target = new ViewTarget(startQuestTextView);
+                Target target = new ViewTarget(startView);
+
+                int[] pos = new int[2];
+                startView.getLocationInWindow(pos);
+
+                sv.setTarget(target);
+            }
+        });
     }
 }
