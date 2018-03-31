@@ -3,4 +3,9 @@
     <item name="start_ar_hint" type="id" />
     <item name="select_quest_hint_name" type="id" />
     <item name="find_floor_hint" type="id" />
+    <item name="journal_btn_hint" type="id" />
+    <item name="inventory_btn_hint" type="id" />
+    <item name="inventory_item_hint" type="id" />
+    <item name="release_btn_hint" type="id" />
+    <item name="interact_btn_hint" type="id" />
 </resources>

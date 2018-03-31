@@ -7,12 +7,15 @@ import android.widget.Toast;
 
 import com.google.ar.core.examples.java.helloar.App;
 import com.google.ar.core.examples.java.helloar.GameModule;
+import com.google.ar.core.examples.java.helloar.HintModule;
 import com.google.ar.core.examples.java.helloar.R;
 import com.google.ar.core.examples.java.helloar.core.game.InteractionResult;
 import com.google.ar.core.examples.java.helloar.core.game.InteractiveObject;
 import com.google.ar.core.examples.java.helloar.core.game.Place;
 import com.google.ar.core.examples.java.helloar.core.game.script.ScriptAction;
 import com.google.ar.core.examples.java.helloar.core.game.slot.Slot;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.Locale;
 import java.util.Map;
@@ -22,6 +25,9 @@ import javax.inject.Inject;
 public class InteractionResultHandler {
     @Inject
     GameModule gameModule;
+
+    @Inject
+    HintModule hintModule;
 
     public InteractionResultHandler() {
         App.getAppComponent().inject(this);
@@ -46,6 +52,12 @@ public class InteractionResultHandler {
                 break;
             case TRANSITIONS:
                 onTransitionsResult(result, activity);
+                break;
+            case HINT:
+                onHintResult(result, activity);
+                break;
+            case NEXT_PURPOSE:
+                onNextPurposeResult(result, activity);
                 break;
             default:
                 onResultFallback(result, activity);
@@ -89,11 +101,25 @@ public class InteractionResultHandler {
 
     private void onJournalUpdateResult(final InteractionResult result, final Activity activity) {
         gameModule.getCurrentJournal().addNow(result.getMsg());
+        showMsg(result.getMsg(), activity);
         showMsg(activity.getString(R.string.journal_updated_str), activity);
     }
 
     private void onMessageResult(final InteractionResult result, final Activity activity) {
         showMsg(result.getMsg(), activity);
+    }
+
+    private void onHintResult(final InteractionResult result, final Activity activity) {
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                hintModule.showHintOnce(result.getEntityID());
+            }
+        });
+    }
+
+    private void onNextPurposeResult(final InteractionResult result, final Activity activity) {
+        EventBus.getDefault().post(result);
     }
 
     private void onResultFallback(final InteractionResult result, final Activity activity) {

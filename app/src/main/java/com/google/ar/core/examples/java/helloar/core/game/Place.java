@@ -64,6 +64,12 @@ public class Place {
         return result;
     }
 
+    public List<SceneObject> getAllVisible() {
+        List<SceneObject> result = new ArrayList<>(interactiveObjects.size());
+        result.addAll(interactiveObjects.values());
+        return result;
+    }
+
     public Map<Integer, InteractiveObject> getInteractiveObjects() {
         return interactiveObjects;
     }

@@ -48,6 +48,9 @@ public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     @Inject
     HintModule hintModule;
 
+    @Inject
+    Context context;
+
     public class CardViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.title_txt)
         TextView titleView;
@@ -62,19 +65,12 @@ public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         @BindView(R.id.ratingBar_quest)
         RatingBar ratingBar;
 
-        @Inject
-        HintModule hintModule;
-
-        @Inject
-        Context context;
-
         int defaultMaxLines;
 
         CardViewHolder(final View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
             defaultMaxLines = descriptionView.getMaxLines();
-            App.getAppComponent().inject(this);
 
         }
 

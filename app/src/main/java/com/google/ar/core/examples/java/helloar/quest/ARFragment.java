@@ -58,6 +58,11 @@ import com.google.ar.core.exceptions.UnavailableApkTooOldException;
 import com.google.ar.core.exceptions.UnavailableArcoreNotInstalledException;
 import com.google.ar.core.exceptions.UnavailableSdkTooOldException;
 import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException;
+import com.google.common.base.Function;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -104,15 +109,18 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
             new Runnable() {
                 @Override
                 public void run() {
-                    ARFragment.this.showSnackbarMessage(getString(R.string.direct_camera_to_floor_str), false);
-                    ARFragment.this.hideButtons();
+                    showSnackbarMessage(getString(R.string.direct_camera_to_floor_str), false);
+                    hideButtons();
                 }
             },
             new Runnable() {
                 @Override
                 public void run() {
-                    ARFragment.this.hideSnackbarMessage();
-                    ARFragment.this.showButtons();
+                    if (currMsg == null) {
+                        currMsg = "Найдите объект дополненной реальности неподалеку";
+                    }
+                    setPurpose(currMsg);
+                    showButtons();
                 }
             }
     );
@@ -155,6 +163,8 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
     private View.OnClickListener toJournalOnClickListener;
     private View.OnClickListener closeOnClickListener;
 
+    private String currMsg = null;
+
     public ARFragment() {
         super();
         App.getAppComponent().inject(this);
@@ -188,20 +198,7 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
         snackbarAction.startIfNotRunning();
 
-        hintModule.addHint(123, new HintModule.Hint() {
-            @Override
-            public void setUpHint(ShowcaseView sv) {
-                sv.setContentText(getString(R.string.act_btn_hint_str));
-                sv.setTarget(new ViewTarget(interactBtn));
-                pauseGLRendering();
-            }
-
-            @Override
-            public void onComplete() {
-                resumeGLRendering();
-            }
-        });
-
+        setUpHints();
         return view;
     }
 
@@ -224,6 +221,12 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         if (toJournalBtn != null) {
             toJournalBtn.setOnClickListener(toJournalOnClickListener);
         }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
     }
 
     @Override
@@ -265,12 +268,15 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
             surfaceView.onPause();
             session.pause();
         }
+
+        hideSnackbarMessage();
     }
 
     @Override
     public void onStop() {
         super.onStop();
         snackbarAction.stopIfRunning();
+        EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -343,7 +349,7 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            hintModule.showHintOnce(123);
+                            hintModule.showHintOnce(R.id.interact_btn_hint);
                         }
                     });
                     snackbarAction.stopIfRunning();
@@ -367,6 +373,13 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         } catch (Throwable t) {
             // Avoid crashing the application due to unhandled exceptions.
             Log.e(TAG, "Exception on the OpenGL thread", t);
+        }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onInteractionResult(InteractionResult interactionResult) {
+        if (interactionResult.getType() == InteractionResult.Type.NEXT_PURPOSE){
+            setPurpose(interactionResult.getMsg());
         }
     }
 
@@ -481,6 +494,11 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         Collection<SceneObject> collided = gameModule.getScene().getCollisions(gameModule.getPlayer().getCollider());
         final InteractiveObject closest = getClosestInteractive(collided);
 
+        final Item item = gameModule.getPlayer().getItem();
+        if (item != null) {
+            rendererHelper.renderObject(frame, camera, item);
+        }
+
         Activity activity = getActivity();
         if (activity != null) {
             activity.runOnUiThread(new Runnable() {
@@ -490,22 +508,16 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
                     if (closest != null) {
                         btn.setText(R.string.interact_str);
                         btn.setEnabled(true);
-                    } else if (ARFragment.this.gameModule.getPlayer().getItem() != null &&
-                            ARFragment.this.gameModule.getPlayer().getItem().getId() != Item.VOID_ID) {
+                    } else if (item != null && item.getId() != Item.VOID_ID) {
                         btn.setText(R.string.release_str);
                         btn.setEnabled(true);
+                        hintModule.showHintOnce(R.id.release_btn_hint);
                     } else {
                         btn.setText(R.string.interact_str);
                         btn.setEnabled(false);
                     }
-
                 }
             });
-        }
-
-        Item item = gameModule.getPlayer().getItem();
-        if (item != null) {
-            rendererHelper.renderObject(frame, camera, item);
         }
     }
 
@@ -596,5 +608,89 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         return null;
     }
 
+    private void setUpHints() {
+        hintModule.addHint(R.id.interact_btn_hint, getARScreenHint(new Function<ShowcaseView, Void>() {
+            @Override
+            public Void apply(@NonNull ShowcaseView input) {
+                input.setContentText(getString(R.string.act_btn_hint_str));
+                input.setTarget(new ViewTarget(interactBtn));
+                return null;
+            }
+        }));
 
+        hintModule.addHint(R.id.journal_btn_hint, getARScreenHint(new Function<ShowcaseView, Void>() {
+            @Override
+            public Void apply(@NonNull ShowcaseView input) {
+                input.setContentText("Нажмите на эту кнопку, чтобы посмотреть список событий данного квеста");
+                input.setTarget(new ViewTarget(toJournalBtn));
+                return null;
+            }
+        }));
+
+        hintModule.addHint(R.id.inventory_btn_hint, getARScreenHint(new Function<ShowcaseView, Void>() {
+            @Override
+            public Void apply(@NonNull ShowcaseView input) {
+                input.setContentText("Нажмите на эту кнопку, чтобы посмотреть вещи в инвентаре");
+                input.setTarget(new ViewTarget(toInventoryBtn));
+                return null;
+            }
+        }));
+
+        hintModule.addHint(R.id.release_btn_hint, getARScreenHint(new Function<ShowcaseView, Void>() {
+            @Override
+            public Void apply(@NonNull ShowcaseView input) {
+                input.setContentText("Нажмите на эту кнопку, чтобы вернуть предмет в инвентарь");
+                input.setTarget(new ViewTarget(interactBtn));
+                return null;
+            }
+        }));
+
+        hintModule.requestHint(R.id.inventory_item_hint);
+    }
+
+    private void setPurpose(final String purpose) {
+        Activity activity = getActivity();
+        if (activity != null) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    messageSnackbar.setText(purpose);
+                    currMsg = purpose;
+                }
+            });
+        }
+    }
+
+    private HintModule.Hint getARScreenHint(final Function<ShowcaseView, Void> callable) {
+        return new HintModule.Hint() {
+            @Override
+            public void setUpHint(final ShowcaseView sv) {
+                pauseGLRendering();
+                Activity activity = getActivity();
+                if (activity != null) {
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            callable.apply(sv);
+                            hideSnackbarMessage();
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onComplete() {
+                resumeGLRendering();
+                Activity activity = getActivity();
+                if (activity != null && isVisible()) {
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            showSnackbarMessage(currMsg, false);
+                        }
+                    });
+                }
+            }
+        };
+    }
 }

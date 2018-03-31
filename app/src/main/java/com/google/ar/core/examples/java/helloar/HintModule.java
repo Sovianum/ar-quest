@@ -2,6 +2,7 @@ package com.google.ar.core.examples.java.helloar;
 
 
 import android.app.Activity;
+import android.content.Context;
 import android.view.MotionEvent;
 
 import com.github.amlcurran.showcaseview.OnShowcaseEventListener;
@@ -13,6 +14,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import dagger.Module;
@@ -20,6 +22,9 @@ import dagger.Provides;
 
 @Module
 public class HintModule {
+    @Inject
+    Context context;
+
     public interface Hint {
         void setUpHint(ShowcaseView sv);
 
@@ -28,12 +33,15 @@ public class HintModule {
 
     public static abstract class NoCompleteHint implements Hint {
         @Override
-        public void onComplete() {}
+        public void onComplete() {
+
+        }
     }
 
     private ShowcaseView sv;
     private Map<Integer, Hint> hintMap;
     private Set<Integer> hintRequests;
+    private Set<Integer> finishedHints;
     private Activity activity;
 
     @Provides
@@ -45,6 +53,7 @@ public class HintModule {
     public HintModule() {
         hintMap = new HashMap<>();
         hintRequests = new HashSet<>();
+        finishedHints = new HashSet<>();
     }
 
     public ShowcaseView getSV() {
@@ -76,11 +85,15 @@ public class HintModule {
     }
 
     public void addHint(int id, Hint hint) {
+        if (finishedHints.contains(id)) {
+            return;
+        }
         hintMap.put(id, hint);
         if (hintRequests.contains(id)) {
             hint.setUpHint(sv);
             sv.show();
             hintRequests.remove(id);  // hint should be run only once
+            finishedHints.add(id);
         }
     }
 
@@ -88,13 +101,17 @@ public class HintModule {
         hintMap.clear();
     }
 
-    public void showHintOnce(int hintName) {
-        showHint(hintName);
-        hintMap.remove(hintName);
+    public void showHintOnce(int hintID) {
+        if (finishedHints.contains(hintID)) {
+            return;
+        }
+        showHint(hintID);
+        hintMap.remove(hintID);
+        finishedHints.add(hintID);
     }
 
-    public void showHint(int hintName) {
-        Hint hint = setUpHint(hintName);
+    public void showHint(int hintID) {
+        Hint hint = setUpHint(hintID);
         if (hint != null) {
             sv.show();
         }

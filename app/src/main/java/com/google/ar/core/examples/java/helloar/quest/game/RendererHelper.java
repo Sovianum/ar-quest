@@ -41,7 +41,7 @@ public class RendererHelper {
 
     public void renderScene(Frame frame, Camera camera, Place place) {
         initInner(frame, camera);
-        for (SceneObject sceneObject : place.getAll()) {
+        for (SceneObject sceneObject : place.getAllVisible()) {
             renderInner(sceneObject);
         }
     }

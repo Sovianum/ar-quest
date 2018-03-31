@@ -18,11 +18,13 @@ public class ActorPlayer extends Player {
         if (item == null) {
             return Item.VOID;
         }
-        item.getGeom().applyGlobal(getGeom().getPose());
         return item;
     }
 
     public void update(Pose pose) {
+        if (item != null) {
+            item.getGeom().applyGlobal(getGeom().getPose());
+        }
         getGeom().applyGlobal(pose.compose(displace));
     }
 

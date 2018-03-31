@@ -58,9 +58,10 @@
   </style>
 
   <style name="CustomShowcaseTheme2" parent="ShowcaseView">
-    <item name="sv_backgroundColor">#6d6d6d</item>
+    <item name="sv_backgroundColor">#dc6d6d6d</item>
     <item name="sv_showcaseColor">#1b1b1b</item>
-    <item name="sv_buttonText">Close</item>
+    <item name="android:textColor">#deffffff</item>
+    <item name="sv_buttonText">Понял</item>
     <item name="sv_titleTextAppearance">@style/CustomTitle2</item>
     <item name="sv_detailTextAppearance">@style/CustomText2</item>
   </style>

@@ -8,6 +8,7 @@ import com.google.ar.core.examples.java.helloar.quest.ARFragment;
 import com.google.ar.core.examples.java.helloar.quest.QuestFragment;
 import com.google.ar.core.examples.java.helloar.quest.game.InteractionResultHandler;
 import com.google.ar.core.examples.java.helloar.quest.game.QuestModule;
+import com.google.ar.core.examples.java.helloar.quest.items.ItemAdapter;
 import com.google.ar.core.examples.java.helloar.quest.items.ItemsListFragment;
 import com.google.ar.core.examples.java.helloar.quest.journal.JournalFragment;
 import com.google.ar.core.examples.java.helloar.quest.journal.JournalMessageAdapter;
@@ -24,8 +25,8 @@ import dagger.Component;
 @Singleton
 @Component(modules = {GameModule.class, QuestModule.class, NetworkModule.class, ContextModule.class, HintModule.class})
 public interface AppComponent {
+    void inject(ItemAdapter itemAdapter);
     void inject(QuestAdapter adapter);
-    void inject(QuestAdapter.CardViewHolder holder);
     void inject(MainActivity activity);
     void inject(ARFragment fragment);
     void inject(QuestFragment fragment);
