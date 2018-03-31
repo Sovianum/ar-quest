@@ -73,6 +73,7 @@ public class QuestModule {
                         "Здесь вы можете опробовать взаимодействие с виртуальным объектами", 3
         );
         q1.addPlace(getAppearanceDemoPlace());
+        q1.setCurrPurpose("Подойдите к андроиду неподалеку");
 
         Quest q2 = new Quest(
                 1,
