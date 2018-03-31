@@ -572,6 +572,8 @@ public class MainActivity extends AppCompatActivity {
             bottomNavigationView.setVisibility(View.GONE);
             if (tag.equals(ARFragment.TAG)) {
                 toolBar.setVisibility(View.GONE);
+            } else {
+                toolBar.setVisibility(View.VISIBLE);
             }
         } else {
             bottomNavigationView.setVisibility(View.VISIBLE);
