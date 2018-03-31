@@ -38,6 +38,8 @@ import com.google.ar.core.examples.java.helloar.quest.quests.QuestsListFragment;
 import com.google.ar.core.examples.java.helloar.settings.SettingsFragment;
 
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -141,6 +143,30 @@ public class MainActivity extends AppCompatActivity {
 
     private AlertDialog alertDialog;
 
+    private BottomNavigationView.OnNavigationItemSelectedListener onNavigationItemSelectedListener =
+            new BottomNavigationView.OnNavigationItemSelectedListener() {
+        @Override
+        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+
+            switch (item.getItemId()) {
+                case R.id.action_quests:
+                    selectFragment(questsListFragment, QuestsListFragment.TAG, false);
+                    break;
+                case R.id.action_current_quest:
+                    goToCurrentQuest();
+                    break;
+                case R.id.action_ar:
+                    goARFragment();
+                    break;
+
+                case R.id.action_settings:
+                    selectFragment(settingsFragment, SettingsFragment.TAG, false);
+                    break;
+            }
+            return false;
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -164,28 +190,7 @@ public class MainActivity extends AppCompatActivity {
         questsListFragment.setQuestCardClickedListener(showQuestInfoCallback);
         questsListFragment.setStartQuestCallback(startQuestCallback);
 
-        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-
-                switch (item.getItemId()) {
-                    case R.id.action_quests:
-                        selectFragment(questsListFragment, QuestsListFragment.TAG, false);
-                        break;
-                    case R.id.action_current_quest:
-                        goToCurrentQuest();
-                        break;
-                    case R.id.action_ar:
-                        goARFragment();
-                        break;
-
-                    case R.id.action_settings:
-                        selectFragment(settingsFragment, SettingsFragment.TAG, false);
-                        break;
-                }
-                return false;
-            }
-        });
+        bottomNavigationView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener);
 
         settingsFragment = new SettingsFragment();
         settingsFragment.setOnLogoutClickListener(onLogoutClickListener);
@@ -242,11 +247,14 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        //if (getSupportFragmentManager().getBackStackEntryCount() > 0 ) {
-        //    getSupportFragmentManager().popBackStackImmediate();
-        //}
-        showBottomNavigation();
         if (getSupportFragmentManager().getBackStackEntryCount() > 1) {
+            int backStackEntryCount = getSupportFragmentManager().getBackStackEntryCount();
+            List<String> fragmentsName = new ArrayList<>();
+            for (int fragmentIndex = 0; fragmentIndex < backStackEntryCount; fragmentIndex++) {
+                fragmentsName.add(getSupportFragmentManager().getBackStackEntryAt(fragmentIndex).getName());
+            }
+            setBottomNavItemColor(fragmentsName.get(fragmentsName.size() - 2));
+            showOrHideBottomNavigation(fragmentsName.get(fragmentsName.size() - 2));
             super.onBackPressed();
         } else {
             Intent startMain = new Intent(Intent.ACTION_MAIN);
@@ -411,6 +419,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void selectFragment(Fragment fragment, String tag, boolean fromNav) {
         showOrHideBottomNavigation(tag);
+
         FragmentManager fragmentManager = getSupportFragmentManager();
         int index = fragmentManager.getBackStackEntryCount() - 1;
 
@@ -436,6 +445,33 @@ public class MainActivity extends AppCompatActivity {
         }
         fragmentTransaction.commit();
         fragmentManager.executePendingTransactions();
+        setBottomNavItemColor(tag);
+    }
+
+    private void setBottomNavItemColor(String fragmentTag) {
+        bottomNavigationView.setOnNavigationItemSelectedListener(null);
+        if (QuestsListFragment.TAG.equals(fragmentTag)) {
+            bottomNavigationView.setSelectedItemId(R.id.action_quests);
+
+        } else if (QuestFragment.TAG.equals(fragmentTag)) {
+            bottomNavigationView.setSelectedItemId(R.id.action_current_quest);
+
+        } else if (JournalFragment.TAG.equals(fragmentTag)) {
+            bottomNavigationView.setSelectedItemId(R.id.action_current_quest);
+
+        } else if (ItemsListFragment.TAG.equals(fragmentTag)) {
+            bottomNavigationView.setSelectedItemId(R.id.action_current_quest);
+
+        } else if (PlaceFragment.TAG.equals(fragmentTag)) {
+            bottomNavigationView.setSelectedItemId(R.id.action_current_quest);
+
+        } else if (ARFragment.TAG.equals(fragmentTag)) {
+            bottomNavigationView.setSelectedItemId(R.id.action_ar);
+
+        } else if (SettingsFragment.TAG.equals(fragmentTag)) {
+            bottomNavigationView.setSelectedItemId(R.id.action_settings);
+        }
+        bottomNavigationView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener);
     }
 
     private void showOrHideBottomNavigation(String tag) {
