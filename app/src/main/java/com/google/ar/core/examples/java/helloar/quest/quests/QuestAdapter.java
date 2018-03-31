@@ -6,6 +6,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
@@ -54,8 +55,10 @@ public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         TextView descriptionView;
         @BindView(R.id.expander_view)
         TextView expanderView;
-        @BindView(R.id.start_quest_view)
-        TextView startQuestTextView;
+        //@BindView(R.id.start_quest_view)
+        //TextView startQuestTextView;
+        @BindView(R.id.start_quest_btn)
+        Button startQuestButton;
         @BindView(R.id.ratingBar_quest)
         RatingBar ratingBar;
 
@@ -87,7 +90,8 @@ public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 @Override
                 public void setUpHint(ShowcaseView sv) {
                     sv.setContentText(context.getString(R.string.select_quest_hint_str));
-                    Target target = new ViewTarget(startQuestTextView);
+                    //Target target = new ViewTarget(startQuestTextView);
+                    Target target = new ViewTarget(startQuestButton);
                     sv.setTarget(target);
                 }
             });
@@ -142,7 +146,12 @@ public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 }
             }
         });
-        cardHolder.startQuestTextView.setOnClickListener(new View.OnClickListener() {
+
+        if(cardHolder.expanderView.getLineCount() < cardHolder.defaultMaxLines) {
+            cardHolder.expanderView.setVisibility(View.GONE);
+        }
+        //cardHolder.startQuestTextView.setOnClickListener(new View.OnClickListener() {
+        cardHolder.startQuestButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startQuestClickListener.onQuestReact(quest);

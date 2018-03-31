@@ -276,6 +276,8 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (!PermissionHelper.hasPermissions(this)) {
             showNoPermission();
+        } else {
+            showTutorialSuggestion();
         }
     }
 
@@ -290,30 +292,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_help:
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setMessage(R.string.help_message)
-                        .setTitle(R.string.help_title)
-                        .setCancelable(true)
-                        .setPositiveButton(android.R.string.yes,
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-                                startTutorial();
-                                //TODO:tutorial start
-
-                            }
-                        });
-                builder.setNegativeButton(android.R.string.no,
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-
-                            }
-                        });
-
-
-                alertDialog = builder.create();
-                alertDialog.show();
+                showTutorialSuggestion();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -353,6 +332,33 @@ public class MainActivity extends AppCompatActivity {
                                 checkAndRequestPermissions();
                             }
                         });
+
+        alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    private void showTutorialSuggestion() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.help_message)
+                .setTitle(R.string.help_title)
+                .setCancelable(true)
+                .setPositiveButton(android.R.string.yes,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                                startTutorial();
+                                //TODO:tutorial start
+
+                            }
+                        });
+        builder.setNegativeButton(android.R.string.no,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+
+                    }
+                });
+
 
         alertDialog = builder.create();
         alertDialog.show();
