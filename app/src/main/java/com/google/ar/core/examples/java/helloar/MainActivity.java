@@ -261,7 +261,7 @@ public class MainActivity extends AppCompatActivity {
                 fragmentsName.add(getSupportFragmentManager().getBackStackEntryAt(fragmentIndex).getName());
             }
             setBottomNavItemColor(fragmentsName.get(fragmentsName.size() - 2));
-            setToolBarTitlesByFragment(fragmentsName.get(fragmentsName.size() - 2));
+            setToolBarByFragment(fragmentsName.get(fragmentsName.size() - 2));
             showOrHideBars(fragmentsName.get(fragmentsName.size() - 2));
             super.onBackPressed();
         } else {
@@ -284,6 +284,39 @@ public class MainActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.tool_bar, menu);
         setToolBarTitle(getString(R.string.default_fragment_toolbar_title));
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_help:
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setMessage(R.string.help_message)
+                        .setTitle(R.string.help_title)
+                        .setCancelable(true)
+                        .setPositiveButton(android.R.string.yes,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                                startTutorial();
+                                //TODO:tutorial start
+
+                            }
+                        });
+                builder.setNegativeButton(android.R.string.no,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+
+                            }
+                        });
+
+
+                alertDialog = builder.create();
+                alertDialog.show();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void showGreeting() {
@@ -412,6 +445,10 @@ public class MainActivity extends AppCompatActivity {
         selectFragment(questFragment, QuestFragment.TAG);
     }
 
+    public void startTutorial() {
+        selectFragment(questsListFragment, QuestsListFragment.TAG);
+    }
+
     private <F extends Fragment> View.OnClickListener getSelectFragmentListener(final F fragment) {
         if (fragment == null) {
             throw new RuntimeException("tried to register null fragment");
@@ -461,7 +498,7 @@ public class MainActivity extends AppCompatActivity {
         fragmentTransaction.commit();
         fragmentManager.executePendingTransactions();
         setBottomNavItemColor(tag);
-        setToolBarTitlesByFragment(tag);
+        setToolBarByFragment(tag);
     }
 
     private void setBottomNavItemColor(String fragmentTag) {
@@ -490,7 +527,7 @@ public class MainActivity extends AppCompatActivity {
         bottomNavigationView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener);
     }
 
-    private void setToolBarTitlesByFragment(String fragmentTag) {
+    private void setToolBarByFragment(String fragmentTag) {
         if (QuestsListFragment.TAG.equals(fragmentTag)) {
             setToolBarTitle(getString(R.string.quest_list_fragment_title));
 
@@ -508,8 +545,6 @@ public class MainActivity extends AppCompatActivity {
         } else if (PlaceFragment.TAG.equals(fragmentTag)) {
             setToolBarTitle(getString(R.string.place_fragment_title));
             goBackByNavigationIcon();
-
-        } else if (ARFragment.TAG.equals(fragmentTag)) {
 
         } else if (SettingsFragment.TAG.equals(fragmentTag)) {
             setToolBarTitle(getString(R.string.settings_fragment_title));
