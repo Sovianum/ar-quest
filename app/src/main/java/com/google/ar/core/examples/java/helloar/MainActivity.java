@@ -181,9 +181,9 @@ public class MainActivity extends AppCompatActivity {
                     goARFragment();
                     break;
 
-                case R.id.action_settings:
-                    selectFragment(settingsFragment, SettingsFragment.TAG, false);
-                    break;
+                //case R.id.action_settings: commented for testing
+                //    selectFragment(settingsFragment, SettingsFragment.TAG, false);
+                //    break;
             }
             return false;
         }
@@ -549,7 +549,7 @@ public class MainActivity extends AppCompatActivity {
             bottomNavigationView.setSelectedItemId(R.id.action_ar);
 
         } else if (SettingsFragment.TAG.equals(fragmentTag)) {
-            bottomNavigationView.setSelectedItemId(R.id.action_settings);
+            //bottomNavigationView.setSelectedItemId(R.id.action_settings); commented for testing
         }
         bottomNavigationView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener);
     }
