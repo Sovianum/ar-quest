@@ -25,6 +25,7 @@ import dagger.Component;
 @Singleton
 @Component(modules = {GameModule.class, QuestModule.class, NetworkModule.class, ContextModule.class, HintModule.class})
 public interface AppComponent {
+    void inject(HintModule module);
     void inject(ItemAdapter itemAdapter);
     void inject(QuestAdapter adapter);
     void inject(MainActivity activity);

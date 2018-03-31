@@ -4,12 +4,11 @@ package com.google.ar.core.examples.java.helloar;
 import android.app.Activity;
 import android.content.Context;
 import android.view.MotionEvent;
-import android.view.ViewGroup;
-import android.widget.RelativeLayout;
+import android.view.View;
+import android.widget.Button;
 
 import com.github.amlcurran.showcaseview.OnShowcaseEventListener;
 import com.github.amlcurran.showcaseview.ShowcaseView;
-import com.google.ar.core.examples.java.helloar.common.CustomViewUtils;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -50,7 +49,8 @@ public class HintModule {
     @Provides
     @Singleton
     public HintModule provideHelperModule() {
-        return new HintModule();
+        App.getAppComponent().inject(this);
+        return this;
     }
 
     public HintModule() {
@@ -69,14 +69,6 @@ public class HintModule {
     }
 
     public void setActivity(Activity activity) {
-        RelativeLayout.LayoutParams lps = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        // This aligns button to the bottom left side of screen
-        lps.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-        lps.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-        // Set margins to the button, we add 16dp margins here
-        int margin = ((Number) (activity.getResources().getDisplayMetrics().density * 16)).intValue();
-        lps.setMargins(margin, margin, margin, margin * 5);
-
         sv = new ShowcaseView.Builder(activity)
                 .withMaterialShowcase()
                 .setContentTitle("Помощь при прохождении")
@@ -84,9 +76,16 @@ public class HintModule {
                 .setStyle(R.style.CustomShowcaseTheme2)
                 .build();
         sv.hide();
-        // Set declared button position to ShowcaseView
-        sv.setButtonPosition(lps);
-        CustomViewUtils.disableAllTouches(sv);
+        Button btn = (Button) sv.getChildAt(0);
+        btn.setBackgroundColor(context.getColor(R.color.transparent));
+        btn.setTextColor(context.getColor(R.color.transparent));
+        sv.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                sv.hide();
+                return true;
+            }
+        });
         this.activity = activity;
     }
 
