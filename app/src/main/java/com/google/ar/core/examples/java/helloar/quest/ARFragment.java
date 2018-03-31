@@ -50,6 +50,7 @@ import com.google.ar.core.examples.java.helloar.core.game.InteractiveObject;
 import com.google.ar.core.examples.java.helloar.core.game.Item;
 import com.google.ar.core.examples.java.helloar.core.game.Place;
 import com.google.ar.core.examples.java.helloar.core.game.slot.Slot;
+import com.google.ar.core.examples.java.helloar.model.Quest;
 import com.google.ar.core.examples.java.helloar.quest.game.DeferredClickListener;
 import com.google.ar.core.examples.java.helloar.quest.game.InteractionResultHandler;
 import com.google.ar.core.examples.java.helloar.quest.game.RendererHelper;
@@ -116,10 +117,13 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
             new Runnable() {
                 @Override
                 public void run() {
-                    if (currMsg == null) {
-                        currMsg = "Найдите объект дополненной реальности неподалеку";
+                    Quest quest = gameModule.getCurrentQuest();
+                    String currPurpose = null;
+                    if (quest != null) {
+                        currPurpose = quest.getCurrPurpose();
                     }
-                    setPurpose(currMsg);
+                    currPurpose = currPurpose == null ? "Найдите объект дополненной реальности неподалеку" : currPurpose;
+                    setPurpose(currPurpose);
                     showButtons();
                 }
             }
@@ -162,8 +166,6 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
     private View.OnClickListener toJournalOnClickListener;
     private View.OnClickListener closeOnClickListener;
-
-    private String currMsg = null;
 
     public ARFragment() {
         super();
@@ -649,13 +651,16 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
     }
 
     private void setPurpose(final String purpose) {
+        if (purpose == null) {
+            return;
+        }
+        gameModule.getCurrentQuest().setCurrPurpose(purpose);
         Activity activity = getActivity();
         if (activity != null) {
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     messageSnackbar.setText(purpose);
-                    currMsg = purpose;
                 }
             });
         }
@@ -681,12 +686,17 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
             @Override
             public void onComplete() {
                 resumeGLRendering();
+                final Quest quest = gameModule.getCurrentQuest();
+                if (quest == null) {
+                    return;
+                }
+
                 Activity activity = getActivity();
                 if (activity != null && isVisible()) {
                     activity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            showSnackbarMessage(currMsg, false);
+                            showSnackbarMessage(quest.getCurrPurpose(), false);
                         }
                     });
                 }

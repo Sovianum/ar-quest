@@ -17,6 +17,7 @@ public class Quest {
     private float rating;
     private Map<Integer, Place> placeMap;
     private Map<Location, Integer> placeIdMap;
+    private String currPurpose;
 
     public Quest(int id, String title, String description, float rating) {
         this.id = id;
@@ -25,6 +26,7 @@ public class Quest {
         this.rating = rating;
         placeMap = new HashMap<>();
         placeIdMap = new HashMap<>();
+        currPurpose = null;
     }
 
     public void addPlace(Place place) {
@@ -82,5 +84,13 @@ public class Quest {
 
     public void setRating(float rating) {
         this.rating = rating;
+    }
+
+    public String getCurrPurpose() {
+        return currPurpose;
+    }
+
+    public void setCurrPurpose(String currPurpose) {
+        this.currPurpose = currPurpose;
     }
 }

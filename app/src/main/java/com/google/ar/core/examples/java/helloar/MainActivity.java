@@ -107,14 +107,31 @@ public class MainActivity extends AppCompatActivity {
     private QuestsListFragment.OnQuestReactor startQuestCallback = new QuestsListFragment.OnQuestReactor() {
         @Override
         public void onQuestReact(final Quest quest) {
-            gameModule.setCurrentQuest(quest);
-            gameModule.getScene().clear();
+            final String msg;
+            boolean needLoad;
+            Quest currQuest = gameModule.getCurrentQuest();
+
+            if (quest == null) {
+                msg = "Попытка загрузить null-квест";
+                needLoad = false;
+            } else if (currQuest == null) {
+                needLoad = true;
+                msg = "Вы выбрали квест " + quest.getTitle();
+            } else {
+                needLoad = quest.getId() != currQuest.getId();
+                msg = needLoad ? "Вы выбрали квест " + quest.getTitle() : "Вы уже играете в этот квест";
+            }
+            if (needLoad) {
+                gameModule.setCurrentQuest(quest);
+                gameModule.getScene().clear();
+            }
+
             MainActivity.this.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     Toast.makeText(
                             MainActivity.this,
-                            "Вы выбрали квест " + quest.getTitle(),
+                            msg,
                             Toast.LENGTH_SHORT
                     ).show();
                 }
