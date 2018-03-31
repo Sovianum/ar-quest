@@ -15,6 +15,8 @@ import com.google.ar.core.examples.java.helloar.core.game.Place;
 import com.google.ar.core.examples.java.helloar.core.game.script.ScriptAction;
 import com.google.ar.core.examples.java.helloar.core.game.slot.Slot;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.Locale;
 import java.util.Map;
 
@@ -53,6 +55,9 @@ public class InteractionResultHandler {
                 break;
             case HINT:
                 onHintResult(result, activity);
+                break;
+            case NEXT_PURPOSE:
+                onNextPurposeResult(result, activity);
                 break;
             default:
                 onResultFallback(result, activity);
@@ -111,6 +116,10 @@ public class InteractionResultHandler {
                 hintModule.showHintOnce(result.getEntityID());
             }
         });
+    }
+
+    private void onNextPurposeResult(final InteractionResult result, final Activity activity) {
+        EventBus.getDefault().post(result);
     }
 
     private void onResultFallback(final InteractionResult result, final Activity activity) {

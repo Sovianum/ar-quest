@@ -15,6 +15,7 @@ public class InteractionResult {
         QUEST_END,
         MESSAGE,
         HINT,
+        NEXT_PURPOSE,
         ERROR,
     }
 
@@ -56,6 +57,12 @@ public class InteractionResult {
 
     public static InteractionResult questEndResult() {
         return new InteractionResult(Type.QUEST_END);
+    }
+
+    public static InteractionResult nextPurposeResult(String msg) {
+        InteractionResult result = new InteractionResult(Type.NEXT_PURPOSE);
+        result.msg = msg;
+        return result;
     }
 
     public static InteractionResult errorResult(String msg) {

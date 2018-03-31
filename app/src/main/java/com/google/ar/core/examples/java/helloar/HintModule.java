@@ -33,7 +33,9 @@ public class HintModule {
 
     public static abstract class NoCompleteHint implements Hint {
         @Override
-        public void onComplete() {}
+        public void onComplete() {
+
+        }
     }
 
     private ShowcaseView sv;
