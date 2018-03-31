@@ -79,6 +79,7 @@
         Подойдите ближе к виртуальному объекту. Кнопка станет активной, и вы сможете
         провести взаимодействие с объектом.
     </string>
+    <string name="default_fragment_toolbar_title">Список квестов</string>
     <string name="quest_list_fragment_title">Список квестов</string>
     <string name="quest_fragment_title">Текущий квест</string>
     <string name="settings_fragment_title">Настройки</string>

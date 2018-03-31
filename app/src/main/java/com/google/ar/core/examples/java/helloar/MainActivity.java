@@ -282,7 +282,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.tool_bar, menu);
-        setToolBarTitle("title");
+        setToolBarTitle(getString(R.string.default_fragment_toolbar_title));
         return true;
     }
 
