@@ -88,4 +88,9 @@
     <item name="android:textColor">?android:attr/textColorSecondary</item>
   </style>
 
+  <style name="AppSearchViewStyle" parent="Widget.AppCompat.SearchView">
+    <item name="queryBackground">@android:color/transparent</item>
+    <item name="android:imeActionId">1</item>
+  </style>
+
 </resources>

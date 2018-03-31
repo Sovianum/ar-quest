@@ -14,6 +14,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
@@ -79,6 +81,9 @@ public class MainActivity extends AppCompatActivity {
     private JournalFragment journalFragment;
     private PlaceFragment placeFragment;
     private SettingsFragment settingsFragment;
+
+    @BindView(R.id.toolbar_actionbar)
+    Toolbar toolBar;
 
     @Inject
     GameModule gameModule;
@@ -190,6 +195,8 @@ public class MainActivity extends AppCompatActivity {
         questsListFragment.setQuestCardClickedListener(showQuestInfoCallback);
         questsListFragment.setStartQuestCallback(startQuestCallback);
 
+        setSupportActionBar(toolBar);
+
         bottomNavigationView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener);
 
         settingsFragment = new SettingsFragment();
@@ -254,7 +261,8 @@ public class MainActivity extends AppCompatActivity {
                 fragmentsName.add(getSupportFragmentManager().getBackStackEntryAt(fragmentIndex).getName());
             }
             setBottomNavItemColor(fragmentsName.get(fragmentsName.size() - 2));
-            showOrHideBottomNavigation(fragmentsName.get(fragmentsName.size() - 2));
+            setToolBarTitlesByFragment(fragmentsName.get(fragmentsName.size() - 2));
+            showOrHideBars(fragmentsName.get(fragmentsName.size() - 2));
             super.onBackPressed();
         } else {
             Intent startMain = new Intent(Intent.ACTION_MAIN);
@@ -269,6 +277,13 @@ public class MainActivity extends AppCompatActivity {
         if (!PermissionHelper.hasPermissions(this)) {
             showNoPermission();
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.tool_bar, menu);
+        setToolBarTitle("title");
+        return true;
     }
 
     private void showGreeting() {
@@ -418,7 +433,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void selectFragment(Fragment fragment, String tag, boolean fromNav) {
-        showOrHideBottomNavigation(tag);
+        showOrHideBars(tag);
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         int index = fragmentManager.getBackStackEntryCount() - 1;
@@ -446,6 +461,7 @@ public class MainActivity extends AppCompatActivity {
         fragmentTransaction.commit();
         fragmentManager.executePendingTransactions();
         setBottomNavItemColor(tag);
+        setToolBarTitlesByFragment(tag);
     }
 
     private void setBottomNavItemColor(String fragmentTag) {
@@ -474,16 +490,60 @@ public class MainActivity extends AppCompatActivity {
         bottomNavigationView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener);
     }
 
-    private void showOrHideBottomNavigation(String tag) {
+    private void setToolBarTitlesByFragment(String fragmentTag) {
+        if (QuestsListFragment.TAG.equals(fragmentTag)) {
+            setToolBarTitle(getString(R.string.quest_list_fragment_title));
+
+        } else if (QuestFragment.TAG.equals(fragmentTag)) {
+            setToolBarTitle(getString(R.string.quest_fragment_title));
+
+        } else if (JournalFragment.TAG.equals(fragmentTag)) {
+            setToolBarTitle(getString(R.string.journal_fragment_title));
+            goBackByNavigationIcon();
+
+        } else if (ItemsListFragment.TAG.equals(fragmentTag)) {
+            setToolBarTitle(getString(R.string.items_list_fragment));
+            goBackByNavigationIcon();
+
+        } else if (PlaceFragment.TAG.equals(fragmentTag)) {
+            setToolBarTitle(getString(R.string.place_fragment_title));
+            goBackByNavigationIcon();
+
+        } else if (ARFragment.TAG.equals(fragmentTag)) {
+
+        } else if (SettingsFragment.TAG.equals(fragmentTag)) {
+            setToolBarTitle(getString(R.string.settings_fragment_title));
+        }
+    }
+
+    private void showOrHideBars(String tag) {
         if (tag.equals(ARFragment.TAG)) {
             bottomNavigationView.setVisibility(View.GONE);
+            toolBar.setVisibility(View.GONE);
         } else {
             bottomNavigationView.setVisibility(View.VISIBLE);
+            toolBar.setVisibility(View.VISIBLE);
         }
     }
 
     private void showBottomNavigation() {
         bottomNavigationView.setVisibility(View.VISIBLE);
+    }
+
+    private void goBackByNavigationIcon() {
+        toolBar.setNavigationIcon(R.drawable.ic_arrow_back_white_24dp);
+        toolBar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+                clearToolbarNavigation();
+            }
+        });
+    }
+
+    private void clearToolbarNavigation() {
+        toolBar.setNavigationIcon(null);
+        toolBar.setNavigationOnClickListener(null);
     }
 
     private static boolean isFragmentInBackstack(final FragmentManager fragmentManager, final String fragmentTagName) {
@@ -493,6 +553,10 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return false;
+    }
+
+    private void setToolBarTitle(String title) {
+        toolBar.setTitle(title);
     }
 
     private void checkAuthorization() {

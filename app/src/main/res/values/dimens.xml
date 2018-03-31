@@ -18,6 +18,7 @@
     <dimen name="button_text_size">12sp</dimen>
 
     <dimen name="layout_botom_margin_size">54dp</dimen>
+    <dimen name="layout_top_margin_size">54dp</dimen>
 
 
 </resources>
