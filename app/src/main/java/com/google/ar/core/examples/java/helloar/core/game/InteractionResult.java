@@ -14,54 +14,69 @@ public class InteractionResult {
         NEW_PLACE,
         QUEST_END,
         MESSAGE,
+        HINT,
         ERROR,
     }
 
     public static InteractionResult newItemsResult(Slot.RepeatedItem items) {
-        return new InteractionResult(Type.NEW_ITEMS, "", items, 0, null);
+        InteractionResult result = new InteractionResult(Type.NEW_ITEMS);
+        result.items = items;
+        return result;
     }
 
     public static InteractionResult takeItemsResult(Slot.RepeatedItem items) {
-        return new InteractionResult(Type.TAKE_ITEMS, "", items, 0, null);
+        InteractionResult result = new InteractionResult(Type.TAKE_ITEMS);
+        result.items = items;
+        return result;
     }
 
     public static InteractionResult transitionsResult(Collection<ScriptAction.StateTransition> transitions) {
-        return new InteractionResult(Type.TRANSITIONS, "", null, 0, transitions);
+        InteractionResult result = new InteractionResult(Type.TRANSITIONS);
+        result.transitions = transitions;
+        return result;
     }
 
     public static InteractionResult journalRecordResult(String msg) {
-        return new InteractionResult(Type.JOURNAL_RECORD, msg, null, 0, null);
+        InteractionResult result = new InteractionResult(Type.JOURNAL_RECORD);
+        result.msg = msg;
+        return result;
     }
 
     public static InteractionResult messageResult(String msg) {
-        return new InteractionResult(Type.MESSAGE, msg, null, 0, null);
+        InteractionResult result = new InteractionResult(Type.MESSAGE);
+        result.msg = msg;
+        return result;
     }
 
     public static InteractionResult newPlaceResult(int placeID) {
-        return new InteractionResult(Type.NEW_PLACE, "", null, placeID, null);
+        InteractionResult result = new InteractionResult(Type.NEW_PLACE);
+        result.entityID = placeID;
+        return result;
     }
 
     public static InteractionResult questEndResult() {
-        return new InteractionResult(Type.QUEST_END, "", null, 0, null);
+        return new InteractionResult(Type.QUEST_END);
     }
 
     public static InteractionResult errorResult(String msg) {
-        return new InteractionResult(Type.ERROR, msg, null, 0, null);
+        InteractionResult result = new InteractionResult(Type.ERROR);
+        result.msg = msg;
+        return result;
+    }
+
+    public static InteractionResult hintResult(int hintID) {
+        InteractionResult result = new InteractionResult(Type.HINT);
+        result.entityID = hintID;
+        return result;
     }
 
     Type type;
     String msg;
     Slot.RepeatedItem items;
-    int id; // id has meaning only for NEW_PLACE type
+    int entityID; // entityID has meaning only for NEW_PLACE and HINT type
     Collection<ScriptAction.StateTransition> transitions;
 
-    private InteractionResult(Type type, String msg, Slot.RepeatedItem items, int id, Collection<ScriptAction.StateTransition> transitions) {
-        this.type = type;
-        this.msg = msg;
-        this.items = items;
-        this.id = id;
-        this.transitions = transitions;
-    }
+    private InteractionResult(Type type){this.type = type;}
 
     public Type getType() {
         return type;
@@ -75,8 +90,8 @@ public class InteractionResult {
         return items;
     }
 
-    public int getId() {
-        return id;
+    public int getEntityID() {
+        return entityID;
     }
 
     public Collection<ScriptAction.StateTransition> getTransitions() {

@@ -9,16 +9,25 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.github.amlcurran.showcaseview.ShowcaseView;
+import com.github.amlcurran.showcaseview.targets.ViewTarget;
+import com.google.ar.core.examples.java.helloar.App;
+import com.google.ar.core.examples.java.helloar.HintModule;
 import com.google.ar.core.examples.java.helloar.R;
 import com.google.ar.core.examples.java.helloar.core.game.Item;
 
 import java.util.List;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private List<Item> items;
+
+    @Inject
+    HintModule hintModule;
 
     public interface OnItemClickListener {
         void onItemClick(Item item);
@@ -40,6 +49,13 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
 
         public void bind(final Item item, final OnItemClickListener onItemClickListener) {
+            hintModule.addHint(R.id.inventory_item_hint, new HintModule.NoCompleteHint() {
+                @Override
+                public void setUpHint(ShowcaseView sv) {
+                    sv.setTarget(new ViewTarget(itemView));
+                    sv.setContentText("Для того, чтобы взять предмет в руки, нажмите на него");
+                }
+            });
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -63,6 +79,7 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        App.getAppComponent().inject(this);
         Context context = parent.getContext();
         int CARD_ID = R.layout.item_card;
         View view = LayoutInflater.from(context).inflate(CARD_ID, parent, false);

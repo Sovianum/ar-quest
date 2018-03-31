@@ -5,6 +5,7 @@ import android.content.Context;
 import com.google.ar.core.Pose;
 import com.google.ar.core.examples.java.helloar.App;
 import com.google.ar.core.examples.java.helloar.GameModule;
+import com.google.ar.core.examples.java.helloar.R;
 import com.google.ar.core.examples.java.helloar.common.CollectionUtils;
 import com.google.ar.core.examples.java.helloar.core.ar.collision.Collider;
 import com.google.ar.core.examples.java.helloar.core.ar.collision.shape.Shape;
@@ -79,7 +80,8 @@ public class QuestModule {
                 "Это демонстрационный квест из одного места, загружаемый из сценария." +
                         "Здесь вы можете опробовать работу с инвентарем.", 3
         );
-        q2.addPlace(getNewStyleInteractionDemoPlaceFromScript());
+//        q2.addPlace(getNewStyleInteractionDemoPlaceFromScript());
+        q2.addPlace(getNewStyleInteractionDemoPlace());
 
         List<Quest> result = CollectionUtils.listOf(q1, q2);
         result.sort(new Comparator<Quest>() {
@@ -175,13 +177,14 @@ public class QuestModule {
                 new ScriptAction(
                         1,
                         CollectionUtils.listOf(
-                                InteractionResult.messageResult("Возьми поесть у белого человека"),
+                                InteractionResult.journalRecordResult("Возьми поесть у белого человека"),
                                 InteractionResult.transitionsResult(
                                         CollectionUtils.listOf(
                                                 new ScriptAction.StateTransition(1, 2),
                                                 new ScriptAction.StateTransition(2, 1)
                                         )
-                                )
+                                ),
+                                InteractionResult.hintResult(R.id.journal_btn_hint)
                         )
                 )
         ));
@@ -197,7 +200,7 @@ public class QuestModule {
                 new ScriptAction(
                         1,
                         CollectionUtils.listOf(
-                                InteractionResult.messageResult("Отблагодари белого человека"),
+                                InteractionResult.journalRecordResult("Отблагодари белого человека"),
                                 InteractionResult.newItemsResult(new Slot.RepeatedItem(rose)),
                                 InteractionResult.takeItemsResult(new Slot.RepeatedItem(banana)),
                                 InteractionResult.transitionsResult(
@@ -255,7 +258,8 @@ public class QuestModule {
                         1,
                         CollectionUtils.listOf(
                                 InteractionResult.newItemsResult(new Slot.RepeatedItem(banana)),
-                                InteractionResult.messageResult("Дай ему поесть"),
+                                InteractionResult.journalRecordResult("Дай ему поесть"),
+                                InteractionResult.hintResult(R.id.inventory_btn_hint),
                                 InteractionResult.transitionsResult(CollectionUtils.listOf(
                                         new ScriptAction.StateTransition(2, 2)
                                 ))
@@ -272,7 +276,7 @@ public class QuestModule {
                 new ScriptAction(
                         1,
                         CollectionUtils.listOf(
-                                InteractionResult.messageResult("Да за кого он меня принимает?!"),
+                                InteractionResult.journalRecordResult("Да за кого он меня принимает?!"),
                                 InteractionResult.transitionsResult(CollectionUtils.listOf(
                                         new ScriptAction.StateTransition(2, 3)
                                 ))

@@ -188,20 +188,7 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
         snackbarAction.startIfNotRunning();
 
-        hintModule.addHint(123, new HintModule.Hint() {
-            @Override
-            public void setUpHint(ShowcaseView sv) {
-                sv.setContentText(getString(R.string.act_btn_hint_str));
-                sv.setTarget(new ViewTarget(interactBtn));
-                pauseGLRendering();
-            }
-
-            @Override
-            public void onComplete() {
-                resumeGLRendering();
-            }
-        });
-
+        setUpHints();
         return view;
     }
 
@@ -343,7 +330,7 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            hintModule.showHintOnce(123);
+                            hintModule.showHintOnce(R.id.interact_btn_hint);
                         }
                     });
                     snackbarAction.stopIfRunning();
@@ -481,6 +468,11 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         Collection<SceneObject> collided = gameModule.getScene().getCollisions(gameModule.getPlayer().getCollider());
         final InteractiveObject closest = getClosestInteractive(collided);
 
+        final Item item = gameModule.getPlayer().getItem();
+        if (item != null) {
+            rendererHelper.renderObject(frame, camera, item);
+        }
+
         Activity activity = getActivity();
         if (activity != null) {
             activity.runOnUiThread(new Runnable() {
@@ -490,22 +482,16 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
                     if (closest != null) {
                         btn.setText(R.string.interact_str);
                         btn.setEnabled(true);
-                    } else if (ARFragment.this.gameModule.getPlayer().getItem() != null &&
-                            ARFragment.this.gameModule.getPlayer().getItem().getId() != Item.VOID_ID) {
+                    } else if (item != null && item.getId() != Item.VOID_ID) {
                         btn.setText(R.string.release_str);
                         btn.setEnabled(true);
+                        hintModule.showHintOnce(R.id.release_btn_hint);
                     } else {
                         btn.setText(R.string.interact_str);
                         btn.setEnabled(false);
                     }
-
                 }
             });
-        }
-
-        Item item = gameModule.getPlayer().getItem();
-        if (item != null) {
-            rendererHelper.renderObject(frame, camera, item);
         }
     }
 
@@ -596,5 +582,64 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         return null;
     }
 
+    private void setUpHints() {
+        hintModule.addHint(R.id.interact_btn_hint, new HintModule.Hint() {
+            @Override
+            public void setUpHint(ShowcaseView sv) {
+                sv.setContentText(getString(R.string.act_btn_hint_str));
+                sv.setTarget(new ViewTarget(interactBtn));
+                pauseGLRendering();
+            }
+
+            @Override
+            public void onComplete() {
+                resumeGLRendering();
+            }
+        });
+
+        hintModule.addHint(R.id.journal_btn_hint, new HintModule.Hint() {
+            @Override
+            public void setUpHint(ShowcaseView sv) {
+                sv.setContentText("Нажмите на эту кнопку, чтобы посмотреть список событий данного квеста");
+                sv.setTarget(new ViewTarget(toJournalBtn));
+                pauseGLRendering();
+            }
+
+            @Override
+            public void onComplete() {
+                resumeGLRendering();
+            }
+        });
+
+        hintModule.addHint(R.id.inventory_btn_hint, new HintModule.Hint() {
+            @Override
+            public void setUpHint(ShowcaseView sv) {
+                sv.setContentText("Нажмите на эту кнопку, чтобы посмотреть вещи в инвентаре");
+                sv.setTarget(new ViewTarget(toInventoryBtn));
+                pauseGLRendering();
+            }
+
+            @Override
+            public void onComplete() {
+                resumeGLRendering();
+            }
+        });
+
+        hintModule.addHint(R.id.release_btn_hint, new HintModule.Hint() {
+            @Override
+            public void setUpHint(ShowcaseView sv) {
+                sv.setContentText("Нажмите на эту кнопку, чтобы вернуть предмет в инвентарь");
+                sv.setTarget(new ViewTarget(interactBtn));
+                pauseGLRendering();
+            }
+
+            @Override
+            public void onComplete() {
+                resumeGLRendering();
+            }
+        });
+
+        hintModule.requestHint(R.id.inventory_item_hint);
+    }
 
 }
