@@ -558,9 +558,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showOrHideBars(String tag) {
-        if (tag.equals(ARFragment.TAG)) {
+        if (tag.equals(ARFragment.TAG) || tag.equals(PlaceFragment.TAG)
+                || tag.equals(JournalFragment.TAG) || tag.equals(ItemsListFragment.TAG)) {
             bottomNavigationView.setVisibility(View.GONE);
-            toolBar.setVisibility(View.GONE);
+            if (tag.equals(ARFragment.TAG)) {
+                toolBar.setVisibility(View.GONE);
+            }
         } else {
             bottomNavigationView.setVisibility(View.VISIBLE);
             toolBar.setVisibility(View.VISIBLE);
