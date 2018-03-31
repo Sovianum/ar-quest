@@ -172,6 +172,8 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    private boolean showTutorialSuggestion = true;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -213,6 +215,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         showGreeting();
+        if (showTutorialSuggestion && PermissionHelper.hasPermissions(this)) {
+            showTutorialSuggestion();
+            showTutorialSuggestion = false;
+        }
+        setFirstLaunch(false);
         hintModule.setActivity(this);
         selectFragmentByView(questsListFragment, QuestsListFragment.TAG);
 
@@ -229,7 +236,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        System.out.println("Destroy activity");
+        //System.out.println("Destroy activity");
         //stopService(new Intent(this, GeolocationService.class));
         super.onDestroy();
     }
@@ -277,7 +284,10 @@ public class MainActivity extends AppCompatActivity {
         if (!PermissionHelper.hasPermissions(this)) {
             showNoPermission();
         } else {
-            showTutorialSuggestion();
+            if (showTutorialSuggestion) {
+                showTutorialSuggestion();
+                showTutorialSuggestion = false;
+            }
         }
     }
 
@@ -314,7 +324,6 @@ public class MainActivity extends AppCompatActivity {
 
             alertDialog = builder.create();
             alertDialog.show();
-            setFirstLaunch(false);
         } else if (!PermissionHelper.hasPermissions(this)) {
             showNoPermission();
         }
