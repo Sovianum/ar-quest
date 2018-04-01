@@ -109,21 +109,15 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
             new Runnable() {
                 @Override
                 public void run() {
-                    showSnackbarMessage(getString(R.string.direct_camera_to_floor_str), false);
-                    hideButtons();
+                    setPurpose(getString(R.string.direct_camera_to_floor_str));
                 }
             },
             new Runnable() {
                 @Override
                 public void run() {
                     Quest quest = gameModule.getCurrentQuest();
-                    String currPurpose = null;
-                    if (quest != null) {
-                        currPurpose = quest.getCurrPurpose();
-                    }
-                    currPurpose = currPurpose == null ? "Найдите объект дополненной реальности неподалеку" : currPurpose;
-                    setPurpose(currPurpose);
-                    showButtons();
+                    quest.setCurrPurpose("Найдите объект дополненной реальности неподалеку");
+                    setPurpose(quest.getCurrPurpose());
                 }
             }
     );
@@ -334,16 +328,15 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
             if (camera.getTrackingState() == TrackingState.TRACKING) {
                 if (!gameModule.getScene().isLoaded()) {
+                    setPurpose(getString(R.string.direct_camera_to_floor_str));
                     snackbarAction.startIfNotRunning();
-//                    Pose planeOrigin = getPlaneOrigin(frame);
-//                    if (planeOrigin != null) {
-//                        Place place = gameModule.getCurrentPlace();
-//                        if (place != null) {
-//                            gameModule.getScene().load(place.getAll(), planeOrigin);
-//                        }
-//                    }
-                    Place place = gameModule.getCurrentPlace();
-                    gameModule.getScene().load(place.getAll(), Pose.IDENTITY);
+                    Pose planeOrigin = getPlaneOrigin(frame);
+                    if (planeOrigin != null) {
+                        Place place = gameModule.getCurrentPlace();
+                        if (place != null) {
+                            gameModule.getScene().load(place.getAll(), planeOrigin);
+                        }
+                    }
                 } else {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
@@ -402,10 +395,6 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
                 break;
         }
     }
-
-    //public void setCloseOnClickListener(View.OnClickListener closeOnClickListener) {
-    //    this.closeOnClickListener = closeOnClickListener;
-    //}
 
     private void pauseGLRendering() {
         // order is important
@@ -568,18 +557,6 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         return null;
     }
 
-    private void showButtons() {
-        toInventoryBtn.setAlpha(1);
-        toJournalBtn.setAlpha(1);
-        interactBtn.setAlpha(1);
-    }
-
-    private void hideButtons() {
-        toInventoryBtn.setAlpha(0);
-        toJournalBtn.setAlpha(0);
-        interactBtn.setAlpha(0);
-    }
-
     private Collection<InteractionResult> interact() {
         final Activity activity = getActivity();
         if (activity == null) {
@@ -675,14 +652,18 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         }
         gameModule.getCurrentQuest().setCurrPurpose(purpose);
         Activity activity = getActivity();
-        if (activity != null) {
-            activity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    messageSnackbar.setText(purpose);
-                }
-            });
+        if (activity == null) {
+            return;
         }
+        if (messageSnackbar == null) {
+            showSnackbarMessage(purpose, false);
+        }
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                messageSnackbar.setText(purpose);
+            }
+        });
     }
 
     private HintModule.Hint getARScreenHint(final Function<ShowcaseView, Void> callable) {
