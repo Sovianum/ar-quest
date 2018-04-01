@@ -474,7 +474,7 @@ public class MainActivity extends AppCompatActivity {
 
         arFragment.setDecorations(place);
 
-        arFragment.setCloseOnClickListener(onCloseARClickListener);
+        //arFragment.setCloseOnClickListener(onCloseARClickListener);
     }
 
     public void goToAuthActivity(View v) {
