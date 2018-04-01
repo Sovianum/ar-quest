@@ -401,9 +401,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void showCongratulation() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(R.string.help_message)
-                .setTitle(R.string.help_title)
-                .setCancelable(true)
+        builder.setMessage(R.string.congrat_msg)
+                .setTitle(R.string.congrat_title)
+                .setCancelable(false)
                 .setPositiveButton(android.R.string.yes,
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
@@ -411,13 +411,6 @@ public class MainActivity extends AppCompatActivity {
                                 selectFragment(questsListFragment, QuestsListFragment.TAG);
                             }
                         });
-        builder.setNegativeButton(android.R.string.no,
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                    }
-                });
         alertDialog = builder.create();
         alertDialog.show();
     }

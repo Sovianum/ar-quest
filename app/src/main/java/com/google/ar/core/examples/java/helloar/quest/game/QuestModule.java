@@ -202,7 +202,7 @@ public class QuestModule {
                 new ScriptAction(
                         1,
                         CollectionUtils.listOf(
-                                InteractionResult.journalRecordResult("Отблагодари белого человека"),
+                                InteractionResult.journalRecordResult("Андроид сказал: Отблагодари белого человека"),
                                 InteractionResult.nextPurposeResult("Передайте розу белому человеку"),
                                 InteractionResult.newItemsResult(new Slot.RepeatedItem(rose)),
                                 InteractionResult.takeItemsResult(new Slot.RepeatedItem(banana)),
@@ -261,7 +261,7 @@ public class QuestModule {
                         1,
                         CollectionUtils.listOf(
                                 InteractionResult.newItemsResult(new Slot.RepeatedItem(banana)),
-                                InteractionResult.journalRecordResult("Дай ему поесть"),
+                                InteractionResult.journalRecordResult("Белый человек сказал: Дай ему поесть"),
                                 InteractionResult.nextPurposeResult("Передайте банан андроиду"),
                                 InteractionResult.hintResult(R.id.inventory_btn_hint),
                                 InteractionResult.transitionsResult(CollectionUtils.listOf(
@@ -280,8 +280,9 @@ public class QuestModule {
                 new ScriptAction(
                         1,
                         CollectionUtils.listOf(
-                                InteractionResult.journalRecordResult("Да за кого он меня принимает?!"),
-                                InteractionResult.nextPurposeResult("Квест окончен. Пожете еще поговорить с виртуалами"),
+                                InteractionResult.journalRecordResult("Белый человек сказал: Да за кого он меня принимает?!"),
+                                InteractionResult.nextPurposeResult(""),
+                                InteractionResult.questEndResult(),
                                 InteractionResult.transitionsResult(CollectionUtils.listOf(
                                         new ScriptAction.StateTransition(2, 3)
                                 ))

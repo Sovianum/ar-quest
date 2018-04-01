@@ -90,6 +90,8 @@
     <string name="journal_fragment_title">Журнал</string>
     <string name="place_fragment_title">Найденные точки</string>
     <string name="items_list_fragment">Инвентарь</string>
+    <string name="congrat_msg">Поздравляем! Вы прошли демонстрационный квест. Вы будете перенаправлены на исходный экран, где сможете самостоятельно продолжить исследование нашего приложения</string>
+    <string name="congrat_title">Поздравление</string>
 
 
 </resources>
