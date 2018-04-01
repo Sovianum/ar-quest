@@ -73,6 +73,8 @@
     Для работы приложения требуются разрешения на использование камеры и геоданных.</string>
     <string name="help_title">Обучение</string>
     <string name="help_message">Хотите пройти обучение? </string>
+    <string name="congratulation_title">Поздравляем</string>
+    <string name="congratulation_message">Вы прошли первый квест. Хотите вернуться к выбору квестов?</string>
     <string name="non_permission_title">Необходимы разрешения</string>
     <string name="non_permission_message">Для выбора квестов разрешите приложению использовать камеру и геолокацию</string>
     <string name="non_camera_permission_message">Для выбора квестов разрешите приложению использовать камеру</string>

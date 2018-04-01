@@ -24,6 +24,7 @@ import android.widget.Toast;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.google.ar.core.examples.java.helloar.auth.AuthActivity;
+import com.google.ar.core.examples.java.helloar.core.game.InteractionResult;
 import com.google.ar.core.examples.java.helloar.core.game.Item;
 import com.google.ar.core.examples.java.helloar.core.game.Place;
 import com.google.ar.core.examples.java.helloar.core.game.journal.Journal;
@@ -38,6 +39,10 @@ import com.google.ar.core.examples.java.helloar.quest.journal.JournalFragment;
 import com.google.ar.core.examples.java.helloar.quest.place.PlaceFragment;
 import com.google.ar.core.examples.java.helloar.quest.quests.QuestsListFragment;
 import com.google.ar.core.examples.java.helloar.settings.SettingsFragment;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -239,6 +244,13 @@ public class MainActivity extends AppCompatActivity {
         setFirstLaunch(false);
         hintModule.setActivity(this);
         selectFragmentByView(questsListFragment, QuestsListFragment.TAG);
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -315,6 +327,13 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onInteractionResult(InteractionResult interactionResult) {
+        if (interactionResult.getType().equals(InteractionResult.Type.QUEST_END)) {
+            showCongratulation();
+        }
+    }
+
     private void showGreeting() {
         if (isFirstLaunch()) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -376,6 +395,29 @@ public class MainActivity extends AppCompatActivity {
                 });
 
 
+        alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    private void showCongratulation() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.help_message)
+                .setTitle(R.string.help_title)
+                .setCancelable(true)
+                .setPositiveButton(android.R.string.yes,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                                selectFragment(questsListFragment, QuestsListFragment.TAG);
+                            }
+                        });
+        builder.setNegativeButton(android.R.string.no,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
         alertDialog = builder.create();
         alertDialog.show();
     }
