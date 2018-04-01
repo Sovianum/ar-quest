@@ -82,7 +82,8 @@ public class QuestModule {
                         "Здесь вы можете опробовать работу с инвентарем.", 3
         );
 //        q2.addPlace(getNewStyleInteractionDemoPlaceFromScript());
-        q2.addPlace(getNewStyleInteractionDemoPlace());
+//        q2.addPlace(getNewStyleInteractionDemoPlace());
+        q2.addPlace(getAppearanceDemoPlace());
 
         List<Quest> result = CollectionUtils.listOf(q1, q2);
         result.sort(new Comparator<Quest>() {

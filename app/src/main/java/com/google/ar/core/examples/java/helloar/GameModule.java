@@ -55,6 +55,10 @@ public class GameModule {
         return currentQuest;
     }
 
+    public void resetCurrentQuest() {
+        currentQuest = null;
+    }
+
     public void setCurrentQuest(Quest currentQuest) {
         // todo add state loading
         if (currentQuest == null || currentQuest == this.currentQuest) {
@@ -76,10 +80,16 @@ public class GameModule {
     }
 
     public Journal<String> getCurrentJournal() {
+        if (currentQuest == null) {
+            return null;
+        }
         return journals.getJournal(currentQuest.getId());
     }
 
     public Slot getCurrentInventory() {
+        if (currentQuest == null) {
+            return null;
+        }
         return inventories.getInventory(currentQuest.getId());
     }
 

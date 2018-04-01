@@ -22,4 +22,8 @@ public class Journal<T> {
     public void addNow(T data) {
         records.add(TimestampRecord.recordNow(data));
     }
+
+    public void clear() {
+        records.clear();
+    }
 }

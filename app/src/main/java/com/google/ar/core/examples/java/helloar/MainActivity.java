@@ -28,10 +28,12 @@ import com.google.ar.core.examples.java.helloar.core.game.InteractionResult;
 import com.google.ar.core.examples.java.helloar.core.game.Item;
 import com.google.ar.core.examples.java.helloar.core.game.Place;
 import com.google.ar.core.examples.java.helloar.core.game.journal.Journal;
+import com.google.ar.core.examples.java.helloar.core.game.slot.Slot;
 import com.google.ar.core.examples.java.helloar.model.Quest;
 import com.google.ar.core.examples.java.helloar.network.NetworkModule;
 import com.google.ar.core.examples.java.helloar.quest.ARFragment;
 import com.google.ar.core.examples.java.helloar.quest.QuestFragment;
+import com.google.ar.core.examples.java.helloar.quest.game.ActorPlayer;
 import com.google.ar.core.examples.java.helloar.quest.game.QuestModule;
 import com.google.ar.core.examples.java.helloar.quest.items.ItemAdapter;
 import com.google.ar.core.examples.java.helloar.quest.items.ItemsListFragment;
@@ -127,6 +129,19 @@ public class MainActivity extends AppCompatActivity {
                 msg = needLoad ? "Вы выбрали квест " + quest.getTitle() : "Вы уже играете в этот квест";
             }
             if (needLoad) {
+                Slot currInventory = gameModule.getCurrentInventory();
+                if (currInventory != null) {
+                    currInventory.clear();
+                }
+                ActorPlayer player = gameModule.getPlayer();
+                if (player != null) {
+                    player.release();
+                }
+                Journal<String> journal = gameModule.getCurrentJournal();
+                if (journal != null) {
+                    journal.clear();
+                }
+
                 gameModule.setCurrentQuest(quest);
                 gameModule.getScene().clear();
             }
@@ -164,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onClick(View view) {
             removeToken();
-            checkAuthorization();
+//            checkAuthorization();
         }
     };
 
@@ -227,7 +242,7 @@ public class MainActivity extends AppCompatActivity {
         settingsFragment.setOnLogoutClickListener(onLogoutClickListener);
 
 
-        startService(new Intent(this, GeolocationService.class));
+//        startService(new Intent(this, GeolocationService.class));
 
         //checkAuthorization(); //commented for focus group testing
         selectFragment(questsListFragment, QuestsListFragment.TAG, false);
@@ -408,6 +423,10 @@ public class MainActivity extends AppCompatActivity {
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();
+                                gameModule.getPlayer().release();
+                                gameModule.getCurrentInventory().clear();
+                                gameModule.getCurrentJournal().clear();
+                                gameModule.resetCurrentQuest();
                                 selectFragment(questsListFragment, QuestsListFragment.TAG);
                             }
                         });

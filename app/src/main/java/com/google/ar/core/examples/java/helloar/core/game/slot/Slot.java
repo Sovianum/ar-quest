@@ -153,4 +153,8 @@ public class Slot extends SceneObject {
     public String getName() {
         return name;
     }
+
+    public void clear() {
+        items.clear();
+    }
 }
