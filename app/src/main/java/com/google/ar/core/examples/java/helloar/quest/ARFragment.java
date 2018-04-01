@@ -52,7 +52,6 @@ import com.google.ar.core.examples.java.helloar.core.game.Place;
 import com.google.ar.core.examples.java.helloar.core.game.slot.Slot;
 import com.google.ar.core.examples.java.helloar.model.Quest;
 import com.google.ar.core.examples.java.helloar.quest.game.DeferredClickListener;
-import com.google.ar.core.examples.java.helloar.quest.game.InteractionResultHandler;
 import com.google.ar.core.examples.java.helloar.quest.game.RendererHelper;
 import com.google.ar.core.examples.java.helloar.rendering.BackgroundRenderer;
 import com.google.ar.core.exceptions.UnavailableApkTooOldException;
@@ -70,6 +69,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 import javax.inject.Inject;
 import javax.microedition.khronos.egl.EGLConfig;
@@ -140,7 +140,6 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
     private View.OnClickListener toInventoryOnClickListener;
 
-    private InteractionResultHandler interactionResultHandler;
     private List<SceneObject> collidedObjects = new ArrayList<>();
     private DeferredClickListener interactor = new DeferredClickListener() {
         private boolean needActualize = false;
@@ -196,7 +195,6 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         surfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
 
         installRequested = false;
-        interactionResultHandler = new InteractionResultHandler();
 
         snackbarAction.startIfNotRunning();
 
@@ -380,8 +378,29 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onInteractionResult(InteractionResult interactionResult) {
-        if (interactionResult.getType() == InteractionResult.Type.NEXT_PURPOSE){
-            setPurpose(interactionResult.getMsg());
+        Activity activity = getActivity();
+        if (activity == null) {
+            return;
+        }
+        switch (interactionResult.getType()) {
+            case NEW_ITEMS:
+                onNewItemsResult(interactionResult, activity);
+                break;
+            case TAKE_ITEMS:
+                onTakeItemsResult(interactionResult, activity);
+                break;
+            case JOURNAL_RECORD:
+                onJournalUpdateResult(interactionResult, activity);
+                break;
+            case MESSAGE:
+                onMessageResult(interactionResult, activity);
+                break;
+            case HINT:
+                onHintResult(interactionResult, activity);
+                break;
+            case NEXT_PURPOSE:
+                onNextPurposeResult(interactionResult, activity);
+                break;
         }
     }
 
@@ -590,7 +609,8 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
         Collection<InteractionResult> results = closestObject.interact(arg);
 
         for (InteractionResult result : results) {
-            interactionResultHandler.onInteractionResult(result, activity);
+            EventBus.getDefault().post(result);
+//            interactionResultHandler.onInteractionResult(result, activity);
         }
 
         return results;
@@ -702,5 +722,58 @@ public class ARFragment extends Fragment implements GLSurfaceView.Renderer   {
                 }
             }
         };
+    }
+
+    private void onNewItemsResult(final InteractionResult result, final Activity activity) {
+        Slot.RepeatedItem repeatedItem = result.getItems();
+        showMsg(
+                String.format(
+                        Locale.ENGLISH,
+                        activity.getString(R.string.inventory_updated_str),
+                        repeatedItem.getCnt(), repeatedItem.getItem().getName()
+                ), activity
+        );
+    }
+
+    private void onTakeItemsResult(final InteractionResult result, final Activity activity) {
+        Slot.RepeatedItem repeatedItem = result.getItems();
+        showMsg(
+                String.format(
+                        Locale.ENGLISH,
+                        "%d instanses of %s were taken",
+                        repeatedItem.getCnt(), repeatedItem.getItem().getName()
+                ), activity
+        );
+    }
+
+    private void onJournalUpdateResult(final InteractionResult result, final Activity activity) {
+        showMsg(result.getMsg(), activity);
+        showMsg(activity.getString(R.string.journal_updated_str), activity);
+    }
+
+    private void onMessageResult(final InteractionResult result, final Activity activity) {
+        showMsg(result.getMsg(), activity);
+    }
+
+    private void onHintResult(final InteractionResult result, final Activity activity) {
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                hintModule.showHintOnce(result.getEntityID());
+            }
+        });
+    }
+
+    private void onNextPurposeResult(final InteractionResult result, final Activity activity) {
+        setPurpose(result.getMsg());
+    }
+
+    private void showMsg(final String msg, final Activity activity) {
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(activity, msg, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

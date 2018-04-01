@@ -6,7 +6,6 @@ import com.google.ar.core.examples.java.helloar.auth.RegistrationFragment;
 import com.google.ar.core.examples.java.helloar.network.NetworkModule;
 import com.google.ar.core.examples.java.helloar.quest.ARFragment;
 import com.google.ar.core.examples.java.helloar.quest.QuestFragment;
-import com.google.ar.core.examples.java.helloar.quest.game.InteractionResultHandler;
 import com.google.ar.core.examples.java.helloar.quest.game.QuestModule;
 import com.google.ar.core.examples.java.helloar.quest.items.ItemAdapter;
 import com.google.ar.core.examples.java.helloar.quest.items.ItemsListFragment;
@@ -32,7 +31,6 @@ public interface AppComponent {
     void inject(ARFragment fragment);
     void inject(QuestFragment fragment);
     void inject(QuestsListFragment fragment);
-    void inject(InteractionResultHandler handler);
     void inject(QuestModule service);
     void inject(ItemsListFragment fragment);
     void inject(JournalFragment fragment);
