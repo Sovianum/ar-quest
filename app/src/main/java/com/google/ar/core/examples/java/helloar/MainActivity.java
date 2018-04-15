@@ -172,27 +172,27 @@ public class MainActivity extends AppCompatActivity {
 
     private BottomNavigationView.OnNavigationItemSelectedListener onNavigationItemSelectedListener =
             new BottomNavigationView.OnNavigationItemSelectedListener() {
-        @Override
-        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                @Override
+                public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
-            switch (item.getItemId()) {
-                case R.id.action_quests:
-                    selectFragment(questsListFragment, QuestsListFragment.TAG, false);
-                    break;
-                case R.id.action_current_quest:
-                    goToCurrentQuest();
-                    break;
-                case R.id.action_ar:
-                    goARFragment();
-                    break;
+                    switch (item.getItemId()) {
+                        case R.id.action_quests:
+                            selectFragment(questsListFragment, QuestsListFragment.TAG, false);
+                            break;
+                        case R.id.action_current_quest:
+                            goToCurrentQuest();
+                            break;
+                        case R.id.action_ar:
+                            goARFragment();
+                            break;
 
-                //case R.id.action_settings: commented for testing
-                //    selectFragment(settingsFragment, SettingsFragment.TAG, false);
-                //    break;
-            }
-            return false;
-        }
-    };
+                        case R.id.action_settings:
+                            selectFragment(settingsFragment, SettingsFragment.TAG, false);
+                            break;
+                    }
+                    return false;
+                }
+            };
 
     private boolean showTutorialSuggestion = true;
 
@@ -227,7 +227,7 @@ public class MainActivity extends AppCompatActivity {
         settingsFragment.setOnLogoutClickListener(onLogoutClickListener);
 
 
-        startService(new Intent(this, GeolocationService.class));
+        //startService(new Intent(this, GeolocationService.class));
 
         //checkAuthorization(); //commented for focus group testing
         selectFragment(questsListFragment, QuestsListFragment.TAG, false);
@@ -499,6 +499,8 @@ public class MainActivity extends AppCompatActivity {
         }
         Place currentPlace = gameModule.getCurrentQuest().getPlaceMap().values().iterator().next();
         gameModule.setCurrentPlace(currentPlace);
+        startService(new Intent(this, GeolocationService.class).putExtra(getString(R.string.foreground),
+                isForegroundTracking()));
         selectFragment(questFragment, QuestFragment.TAG);
     }
 
@@ -584,7 +586,7 @@ public class MainActivity extends AppCompatActivity {
             bottomNavigationView.setSelectedItemId(R.id.action_ar);
 
         } else if (SettingsFragment.TAG.equals(fragmentTag)) {
-            //bottomNavigationView.setSelectedItemId(R.id.action_settings); commented for testing
+            bottomNavigationView.setSelectedItemId(R.id.action_settings);
         }
         bottomNavigationView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener);
     }
@@ -694,5 +696,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         hintModule.requestHint(R.id.select_quest_hint_name);
+    }
+
+    private boolean isForegroundTracking() {
+        SharedPreferences prefs = PreferenceManager
+                .getDefaultSharedPreferences(getApplicationContext());
+        return prefs.getBoolean(getString(R.string.foreground_tracking), true);
     }
 }

@@ -7,6 +7,22 @@
     android:layout_marginBottom="@dimen/layout_botom_margin_size"
     android:layout_marginTop="@dimen/layout_top_margin_size">
 
+    <Switch
+        android:id="@+id/switch_geoservice_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:text="@string/switch_geo_text" />
+
+    <TextView
+        android:id="@+id/switch_geoservice_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/spaces_login" />
+
     <Button
         android:id="@+id/logout_btn"
         android:layout_width="match_parent"
@@ -14,16 +30,5 @@
         android:text="@string/logout_btn"
         android:textColor="@color/red"
         style="?android:attr/borderlessButtonStyle" />
-    <Space
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/spaces_login" />
-
-    <Button
-        android:id="@+id/stop_service_btn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/stop_service_btn"
-        style="?android:attr/borderlessButtonStyle" />
-
 
 </LinearLayout>

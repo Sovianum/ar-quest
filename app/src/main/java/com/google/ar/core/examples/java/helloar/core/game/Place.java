@@ -18,6 +18,10 @@ public class Place {
 
     public Place() {
         interactiveObjects = new HashMap<>();
+        name = "default";
+        location = new Location("");
+        location.setLatitude(0.0);
+        location.setLongitude(0.0);
     }
 
     public Place(int id, String name, String description) {
