@@ -28,6 +28,8 @@
     <string name="first_launch">isFirstLaunch</string>
     <string name="foreground_tracking">isForeground</string>
     <string name="foreground">foreground</string>
+    <string name="quest_id">quest_id</string>
+    <string name="download">download</string>
     <string name="login_title">Авторизация</string>
     <string name="register_title">Регистрация</string>
     <string name="login_hint">login</string>
@@ -99,6 +101,7 @@
     <string name="switch_geo_text"> Фоновое отслеживание геолокации </string>
     <string name="switch_geo_title">Фоновое отслеживание геолокации</string>
     <string name="switch_geo_message">Отключение фонового отслеживания не позволит приложении сообщить о найденном месте. Продолжить? </string>
+    <string name="download_btn_str">Загрузить</string>
 
 
 </resources>

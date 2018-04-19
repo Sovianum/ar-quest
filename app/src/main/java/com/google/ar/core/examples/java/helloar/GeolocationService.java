@@ -106,7 +106,7 @@ public class GeolocationService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         App.getAppComponent().inject(this);
-        Log.d("MyService", "onStart: " + intent);
+        Log.d("GeoLocationService", "onStart: " + intent);
 
         LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         initializeLocation();

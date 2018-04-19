@@ -1,7 +1,10 @@
 package com.google.ar.core.examples.java.helloar;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationListener;
@@ -12,6 +15,7 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -29,6 +33,8 @@ import com.google.ar.core.examples.java.helloar.core.game.Item;
 import com.google.ar.core.examples.java.helloar.core.game.Place;
 import com.google.ar.core.examples.java.helloar.core.game.journal.Journal;
 import com.google.ar.core.examples.java.helloar.model.Quest;
+import com.google.ar.core.examples.java.helloar.network.Download;
+import com.google.ar.core.examples.java.helloar.network.DownloadService;
 import com.google.ar.core.examples.java.helloar.network.NetworkModule;
 import com.google.ar.core.examples.java.helloar.quest.ARFragment;
 import com.google.ar.core.examples.java.helloar.quest.QuestFragment;
@@ -107,6 +113,11 @@ public class MainActivity extends AppCompatActivity {
         public void onQuestReact(Quest quest) {
             goToCurrentQuest();
         }
+
+        @Override
+        public void onDowloadReact(Quest quest) {
+
+        }
     };
 
     private QuestsListFragment.OnQuestReactor startQuestCallback = new QuestsListFragment.OnQuestReactor() {
@@ -129,6 +140,29 @@ public class MainActivity extends AppCompatActivity {
             if (needLoad) {
                 gameModule.setCurrentQuest(quest);
                 gameModule.getScene().clear();
+            }
+
+            MainActivity.this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(
+                            MainActivity.this,
+                            msg,
+                            Toast.LENGTH_SHORT
+                    ).show();
+                }
+            });
+        }
+
+        @Override
+        public void onDowloadReact(final Quest quest) {
+            final String msg;
+
+            if (quest == null) {
+                msg = "Попытка загрузить null-квест";
+            } else {
+                msg = "Вы загружаете квест " + quest.getTitle();
+                startDownload(quest.getId());
             }
 
             MainActivity.this.runOnUiThread(new Runnable() {
@@ -231,6 +265,7 @@ public class MainActivity extends AppCompatActivity {
 
         //checkAuthorization(); //commented for focus group testing
         selectFragment(questsListFragment, QuestsListFragment.TAG, false);
+        registerDownloadReceiver();
     }
 
     @Override
@@ -703,4 +738,34 @@ public class MainActivity extends AppCompatActivity {
                 .getDefaultSharedPreferences(getApplicationContext());
         return prefs.getBoolean(getString(R.string.foreground_tracking), true);
     }
+
+    public static final String MESSAGE_PROGRESS = "message_progress";
+
+    private void startDownload(int id) {
+        Intent intent = new Intent(this,DownloadService.class);
+        intent.putExtra(getResources().getString(R.string.quest_id),id);
+        startService(intent);
+    }
+
+    private void registerDownloadReceiver() {
+        LocalBroadcastManager bManager = LocalBroadcastManager.getInstance(this);
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(MESSAGE_PROGRESS);
+        bManager.registerReceiver(broadcastReceiver, intentFilter);
+
+    }
+
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.getAction().equals(MESSAGE_PROGRESS)) {
+                Download download = intent.getParcelableExtra(getResources().getString(R.string.download));
+                questsListFragment.setDownloadProgress(download.getId(), download.getProgress());
+                System.out.println(download.getProgress());
+                if(download.getProgress() == 100) {
+                    questsListFragment.setDownloadCompleted(download.getId());
+                }
+            }
+        }
+    };
 }
