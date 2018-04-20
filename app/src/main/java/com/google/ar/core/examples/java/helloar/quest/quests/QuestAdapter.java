@@ -1,12 +1,15 @@
 package com.google.ar.core.examples.java.helloar.quest.quests;
 
 import android.content.Context;
+import android.os.Environment;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
@@ -18,6 +21,7 @@ import com.google.ar.core.examples.java.helloar.HintModule;
 import com.google.ar.core.examples.java.helloar.R;
 import com.google.ar.core.examples.java.helloar.model.Quest;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +30,8 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+import static com.google.ar.core.examples.java.helloar.network.DownloadService.fileNameStubs;
 
 public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public static QuestAdapter.OnItemClickListener itemClickListenerFromReactor(final QuestsListFragment.OnQuestReactor reactor) {
@@ -64,10 +70,13 @@ public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         TextView expanderView;
         //@BindView(R.id.start_quest_view)
         //TextView startQuestTextView;
-        @BindView(R.id.start_quest_btn)
+        @BindView(R.id.start_or_download_quest_btn)
         Button startQuestButton;
         @BindView(R.id.ratingBar_quest)
         RatingBar ratingBar;
+        @BindView(R.id.progressDownload)
+        ProgressBar mProgressBar;
+
 
         int defaultMaxLines;
 
@@ -75,7 +84,6 @@ public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             super(itemView);
             ButterKnife.bind(this, itemView);
             defaultMaxLines = descriptionView.getMaxLines();
-
         }
 
         public void bind(final Quest item, final OnItemClickListener onItemClickListener) {
@@ -85,6 +93,24 @@ public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                     onItemClickListener.onItemClick(item);
                 }
             });
+        }
+
+        public void setDownloadable() {
+            mProgressBar.setVisibility(View.GONE);
+            startQuestButton.setText(fragment.getResources().getString(R.string.download_btn_str));
+            startQuestButton.setCompoundDrawablesWithIntrinsicBounds(null, null,
+                    ContextCompat.getDrawable(fragment.getActivity(),
+                            R.drawable.ic_file_download_black_24dp), null);
+        }
+
+        public void setStartable() {
+            mProgressBar.setVisibility(View.GONE);
+            startQuestButton.setText(fragment.getResources().getString(R.string.start_quest_str));
+            startQuestButton.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+        }
+
+        public void setDownloadProgress(int downloadProgress) {
+            mProgressBar.setProgress(downloadProgress);
         }
     }
 
@@ -140,13 +166,27 @@ public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             cardHolder.expanderView.setVisibility(View.GONE);
         }
         //cardHolder.startQuestTextView.setOnClickListener(new View.OnClickListener() {
-        cardHolder.startQuestButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startQuestClickListener.onQuestReact(quest);
-                hintModule.showHintOnce(R.id.start_ar_hint);
-            }
-        });
+
+
+        if (!checkFileExists(fileNameStubs)) { //STUBS FOR TESTING, ITS WORKING WRONG!!!!!!!!
+            cardHolder.setStartable();
+            cardHolder.startQuestButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    startQuestClickListener.onQuestReact(quest);
+                    hintModule.showHintOnce(R.id.start_ar_hint);
+                }
+            });
+        } else {
+            cardHolder.setDownloadable();
+            cardHolder.startQuestButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    startQuestClickListener.onDowloadReact(quest);
+                    cardHolder.mProgressBar.setVisibility(View.VISIBLE);
+                }
+            });
+        }
 
         questItemMap.put(quest.getId(), position);
         cardHolder.bind(quest, itemClickListenerFromReactor(onItemClickListener));
@@ -167,7 +207,7 @@ public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                     .recyclerView
                     .getLayoutManager()
                     .findViewByPosition(firstQuestItemPosition)
-                    .findViewById(R.id.start_quest_btn);
+                    .findViewById(R.id.start_or_download_quest_btn);
         } catch (NullPointerException e) {
             return;
         }
@@ -189,4 +229,52 @@ public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             }
         });
     }
+
+    private boolean checkFileExists(String filename) {
+        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), filename);
+        return file.exists();
+    }
+
+    public void setDownloadProgress(int questId, int downloadProgress) {
+        final View downloadedQuestView;
+        try {
+            int itemPosition = questItemMap.get(questId);
+            downloadedQuestView = fragment
+                    .recyclerView
+                    .getLayoutManager()
+                    .findViewByPosition(itemPosition);
+                    ProgressBar progressBar = downloadedQuestView.findViewById(R.id.progressDownload);
+                    progressBar.setProgress(downloadProgress);
+            //notifyItemChanged(itemPosition);
+        } catch (NullPointerException e) {
+            return;
+        }
+    }
+
+    public void setDownloadCompleted(final int questId) {
+        final View downloadedQuestView;
+        try {
+            final int itemPosition = questItemMap.get(questId);
+            downloadedQuestView = fragment
+                    .recyclerView
+                    .getLayoutManager()
+                    .findViewByPosition(itemPosition);
+            ProgressBar progressBar = downloadedQuestView.findViewById(R.id.progressDownload);
+            progressBar.setProgress(100);
+            Button startQuestButton = downloadedQuestView.findViewById(R.id.start_or_download_quest_btn);
+            startQuestButton.setText(fragment.getResources().getString(R.string.start_quest_str));
+            startQuestButton.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+            startQuestButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    startQuestClickListener.onQuestReact(quests.get(itemPosition));
+                }
+            });
+            progressBar.setVisibility(View.GONE);
+        } catch (NullPointerException e) {
+            return;
+        }
+    }
+
+
 }

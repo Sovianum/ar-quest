@@ -3,10 +3,12 @@ package com.google.ar.core.examples.java.helloar;
 import android.Manifest;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -14,6 +16,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 
 import com.google.ar.core.examples.java.helloar.core.game.Place;
@@ -31,6 +34,7 @@ public class GeolocationService extends Service {
     }
 
     private static final String TAG = "GeolocationService";
+    private static final String CHANNEL_ID = "channel_01";
     private LocationManager locationManager = null;
     private Location lastLocation;
     private static final double DISTANCE = 50.0;
@@ -40,6 +44,7 @@ public class GeolocationService extends Service {
     private static final String NOTIFICATION_SEARCHING_TITLE = "Поиск мест";
     private static final String NOTIFICATION_SEARCHING_CONTENT = "Найдите контрольную точку для продолжения квеста";
     private Place searchedPlace;
+    private boolean showedSearchingNotif;
 
     private Location mDestination;
 
@@ -55,17 +60,27 @@ public class GeolocationService extends Service {
                 }
                 Collection<Place> currentQuestPlaces = currentQuest.getAvailablePlaces();
                 if(isCloseToPoints(currentQuestPlaces, location)) {
-                    showNotification("Найдена точка", String.valueOf(location.getLongitude()) +
+                    //showNotification("Найдена точка", String.valueOf(location.getLongitude()) +
+                    //        ", " + location.getLatitude());
+                    sendNotification(String.valueOf(location.getLongitude()) +
                             ", " + location.getLatitude());
                     gameModule.getCurrentJournal().addNow("Найдена контрольная точка " +
                         searchedPlace.getName());
+                    showedSearchingNotif = false;
                 } else {
-                    showNotificationSearching(NOTIFICATION_SEARCHING_TITLE, NOTIFICATION_SEARCHING_CONTENT);
+                    //showNotificationSearching(NOTIFICATION_SEARCHING_TITLE, NOTIFICATION_SEARCHING_CONTENT);
+                    //sendNotification("Not found");
+
                 }
             } else if(searchedPlace == null) {
-                showNotificationSearching(NOTIFICATION_SEARCHING_TITLE, NOTIFICATION_SEARCHING_CONTENT);
+                //showNotificationSearching(NOTIFICATION_SEARCHING_TITLE, NOTIFICATION_SEARCHING_CONTENT);
+                //sendNotification("Not found");
             } else if (location.distanceTo(searchedPlace.getLocation()) > DISTANCE) {
-                showNotificationSearching(NOTIFICATION_SEARCHING_TITLE, NOTIFICATION_SEARCHING_CONTENT);
+                //if (!showedSearchingNotif) {
+                    //showNotificationSearching(NOTIFICATION_SEARCHING_TITLE, NOTIFICATION_SEARCHING_CONTENT);
+                    //showedSearchingNotif = true;
+                //}
+                //sendNotification("Not found");
             }
         }
 
@@ -91,7 +106,7 @@ public class GeolocationService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         App.getAppComponent().inject(this);
-        Log.d("MyService", "onStart: " + intent);
+        Log.d("GeoLocationService", "onStart: " + intent);
 
         LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         initializeLocation();
@@ -110,6 +125,15 @@ public class GeolocationService extends Service {
                 locationListener);
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0,
                 locationListener);
+        boolean inForeground = false;
+        if (intent.hasExtra(getResources().getString(R.string.foreground))) {
+            inForeground = intent.getBooleanExtra("foreground", false);
+        }
+        if (inForeground) {
+            showNotificationSearching(NOTIFICATION_SEARCHING_TITLE, NOTIFICATION_SEARCHING_CONTENT);
+        } else {
+            stopForeground(true);
+        }
 
         return START_STICKY;
     }
@@ -187,5 +211,40 @@ public class GeolocationService extends Service {
             return location2.distanceTo(location1) <= DISTANCE;
         }
         return false;
+    }
+
+
+    private void sendNotification(String notificationDetails) {
+        NotificationManager mNotificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = getString(R.string.app_name);
+            NotificationChannel mChannel =
+                    new NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_DEFAULT);
+
+            mNotificationManager.createNotificationChannel(mChannel);
+        }
+
+        Intent notificationIntent = new Intent(getApplicationContext(), MainActivity.class);
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        stackBuilder.addParentStack(MainActivity.class);
+        stackBuilder.addNextIntent(notificationIntent);
+
+        PendingIntent notificationPendingIntent =
+                stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(GeolocationService.this, "default")
+                .setSmallIcon(R.drawable.ic_launcher) // notification icon
+                .setColor(Color.RED)
+                .setContentTitle(NOTIFICATION_TITLE) // title for notification
+                .setContentText(getString(R.string.geofence_notification_text) + " " + notificationDetails + "?")// message for notification
+                .setAutoCancel(true) // clear notification after click
+                .setContentIntent(notificationPendingIntent);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            mBuilder.setChannelId(CHANNEL_ID); // Channel ID
+        }
+        mBuilder.setAutoCancel(true);
+        mNotificationManager.notify(0, mBuilder.build());
     }
 }

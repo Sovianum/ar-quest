@@ -6,6 +6,7 @@
     <dimen name="link_text_size">20sp</dimen>
     <dimen name="spaces_login">40dp</dimen>
     <dimen name="spaces_register">40dp</dimen>
+    <dimen name="spaces_progress">10dp</dimen>
 
     <!--journal dimens-->
     <dimen name="journal_vertical_margin">20dp</dimen>

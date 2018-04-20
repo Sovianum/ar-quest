@@ -1,7 +1,10 @@
 package com.google.ar.core.examples.java.helloar;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationListener;
@@ -12,6 +15,7 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -30,6 +34,8 @@ import com.google.ar.core.examples.java.helloar.core.game.Place;
 import com.google.ar.core.examples.java.helloar.core.game.journal.Journal;
 import com.google.ar.core.examples.java.helloar.core.game.slot.Slot;
 import com.google.ar.core.examples.java.helloar.model.Quest;
+import com.google.ar.core.examples.java.helloar.network.Download;
+import com.google.ar.core.examples.java.helloar.network.DownloadService;
 import com.google.ar.core.examples.java.helloar.network.NetworkModule;
 import com.google.ar.core.examples.java.helloar.quest.ARFragment;
 import com.google.ar.core.examples.java.helloar.quest.QuestFragment;
@@ -109,6 +115,11 @@ public class MainActivity extends AppCompatActivity {
         public void onQuestReact(Quest quest) {
             goToCurrentQuest();
         }
+
+        @Override
+        public void onDowloadReact(Quest quest) {
+
+        }
     };
 
     private QuestsListFragment.OnQuestReactor startQuestCallback = new QuestsListFragment.OnQuestReactor() {
@@ -157,6 +168,29 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
+
+        @Override
+        public void onDowloadReact(final Quest quest) {
+            final String msg;
+
+            if (quest == null) {
+                msg = "Попытка загрузить null-квест";
+            } else {
+                msg = "Вы загружаете квест " + quest.getTitle();
+                startDownload(quest.getId());
+            }
+
+            MainActivity.this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(
+                            MainActivity.this,
+                            msg,
+                            Toast.LENGTH_SHORT
+                    ).show();
+                }
+            });
+        }
     };
 
     private ItemAdapter.OnItemClickListener chooseItemOnClickListener = new ItemAdapter.OnItemClickListener() {
@@ -187,27 +221,27 @@ public class MainActivity extends AppCompatActivity {
 
     private BottomNavigationView.OnNavigationItemSelectedListener onNavigationItemSelectedListener =
             new BottomNavigationView.OnNavigationItemSelectedListener() {
-        @Override
-        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                @Override
+                public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
-            switch (item.getItemId()) {
-                case R.id.action_quests:
-                    selectFragment(questsListFragment, QuestsListFragment.TAG, false);
-                    break;
-                case R.id.action_current_quest:
-                    goToCurrentQuest();
-                    break;
-                case R.id.action_ar:
-                    goARFragment();
-                    break;
+                    switch (item.getItemId()) {
+                        case R.id.action_quests:
+                            selectFragment(questsListFragment, QuestsListFragment.TAG, false);
+                            break;
+                        case R.id.action_current_quest:
+                            goToCurrentQuest();
+                            break;
+                        case R.id.action_ar:
+                            goARFragment();
+                            break;
 
-                //case R.id.action_settings: commented for testing
-                //    selectFragment(settingsFragment, SettingsFragment.TAG, false);
-                //    break;
-            }
-            return false;
-        }
-    };
+                        case R.id.action_settings:
+                            selectFragment(settingsFragment, SettingsFragment.TAG, false);
+                            break;
+                    }
+                    return false;
+                }
+            };
 
     private boolean showTutorialSuggestion = true;
 
@@ -241,11 +275,11 @@ public class MainActivity extends AppCompatActivity {
         settingsFragment = new SettingsFragment();
         settingsFragment.setOnLogoutClickListener(onLogoutClickListener);
 
-
-//        startService(new Intent(this, GeolocationService.class));
+        //startService(new Intent(this, GeolocationService.class));
 
         //checkAuthorization(); //commented for focus group testing
         selectFragment(questsListFragment, QuestsListFragment.TAG, false);
+        registerDownloadReceiver();
     }
 
     @Override
@@ -518,6 +552,8 @@ public class MainActivity extends AppCompatActivity {
         }
         Place currentPlace = gameModule.getCurrentQuest().getPlaceMap().values().iterator().next();
         gameModule.setCurrentPlace(currentPlace);
+        startService(new Intent(this, GeolocationService.class).putExtra(getString(R.string.foreground),
+                isForegroundTracking()));
         selectFragment(questFragment, QuestFragment.TAG);
     }
 
@@ -603,7 +639,7 @@ public class MainActivity extends AppCompatActivity {
             bottomNavigationView.setSelectedItemId(R.id.action_ar);
 
         } else if (SettingsFragment.TAG.equals(fragmentTag)) {
-            //bottomNavigationView.setSelectedItemId(R.id.action_settings); commented for testing
+            bottomNavigationView.setSelectedItemId(R.id.action_settings);
         }
         bottomNavigationView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener);
     }
@@ -714,4 +750,40 @@ public class MainActivity extends AppCompatActivity {
         });
         hintModule.requestHint(R.id.select_quest_hint_name);
     }
+
+    private boolean isForegroundTracking() {
+        SharedPreferences prefs = PreferenceManager
+                .getDefaultSharedPreferences(getApplicationContext());
+        return prefs.getBoolean(getString(R.string.foreground_tracking), true);
+    }
+
+    public static final String MESSAGE_PROGRESS = "message_progress";
+
+    private void startDownload(int id) {
+        Intent intent = new Intent(this,DownloadService.class);
+        intent.putExtra(getResources().getString(R.string.quest_id),id);
+        startService(intent);
+    }
+
+    private void registerDownloadReceiver() {
+        LocalBroadcastManager bManager = LocalBroadcastManager.getInstance(this);
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(MESSAGE_PROGRESS);
+        bManager.registerReceiver(broadcastReceiver, intentFilter);
+
+    }
+
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.getAction().equals(MESSAGE_PROGRESS)) {
+                Download download = intent.getParcelableExtra(getResources().getString(R.string.download));
+                questsListFragment.setDownloadProgress(download.getId(), download.getProgress());
+                System.out.println(download.getProgress());
+                if(download.getProgress() == 100) {
+                    questsListFragment.setDownloadCompleted(download.getId());
+                }
+            }
+        }
+    };
 }

@@ -31,13 +31,15 @@ public final class PermissionHelper {
   static final String CAMERA_PERMISSION = Manifest.permission.CAMERA;
   static final String FINE_LOC_PERMISSION = Manifest.permission.ACCESS_FINE_LOCATION;
   static final String COARSE_LOC_PERMISSION = Manifest.permission.ACCESS_COARSE_LOCATION;
-  public static final String INTERNET_PERMISSION = Manifest.permission.INTERNET;
+  static final String INTERNET_PERMISSION = Manifest.permission.INTERNET;
+  static final String STORAGE_PERMISSION = Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
   public static boolean hasPermissions(Context context) {
     return hasPermission(context, CAMERA_PERMISSION) &&
             hasPermission(context, FINE_LOC_PERMISSION) &&
             hasPermission(context, COARSE_LOC_PERMISSION) &&
-            hasPermission(context, INTERNET_PERMISSION);
+            hasPermission(context, INTERNET_PERMISSION) &&
+            hasPermission(context, STORAGE_PERMISSION);
   }
 
   static private boolean hasPermission(Context context, String permission) {
@@ -62,7 +64,8 @@ public final class PermissionHelper {
                     CAMERA_PERMISSION,
                     FINE_LOC_PERMISSION,
                     COARSE_LOC_PERMISSION,
-                    INTERNET_PERMISSION
+                    INTERNET_PERMISSION,
+                    STORAGE_PERMISSION
             }, MY_PERMISSIONS_CODE);
   }
 

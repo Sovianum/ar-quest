@@ -28,6 +28,7 @@ import butterknife.ButterKnife;
 public class QuestsListFragment extends Fragment {
     public interface OnQuestReactor {
         void onQuestReact(Quest quest);
+        void onDowloadReact(Quest quest);
     }
 
     public static final String TAG = QuestsListFragment.class.getSimpleName();
@@ -104,5 +105,13 @@ public class QuestsListFragment extends Fragment {
 
     public void setStartQuestCallback(OnQuestReactor listener) {
         this.startQuestListener = listener;
+    }
+
+    public void setDownloadProgress(int questId, int downloadProgress) {
+        adapter.setDownloadProgress(questId, downloadProgress);
+    }
+
+    public void setDownloadCompleted(int questId) {
+        adapter.setDownloadCompleted(questId);
     }
 }

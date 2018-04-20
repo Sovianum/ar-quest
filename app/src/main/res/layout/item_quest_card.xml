@@ -39,11 +39,12 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="end">
+            android:gravity="end"
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/expander_view"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="3"
                 android:gravity="start|bottom"
@@ -53,7 +54,7 @@
                 android:paddingEnd="8dp"
                 />
 
-            <Button
+            <!--<Button
                 android:id="@+id/start_quest_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -61,7 +62,25 @@
                 android:text="@string/start_quest_str"
                 android:textColor="@color/white"
                 style="?android:attr/borderlessButtonStyle"
-                />
+                />-->
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/start_or_download_quest_btn"
+                android:text="@string/download_btn_str"
+                android:textColor="@android:color/white"
+                android:drawableEnd="@drawable/ic_file_download_black_24dp"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <ProgressBar
+                android:id="@+id/progressDownload"
+                style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"/>
 
         </LinearLayout>
 
