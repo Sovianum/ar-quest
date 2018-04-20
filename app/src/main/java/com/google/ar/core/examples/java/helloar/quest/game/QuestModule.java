@@ -72,7 +72,7 @@ public class QuestModule {
                 "Это демонстрационный квест из одного места." +
                         "Здесь вы можете опробовать взаимодействие с виртуальным объектами", 3
         );
-        q1.addPlace(getAppearanceDemoPlace());
+        q1.addPlace(getNewStyleInteractionDemoPlace());
         q1.setCurrPurpose("Подойдите к андроиду неподалеку");
 
         Quest q2 = new Quest(
@@ -83,7 +83,7 @@ public class QuestModule {
         );
 //        q2.addPlace(getNewStyleInteractionDemoPlaceFromScript());
 //        q2.addPlace(getNewStyleInteractionDemoPlace());
-        q2.addPlace(getAppearanceDemoPlace());
+        q2.addPlace(getNewStyleInteractionDemoPlace());
 
         List<Quest> result = CollectionUtils.listOf(q1, q2);
         result.sort(new Comparator<Quest>() {
