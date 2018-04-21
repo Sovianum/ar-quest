@@ -2,16 +2,19 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 27
+    buildToolsVersion '26.0.2'
     defaultConfig {
-        applicationId "com.google.ar.core.examples.java.helloar"
-
-        // 24 is the minimum since ARCore only works with 24 and higher.
+        applicationId "com.example.virosample"
+        applicationIdSuffix ".arcore"
         minSdkVersion 24
         targetSdkVersion 27
         versionCode 1
         versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        ndk {
+            abiFilters "armeabi-v7a", "x86", "armeabi", "mips"
+        }
     }
-
     buildTypes {
         release {
             minifyEnabled false
@@ -21,9 +24,12 @@ android {
 }
 
 dependencies {
-    // ARCore library
-    implementation 'com.google.ar:core:1.0.0'
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile project(':gvr_common')
+    compile project(':arcore_client')
+    compile project(':viro_core')
 
+    // dependencies from helloar
     // Obj - a simple Wavefront OBJ file loader
     // https://github.com/javagl/Obj
     implementation 'de.javagl:obj:0.2.1'
