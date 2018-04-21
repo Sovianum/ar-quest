@@ -11,7 +11,7 @@ import android.widget.TextView;
 import edu.technopark.arquest.App;
 import edu.technopark.arquest.GameModule;
 import edu.technopark.arquest.R;
-import edu.technopark.arquest.core.game.Place;
+import edu.technopark.arquest.game.Place;
 
 import javax.inject.Inject;
 

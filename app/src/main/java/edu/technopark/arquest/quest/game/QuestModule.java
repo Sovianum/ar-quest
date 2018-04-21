@@ -2,53 +2,33 @@ package edu.technopark.arquest.quest.game;
 
 import android.content.Context;
 
-import com.google.ar.core.Pose;
-import edu.technopark.arquest.App;
-import edu.technopark.arquest.GameModule;
-import edu.technopark.arquest.R;
-import edu.technopark.arquest.common.CollectionUtils;
-import edu.technopark.arquest.core.ar.collision.Collider;
-import edu.technopark.arquest.core.ar.collision.shape.Shape;
-import edu.technopark.arquest.core.ar.collision.shape.Sphere;
-import edu.technopark.arquest.core.ar.drawable.IDrawable;
-import edu.technopark.arquest.core.ar.drawable.TextureDrawable;
-import edu.technopark.arquest.core.game.Action;
-import edu.technopark.arquest.core.game.InteractionArgument;
-import edu.technopark.arquest.core.game.InteractionResult;
-import edu.technopark.arquest.core.game.InteractiveObject;
-import edu.technopark.arquest.core.game.Item;
-import edu.technopark.arquest.core.game.ItemlessAction;
-import edu.technopark.arquest.core.game.Place;
-import edu.technopark.arquest.core.game.script.ActionCondition;
-import edu.technopark.arquest.core.game.script.ObjectState;
-import edu.technopark.arquest.core.game.script.ScriptAction;
-import edu.technopark.arquest.core.game.slot.Slot;
-import edu.technopark.arquest.model.Quest;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
+import com.viro.core.Object3D;
+import com.viro.core.PhysicsBody;
+import com.viro.core.PhysicsShapeSphere;
+import com.viro.core.Vector;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
+import edu.technopark.arquest.App;
+import edu.technopark.arquest.GameModule;
+import edu.technopark.arquest.R;
+import edu.technopark.arquest.common.CollectionUtils;
+import edu.technopark.arquest.game.InteractionResult;
+import edu.technopark.arquest.game.InteractiveObject;
+import edu.technopark.arquest.game.Item;
+import edu.technopark.arquest.game.Place;
+import edu.technopark.arquest.game.script.ActionCondition;
+import edu.technopark.arquest.game.script.ObjectState;
+import edu.technopark.arquest.game.script.ScriptAction;
+import edu.technopark.arquest.game.slot.Slot;
+import edu.technopark.arquest.model.Quest;
+import edu.technopark.arquest.model.VisualResource;
 
 @Module
 public class QuestModule {
@@ -72,107 +52,99 @@ public class QuestModule {
                 "Это демонстрационный квест из одного места." +
                         "Здесь вы можете опробовать взаимодействие с виртуальным объектами", 3
         );
-        q1.addPlace(getAppearanceDemoPlace());
+        q1.addPlace(getNewStyleInteractionDemoPlace());
         q1.setCurrPurpose("Подойдите к андроиду неподалеку");
 
-        Quest q2 = new Quest(
-                1,
-                "Демо-квест инвентарь + загрузка из скрипта",
-                "Это демонстрационный квест из одного места, загружаемый из сценария." +
-                        "Здесь вы можете опробовать работу с инвентарем.", 3
-        );
-//        q2.addPlace(getNewStyleInteractionDemoPlaceFromScript());
-//        q2.addPlace(getNewStyleInteractionDemoPlace());
-        q2.addPlace(getAppearanceDemoPlace());
-
-        List<Quest> result = CollectionUtils.listOf(q1, q2);
-        result.sort(new Comparator<Quest>() {
-            @Override
-            public int compare(Quest o1, Quest o2) {
-                return o1.getId() - o2.getId();
-            }
-        });
-        return result;
+        return Collections.singletonList(q1);
     }
 
-    public Place getNewStyleInteractionDemoPlaceFromScript() {
-        InputStream in;
-        try {
-            in = context.getAssets().open("scripts/inter_place.json");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        Reader reader = new InputStreamReader(in);
-
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(
-                Shape.class,
-                new JsonDeserializer<Shape>() {
-                    @Override
-                    public Shape deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-                        return new Sphere(
-                                json.getAsJsonObject().get("radius").getAsFloat()
-                        );
-                    }
-                }
-        );
-        gsonBuilder.registerTypeAdapter(
-                IDrawable.class,
-                new JsonDeserializer<IDrawable>() {
-                    @Override
-                    public IDrawable deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-                        JsonObject jsonObject = json.getAsJsonObject();
-                        return new TextureDrawable(
-                                jsonObject.get("modelName").getAsString(),
-                                jsonObject.get("textureName").getAsString()
-                        );
-                    }
-                }
-        );
-        gsonBuilder.registerTypeAdapter(
-                Item.class,
-                new JsonDeserializer<Item>() {
-                    @Override
-                    public Item deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-                        JsonObject jsonObject = json.getAsJsonObject();
-                        Item item = new Item(
-                                jsonObject.get("id").getAsInt(),
-                                jsonObject.get("name").getAsString(),
-                                jsonObject.get("description").getAsString(),
-                                jsonObject.get("modelName").getAsString(),
-                                jsonObject.get("textureName").getAsString()
-                        );
-                        item.getGeom().setScale(jsonObject.get("geom").getAsJsonObject().get("scale").getAsFloat());
-                        return item;
-                    }
-                }
-        );
-
-        Gson gson = gsonBuilder.create();
-        Place place = gson.fromJson(reader, Place.class);
-
-        for (Map.Entry<Integer, InteractiveObject> entry : place.getInteractiveObjects().entrySet()) {
-            InteractiveObject obj = entry.getValue();
-            obj.setAction(obj.getActionFromStates());
-        }
-
-        return place;
-    }
+//    public Place getNewStyleInteractionDemoPlaceFromScript() {
+//        InputStream in;
+//        try {
+//            in = context.getAssets().open("scripts/inter_place.json");
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+//
+//        Reader reader = new InputStreamReader(in);
+//
+//        GsonBuilder gsonBuilder = new GsonBuilder();
+//        gsonBuilder.registerTypeAdapter(
+//                Shape.class,
+//                new JsonDeserializer<Shape>() {
+//                    @Override
+//                    public Shape deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+//                        return new Sphere(
+//                                json.getAsJsonObject().get("radius").getAsFloat()
+//                        );
+//                    }
+//                }
+//        );
+//        gsonBuilder.registerTypeAdapter(
+//                IDrawable.class,
+//                new JsonDeserializer<IDrawable>() {
+//                    @Override
+//                    public IDrawable deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+//                        JsonObject jsonObject = json.getAsJsonObject();
+//                        return new TextureDrawable(
+//                                jsonObject.get("modelName").getAsString(),
+//                                jsonObject.get("textureName").getAsString()
+//                        );
+//                    }
+//                }
+//        );
+//        gsonBuilder.registerTypeAdapter(
+//                Item.class,
+//                new JsonDeserializer<Item>() {
+//                    @Override
+//                    public Item deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+//                        JsonObject jsonObject = json.getAsJsonObject();
+//                        Item item = new Item(
+//                                jsonObject.get("id").getAsInt(),
+//                                jsonObject.get("name").getAsString(),
+//                                jsonObject.get("description").getAsString(),
+//                                jsonObject.get("modelName").getAsString(),
+//                                jsonObject.get("textureName").getAsString()
+//                        );
+//                        item.getGeom().setScale(jsonObject.get("geom").getAsJsonObject().get("scale").getAsFloat());
+//                        return item;
+//                    }
+//                }
+//        );
+//
+//        Gson gson = gsonBuilder.create();
+//        Place place = gson.fromJson(reader, Place.class);
+//
+//        for (Map.Entry<Integer, InteractiveObject> entry : place.getInteractiveObjects().entrySet()) {
+//            InteractiveObject obj = entry.getValue();
+//            obj.setAction(obj.getActionFromStates());
+//        }
+//
+//        return place;
+//    }
 
     public Place getNewStyleInteractionDemoPlace() {
-        final Item rose = new Item(20, "rose", "rose","rose.obj", "rose.jpg");
-        rose.getGeom().setScale(0.001f);
-        final Item banana = new Item(10, "banana", "banana","banana.obj", "banana.jpg");
-        banana.getGeom().setScale(0.001f);
+        final float scale = 0.001f;
+
+        final Item rose = new Item(
+                20, "rose", "rose",
+                new VisualResource(Object3D.Type.OBJ).setModelUri("rose.obj").setTextureUri("rose.jpg")
+        );
+        rose.setScale(new Vector(scale, scale, scale));
+
+        final Item banana = new Item(
+                10, "banana", "banana",
+                new VisualResource(Object3D.Type.OBJ).setModelUri("banana.obj").setTextureUri("banana.lpg")
+        );
+        banana.setScale(new Vector(scale, scale, scale));
 
         InteractiveObject andy = new InteractiveObject(
                 1, "andy", "andy",
                 CollectionUtils.singleItemList(rose)
         );
-        andy.setDrawable(new TextureDrawable("andy.obj", "andy.png"));
-        andy.getGeom().apply(Pose.makeTranslation(0, 0, -0.5f));
-        andy.setCollider(new Collider(new Sphere(0.3f)));
+        andy.setVisualResource(new VisualResource(Object3D.Type.OBJ).setModelUri("andy.obj").setTextureUri("andy.png"));
+        andy.setPosition(new Vector(0, 0, -0.5f));
+        andy.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.3f));
 
         ObjectState andyState1 = new ObjectState(1, true);
         andyState1.setActions(CollectionUtils.listOf(
@@ -248,9 +220,10 @@ public class QuestModule {
                 2, "white", "white",
                 CollectionUtils.singleItemList(banana)
         );
-        whiteGuy.setDrawable(new TextureDrawable("bigmax.obj", "bigmax.jpg"));
-        whiteGuy.getGeom().apply(Pose.makeTranslation(0.25f, 0, 0f)).setScale(0.003f);
-        whiteGuy.setCollider(new Collider(new Sphere(0.3f)));
+        whiteGuy.setVisualResource(new VisualResource(Object3D.Type.OBJ).setModelUri("bigmax.obj").setTextureUri("bigmax.jpg"));
+        whiteGuy.setPosition(new Vector(0.25f, 0, 0));
+        whiteGuy.setScale(new Vector(0.003f, 0.003f, 0.003f));
+        whiteGuy.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.3f));
         whiteGuy.setStates(CollectionUtils.listOf(ObjectState.enableObjectState(0, true, false)));
 
         ObjectState guyState0 = new ObjectState(0, true);
@@ -321,218 +294,6 @@ public class QuestModule {
         Place place = new Place();
         place.loadInteractiveObjects(CollectionUtils.listOf(andy, whiteGuy));
 
-        return place;
-    }
-
-    public Place getInteractionDemoPlace() {
-        final Item rose = new Item(20, "rose", "rose","rose.obj", "rose.jpg");
-        final Item banana = new Item(10, "banana", "banana","banana.obj", "banana.jpg");
-
-        InteractiveObject andy = new InteractiveObject(
-                1, "andy", "andy",
-                CollectionUtils.singleItemList(rose)
-        );
-        andy.setDrawable(new TextureDrawable("andy.obj", "andy.png"));
-        andy.getGeom().apply(Pose.makeTranslation(0, 0, 0f));
-        andy.setCollider(new Collider(new Sphere(0.3f)));
-        andy.setStates(CollectionUtils.listOf(ObjectState.enableObjectState(0, true, true)));
-
-        final InteractiveObject whiteGuy = new InteractiveObject(
-                2, "white", "white",
-                CollectionUtils.singleItemList(banana)
-        );
-        whiteGuy.setDrawable(new TextureDrawable("bigmax.obj", "bigmax.jpg"));
-        whiteGuy.getGeom().apply(Pose.makeTranslation(0.25f, 0, 0f)).setScale(0.003f);
-        whiteGuy.setCollider(new Collider(new Sphere(0.3f)));
-        whiteGuy.setStates(CollectionUtils.listOf(ObjectState.enableObjectState(0, true, false)));
-
-        andy.setAction(new Action() {
-            private final List<Collection<InteractionResult>> resultTransitions = getResultTransitions();
-            private int cnt = 0;
-
-            @Override
-            public Collection<InteractionResult> act(InteractionArgument argument) {
-                rose.getGeom().setScale(0.001f);
-                if (cnt == 0) {
-                    whiteGuy.setEnabled(true);
-                    return resultTransitions.get(cnt++);
-                }
-                if (cnt == 1) {
-                    Collection<Slot.RepeatedItem> items = argument.getItems();
-                    for (Slot.RepeatedItem item : items) {
-                        Item innerItem = item.getItem();
-                        if (innerItem != null && Objects.equals(innerItem.getName(), "banana")) {
-                            item.getItem().setEnabled(false);
-                            gameModule.getCurrentInventory().removeAll(10);
-                            return resultTransitions.get(cnt++);
-                        }
-                    }
-                    return CollectionUtils.singleItemList(InteractionResult.messageResult("Где еда?"));
-                }
-                return CollectionUtils.singleItemList(InteractionResult.messageResult("Мне нечего тебе сказать"));
-            }
-
-            private List<Collection<InteractionResult>> getResultTransitions() {
-                List<Collection<InteractionResult>> result = new ArrayList<>();
-
-                Collection<InteractionResult> transition1 = new ArrayList<>();
-                transition1.add(
-                        InteractionResult.messageResult(
-                                "Возьми поесть у белого человека"
-                        )
-                );
-                result.add(transition1);
-
-                Collection<InteractionResult> transition2 = new ArrayList<>();
-                transition2.add(
-                        InteractionResult.messageResult(
-                                "Отблагодари белого человека"
-                        )
-                );
-                transition2.add(
-                        InteractionResult.newItemsResult(
-                                new Slot.RepeatedItem(rose)
-                        )
-                );
-                result.add(transition2);
-
-                return result;
-            }
-        });
-
-        whiteGuy.setAction(new Action() {
-            private final List<Collection<InteractionResult>> transitions = getResultTransitions();
-            private int cnt = 0;
-
-            @Override
-            public Collection<InteractionResult> act(InteractionArgument argument) {
-                banana.getGeom().setScale(0.001f);
-                if (cnt == 0) {
-                    return transitions.get(cnt++);
-                }
-                if (cnt == 1) {
-                    for (Slot.RepeatedItem item : argument.getItems()) {
-                        if (item.getItem().getName().equals("rose")) {
-                            item.getItem().setEnabled(false);
-                            gameModule.getCurrentInventory().removeAll(20);
-                            return transitions.get(cnt++);
-                        }
-                    }
-                }
-                return CollectionUtils.singleItemList(InteractionResult.messageResult("Ммм?"));
-            }
-
-            private List<Collection<InteractionResult>> getResultTransitions() {
-                List<Collection<InteractionResult>> result = new ArrayList<>();
-
-                Collection<InteractionResult> transition1 = new ArrayList<>();
-                transition1.add(
-                        InteractionResult.messageResult(
-                                "Дай ему поесть"
-                        )
-                );
-                transition1.add(
-                        InteractionResult.newItemsResult(
-                                new Slot.RepeatedItem(banana)
-                        )
-                );
-                result.add(transition1);
-
-                Collection<InteractionResult> transition2 = new ArrayList<>();
-                transition2.add(
-                        InteractionResult.messageResult(
-                                "Да за кого он меня принимает?!"
-                        )
-                );
-                result.add(transition2);
-
-                return result;
-            }
-        });
-
-        Place place = new Place();
-        List<InteractiveObject> objects = new ArrayList<>();
-        objects.add(andy);
-        objects.add(whiteGuy);
-        place.loadInteractiveObjects(objects);
-        return place;
-    }
-
-    public Place getAppearanceDemoPlace() {
-        InteractiveObject andy = new InteractiveObject(
-                1, "andy", "andy"
-
-        );
-        andy.setDrawable(new TextureDrawable("andy.obj", "andy.png"));
-        andy.getGeom().apply(Pose.makeTranslation(0, 0, 0f));
-        andy.setCollider(new Collider(new Sphere(0.3f)));
-        andy.setStates(CollectionUtils.listOf(ObjectState.enableObjectState(0, true, true)));
-
-        final InteractiveObject rose = new InteractiveObject(
-                2, "rose", "rose"
-        );
-        rose.setStates(CollectionUtils.listOf(ObjectState.enableObjectState(0, true, false)));
-
-        final InteractiveObject banana = new InteractiveObject(
-                3, "banana", "banana"
-        );
-        banana.setStates(CollectionUtils.listOf(ObjectState.enableObjectState(0, true, false)));
-
-
-        andy.setAction(new Action() {
-            private final Item toy = new Item(10, "toy", "toy", "bigmax.obj", "bigmax.jpg");
-
-            @Override
-            public Collection<InteractionResult> act(InteractionArgument argument) {
-                rose.setEnabled(true);
-                Collection<InteractionResult> results = new ArrayList<>();
-                results.add(
-                        InteractionResult.messageResult(
-                                "You interacted andy; now rose is available"
-                        )
-                );
-                results.add(
-                        InteractionResult.newItemsResult(
-                                new Slot.RepeatedItem(toy)
-                        )
-                );
-                return results;
-            }
-        });
-
-        rose.getIdentifiable().setParentID(1);
-        rose.setDrawable(new TextureDrawable("rose.obj", "rose.jpg"));
-        rose.getGeom().apply(Pose.makeTranslation(0.5f, 0, 0)).setScale(0.003f);
-        rose.setCollider(new Collider(new Sphere(0.3f)));
-        rose.setAction(new ItemlessAction() {
-            @Override
-            public Collection<InteractionResult> act(InteractionArgument argument) {
-                banana.setEnabled(true);
-                return CollectionUtils.singleItemList(InteractionResult.messageResult(
-                        "You interacted rose; now banana is available"
-                ));
-            }
-        });
-
-        banana.getIdentifiable().setParentID(1);
-        banana.setDrawable(new TextureDrawable("banana.obj", "banana.jpg"));
-        banana.getGeom().apply(Pose.makeTranslation(0, 0, 0.5f)).setScale(0.001f);
-        banana.setCollider(new Collider(new Sphere(0.3f)));
-        banana.setAction(new ItemlessAction() {
-            @Override
-            public Collection<InteractionResult> act(InteractionArgument argument) {
-                return CollectionUtils.singleItemList(InteractionResult.messageResult(
-                        "You interacted banana"
-                ));
-            }
-        });
-
-        Place place = new Place();
-        List<InteractiveObject> objects = new ArrayList<>();
-        objects.add(andy);
-        objects.add(rose);
-        objects.add(banana);
-        place.loadInteractiveObjects(objects);
         return place;
     }
 }

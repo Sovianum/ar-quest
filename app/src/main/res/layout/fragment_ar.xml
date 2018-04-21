@@ -21,8 +21,8 @@
     android:layout_height="match_parent"
     tools:context=".quest.ARFragment">
 
-<android.opengl.GLSurfaceView
-    android:id="@+id/surfaceview"
+<com.viro.core.ViroViewARCore
+    android:id="@+id/viro_view"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:layout_gravity="top" />

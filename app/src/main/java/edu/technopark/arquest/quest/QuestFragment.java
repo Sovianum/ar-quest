@@ -17,9 +17,9 @@ import android.widget.TextView;
 import edu.technopark.arquest.App;
 import edu.technopark.arquest.GameModule;
 import edu.technopark.arquest.R;
-import edu.technopark.arquest.core.game.Item;
-import edu.technopark.arquest.core.game.journal.Journal;
-import edu.technopark.arquest.core.game.journal.TimestampRecord;
+import edu.technopark.arquest.game.Item;
+import edu.technopark.arquest.game.journal.Journal;
+import edu.technopark.arquest.game.journal.TimestampRecord;
 import edu.technopark.arquest.quest.items.ItemAdapter;
 import edu.technopark.arquest.quest.place.PlacesAdapter;
 

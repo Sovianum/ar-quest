@@ -2,7 +2,7 @@ package edu.technopark.arquest.model;
 
 import android.location.Location;
 
-import edu.technopark.arquest.core.game.Place;
+import edu.technopark.arquest.game.Place;
 import com.google.common.collect.Lists;
 
 import java.util.Comparator;

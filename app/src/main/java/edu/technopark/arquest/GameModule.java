@@ -1,20 +1,8 @@
 package edu.technopark.arquest;
 
-import com.google.ar.core.Pose;
-import edu.technopark.arquest.core.ar.Scene;
-import edu.technopark.arquest.core.ar.collision.Collider;
-import edu.technopark.arquest.core.ar.collision.shape.Sphere;
-import edu.technopark.arquest.core.game.InteractionResult;
-import edu.technopark.arquest.core.game.InteractiveObject;
-import edu.technopark.arquest.core.game.Place;
-import edu.technopark.arquest.core.game.Player;
-import edu.technopark.arquest.core.game.journal.Journal;
-import edu.technopark.arquest.core.game.script.ScriptAction;
-import edu.technopark.arquest.core.game.slot.Slot;
-import edu.technopark.arquest.model.Quest;
-import edu.technopark.arquest.quest.game.ActorPlayer;
-import edu.technopark.arquest.storage.Inventories;
-import edu.technopark.arquest.storage.Journals;
+import com.viro.core.ARScene;
+import com.viro.core.PhysicsBody;
+import com.viro.core.PhysicsShapeSphere;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -25,22 +13,33 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
+import edu.technopark.arquest.game.InteractionResult;
+import edu.technopark.arquest.game.InteractiveObject;
+import edu.technopark.arquest.game.Place;
+import edu.technopark.arquest.game.Player;
+import edu.technopark.arquest.game.journal.Journal;
+import edu.technopark.arquest.game.script.ScriptAction;
+import edu.technopark.arquest.game.slot.Slot;
+import edu.technopark.arquest.model.Quest;
+import edu.technopark.arquest.quest.game.ActorPlayer;
+import edu.technopark.arquest.storage.Inventories;
+import edu.technopark.arquest.storage.Journals;
 
 @Module
 public class GameModule {
     private Journals journals;
     private Inventories inventories;
     private ActorPlayer player;
-    private Scene scene;
+    private ARScene scene;
     private Quest currentQuest;
 
     public GameModule() {
         journals = new Journals();
         inventories = new Inventories();
 
-        player = new ActorPlayer(Pose.makeTranslation(0, 0, -0.3f));
-        player.setCollider(new Collider(new Sphere(0.05f)));
-        scene = new Scene();
+        player = new ActorPlayer();
+        player.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.05f));
+        scene = new ARScene();
 
         EventBus.getDefault().register(this);
     }
@@ -101,7 +100,7 @@ public class GameModule {
         player.setPlace(place);
     }
 
-    public Scene getScene() {
+    public ARScene getScene() {
         return scene;
     }
 
@@ -125,7 +124,7 @@ public class GameModule {
 
     private void onTransitionsResult(final InteractionResult result) {
         Place currPlace = getPlayer().getPlace();
-        Map<Integer, InteractiveObject> interactiveObjectMap = currPlace.getInteractiveObjects();
+        Map<String, InteractiveObject> interactiveObjectMap = currPlace.getInteractiveObjects();
         for (ScriptAction.StateTransition transition : result.getTransitions()) {
             interactiveObjectMap
                     .get(transition.getTargetObjectID())

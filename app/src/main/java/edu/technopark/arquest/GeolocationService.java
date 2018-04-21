@@ -19,7 +19,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 
-import edu.technopark.arquest.core.game.Place;
+import edu.technopark.arquest.game.Place;
 import edu.technopark.arquest.model.Quest;
 
 import java.util.Collection;

@@ -1,31 +1,15 @@
 package edu.technopark.arquest.quest.game;
 
-import com.google.ar.core.Pose;
-import edu.technopark.arquest.core.game.Item;
-import edu.technopark.arquest.core.game.Place;
-import edu.technopark.arquest.core.game.Player;
+import edu.technopark.arquest.game.Item;
+import edu.technopark.arquest.game.Place;
+import edu.technopark.arquest.game.Player;
 
 public class ActorPlayer extends Player {
-    private Pose displace;
     private Item item;
     private Place place;
 
-    public ActorPlayer(Pose displace) {
-        this.displace = displace;
-    }
-
     public Item getItem() {
-        if (item == null) {
-            return Item.VOID;
-        }
         return item;
-    }
-
-    public void update(Pose pose) {
-        if (item != null) {
-            item.getGeom().applyGlobal(getGeom().getPose());
-        }
-        getGeom().applyGlobal(pose.compose(displace));
     }
 
     public void hold(Item item) {

@@ -1,6 +1,6 @@
 package edu.technopark.arquest.storage;
 
-import edu.technopark.arquest.core.game.slot.Slot;
+import edu.technopark.arquest.game.slot.Slot;
 
 import java.util.HashMap;
 import java.util.Map;

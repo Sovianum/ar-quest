@@ -14,7 +14,7 @@ import android.widget.LinearLayout;
 import edu.technopark.arquest.App;
 import edu.technopark.arquest.GameModule;
 import edu.technopark.arquest.R;
-import edu.technopark.arquest.core.game.Item;
+import edu.technopark.arquest.game.Item;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,6 +1,6 @@
 package edu.technopark.arquest.storage;
 
-import edu.technopark.arquest.core.game.journal.Journal;
+import edu.technopark.arquest.game.journal.Journal;
 
 import java.util.HashMap;
 import java.util.Map;

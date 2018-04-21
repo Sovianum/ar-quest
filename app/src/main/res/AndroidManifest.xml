@@ -15,7 +15,7 @@
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.google.ar.core.examples.java.helloar">
+    package="edu.technopark.arquest">
 
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -32,7 +32,7 @@
         android:required="true" />
 
     <application
-        android:name="edu.technopark.arquest.App"
+        android:name=".App"
         android:allowBackup="false"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
@@ -40,7 +40,7 @@
         android:usesCleartextTraffic="false"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
-            android:name="edu.technopark.arquest.MainActivity"
+            android:name=".MainActivity"
             android:label="@string/app_name"
             android:theme="@style/Theme.AppCompat.NoActionBar">
             <intent-filter>
@@ -58,16 +58,16 @@
             android:value="required" />
 
         <activity
-            android:name="edu.technopark.arquest.auth.AuthActivity"
+            android:name=".auth.AuthActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
 
         <service
-            android:name="edu.technopark.arquest.GeolocationService"
+            android:name=".GeolocationService"
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.BIND_JOB_SERVICE" />
         <service
-            android:name="edu.technopark.arquest.network.DownloadService"
+            android:name=".network.DownloadService"
             android:exported="false"></service>
     </application>
 

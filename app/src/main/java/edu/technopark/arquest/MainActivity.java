@@ -41,11 +41,11 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import edu.technopark.arquest.auth.AuthActivity;
-import edu.technopark.arquest.core.game.InteractionResult;
-import edu.technopark.arquest.core.game.Item;
-import edu.technopark.arquest.core.game.Place;
-import edu.technopark.arquest.core.game.journal.Journal;
-import edu.technopark.arquest.core.game.slot.Slot;
+import edu.technopark.arquest.game.InteractionResult;
+import edu.technopark.arquest.game.Item;
+import edu.technopark.arquest.game.Place;
+import edu.technopark.arquest.game.journal.Journal;
+import edu.technopark.arquest.game.slot.Slot;
 import edu.technopark.arquest.model.Quest;
 import edu.technopark.arquest.network.Download;
 import edu.technopark.arquest.network.DownloadService;
@@ -154,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 gameModule.setCurrentQuest(quest);
-                gameModule.getScene().clear();
+                gameModule.getScene().dispose();
             }
 
             MainActivity.this.runOnUiThread(new Runnable() {
@@ -480,11 +480,11 @@ public class MainActivity extends AppCompatActivity {
         return prefs.getBoolean(getString(R.string.first_launch), true);
     }
 
-    private void setFirstLaunch(boolean isFirstLauch) {
+    private void setFirstLaunch(boolean isFirstLaunch) {
         SharedPreferences.Editor editor = PreferenceManager
                 .getDefaultSharedPreferences(getApplicationContext()).edit();
 
-        editor.putBoolean(getString(R.string.first_launch), isFirstLauch);
+        editor.putBoolean(getString(R.string.first_launch), isFirstLaunch);
         editor.apply();
     }
 
@@ -504,13 +504,6 @@ public class MainActivity extends AppCompatActivity {
         journal.addNow("First record");
         journal.addNow("Second record");
         journal.addNow("Third record");
-//        gameModule.addCurrentJournal(journal);
-
-//        gameModule.addCurrentInventory(new Slot(0, Player.INVENTORY, false));
-
-//        Places places = new Places();
-//        places.addPlace(new Place(0, "First place", "Description")); //STUB!!!
-//        gameModule.addCurrentPlaces(places);
     }
 
     private void setUpArFragment() throws FileNotFoundException {
@@ -519,7 +512,7 @@ public class MainActivity extends AppCompatActivity {
         itemsListFragment = new ItemsListFragment();
         itemsListFragment.setOnItemClickListener(chooseItemOnClickListener);
 
-        Place place = questModule.getNewStyleInteractionDemoPlaceFromScript();
+        Place place = questModule.getNewStyleInteractionDemoPlace();
 
         arFragment = new ARFragment();
         arFragment.setToInventoryOnClickListener(getSelectFragmentListener(itemsListFragment));

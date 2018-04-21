@@ -14,7 +14,7 @@ import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import edu.technopark.arquest.App;
 import edu.technopark.arquest.HintModule;
 import edu.technopark.arquest.R;
-import edu.technopark.arquest.core.game.Item;
+import edu.technopark.arquest.game.Item;
 
 import java.util.List;
 
