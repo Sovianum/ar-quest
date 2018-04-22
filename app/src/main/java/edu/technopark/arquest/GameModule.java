@@ -9,6 +9,7 @@ import org.greenrobot.eventbus.Subscribe;
 
 import java.util.Map;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import dagger.Module;
@@ -21,6 +22,7 @@ import edu.technopark.arquest.game.journal.Journal;
 import edu.technopark.arquest.game.script.ScriptAction;
 import edu.technopark.arquest.game.slot.Slot;
 import edu.technopark.arquest.model.Quest;
+import edu.technopark.arquest.quest.AssetModule;
 import edu.technopark.arquest.quest.game.ActorPlayer;
 import edu.technopark.arquest.storage.Inventories;
 import edu.technopark.arquest.storage.Journals;
@@ -33,6 +35,9 @@ public class GameModule {
     private ARScene scene;
     private Quest currentQuest;
     private boolean withAR;
+
+    @Inject
+    AssetModule assetModule;
 
     public GameModule(boolean withAR) {
         journals = new Journals();
@@ -56,7 +61,8 @@ public class GameModule {
     @Provides
     @Singleton
     public GameModule provideGameModule() {
-        return new GameModule(withAR);
+        App.getAppComponent().inject(this);
+        return this;
     }
 
     public boolean isWithAR() {
@@ -72,7 +78,6 @@ public class GameModule {
     }
 
     public void setCurrentQuest(Quest currentQuest) {
-        // todo add state loading
         if (currentQuest == null || currentQuest == this.currentQuest) {
             return;
         }
@@ -110,7 +115,11 @@ public class GameModule {
     }
 
     public void setCurrentPlace(Place place) {
+        if (!withAR) {
+            return;
+        }
         if (player != null) player.setPlace(place);
+        assetModule.loadPlace(place);
     }
 
     public ARScene getScene() {

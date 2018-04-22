@@ -5,6 +5,7 @@ import edu.technopark.arquest.auth.LoginFragment;
 import edu.technopark.arquest.auth.RegistrationFragment;
 import edu.technopark.arquest.network.NetworkModule;
 import edu.technopark.arquest.quest.ARActivity;
+import edu.technopark.arquest.quest.AssetModule;
 import edu.technopark.arquest.quest.QuestFragment;
 import edu.technopark.arquest.quest.game.QuestModule;
 import edu.technopark.arquest.quest.items.ItemAdapter;
@@ -22,8 +23,10 @@ import javax.inject.Singleton;
 import dagger.Component;
 
 @Singleton
-@Component(modules = {GameModule.class, QuestModule.class, NetworkModule.class, ContextModule.class, HintModule.class})
+@Component(modules = {GameModule.class, QuestModule.class, NetworkModule.class, ContextModule.class, HintModule.class, AssetModule.class})
 public interface AppComponent {
+    void inject(GameModule module);
+    void inject(AssetModule module);
     void inject(HintModule module);
     void inject(ItemAdapter itemAdapter);
     void inject(QuestAdapter adapter);

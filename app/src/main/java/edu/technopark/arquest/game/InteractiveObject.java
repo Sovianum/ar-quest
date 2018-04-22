@@ -15,7 +15,6 @@ public class InteractiveObject extends Identifiable3D {
     private final String description;
     private Action action;
     private Collection<Item> items;
-    private VisualResource visualResource;
 
     private int currentStateID;
     private Map<Integer, ObjectState> states;
@@ -35,14 +34,6 @@ public class InteractiveObject extends Identifiable3D {
             return CollectionUtils.singleItemList(InteractionResult.errorResult(""));
         }
         return action.act(argument);
-    }
-
-    public VisualResource getVisualResource() {
-        return visualResource;
-    }
-
-    public void setVisualResource(VisualResource visualResource) {
-        this.visualResource = visualResource;
     }
 
     public Collection<Item> getItems() {

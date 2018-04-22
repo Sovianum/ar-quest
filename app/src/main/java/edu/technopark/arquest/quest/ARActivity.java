@@ -17,6 +17,10 @@ import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.google.common.base.Function;
 import com.viro.core.ARScene;
+import com.viro.core.Box;
+import com.viro.core.Material;
+import com.viro.core.Node;
+import com.viro.core.Object3D;
 import com.viro.core.ViroView;
 import com.viro.core.ViroViewARCore;
 
@@ -25,6 +29,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -134,13 +139,7 @@ public class ARActivity extends Activity {
         if (gameModule.isWithAR()) {
             viroView = new ViroViewARCore(this, new ViroViewARCore.StartupListener() {
                 @Override
-                public void onSuccess() {
-//                ARScene scene = gameModule.getScene();
-//                if (scene == null) {
-//                    return;
-//                }
-                    viroView.setScene(new ARScene());
-                }
+                public void onSuccess() {viroView.setScene(gameModule.getScene());}
 
                 @Override
                 public void onFailure(ViroViewARCore.StartupError startupError, String s) {
@@ -161,12 +160,6 @@ public class ARActivity extends Activity {
 //        setUpHints();
     }
 
-    public void setDecorations(Place place) {
-        if (place != null) {
-            gameModule.setCurrentPlace(place);
-        }
-    }
-
     @Override
     public void onStart() {
         super.onStart();
@@ -183,6 +176,10 @@ public class ARActivity extends Activity {
             if (viroView != null) viroView.onActivityResumed(this);
         } else {
             PermissionHelper.requestPermissions(this);
+        }
+
+        if (gameModule.isWithAR()) {
+            loadPlace(gameModule.getCurrentPlace());
         }
     }
 
@@ -213,6 +210,16 @@ public class ARActivity extends Activity {
             Toast.makeText(this, "Camera permission is needed to run this application", Toast.LENGTH_LONG)
                     .show();
             finish();
+        }
+    }
+
+    private void loadPlace(Place place) {
+        if (place == null) {
+            return;
+        }
+        Node root = gameModule.getScene().getRootNode();
+        for (Object3D object3D : place.getAll()) {
+            root.addChildNode(object3D);
         }
     }
 

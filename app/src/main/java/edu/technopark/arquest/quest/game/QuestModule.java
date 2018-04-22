@@ -10,6 +10,7 @@ import com.viro.core.Vector;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Queue;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -30,6 +31,7 @@ import edu.technopark.arquest.game.script.ScriptAction;
 import edu.technopark.arquest.game.slot.Slot;
 import edu.technopark.arquest.model.Quest;
 import edu.technopark.arquest.model.VisualResource;
+import edu.technopark.arquest.quest.AssetModule;
 
 @Module
 public class QuestModule {
@@ -57,6 +59,7 @@ public class QuestModule {
 
         if (gameModule.isWithAR()) {
             q1.addPlace(getNewStyleInteractionDemoPlace());
+//            q1.addPlace(getSingleObjectPlace());
         } else {
             q1.addPlace(new Place());
         }
@@ -129,18 +132,32 @@ public class QuestModule {
 //        return place;
 //    }
 
+    public Place getSingleObjectPlace() {
+        InteractiveObject andy = new InteractiveObject(
+                1, "andy", "andy"
+        );
+        andy.setVisualResource(new VisualResource(Object3D.Type.OBJ).setModelUri("file:///android_asset/andy.obj").setTextureUri("andy.png"));
+        andy.setPosition(new Vector(0, 0, -0.5f));
+        andy.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.3f));
+
+        Place place = new Place();
+        place.loadInteractiveObjects(CollectionUtils.listOf(andy));
+
+        return place;
+    }
+
     public Place getNewStyleInteractionDemoPlace() {
         final float scale = 0.001f;
 
         final Item rose = new Item(
                 20, "rose", "rose",
-                new VisualResource(Object3D.Type.OBJ).setModelUri("rose.obj").setTextureUri("rose.jpg")
+                new VisualResource(Object3D.Type.OBJ).setModelUri("file:///android_asset/rose.obj").setTextureUri("rose.jpg")
         );
         rose.setScale(new Vector(scale, scale, scale));
 
         final Item banana = new Item(
                 10, "banana", "banana",
-                new VisualResource(Object3D.Type.OBJ).setModelUri("banana.obj").setTextureUri("banana.lpg")
+                new VisualResource(Object3D.Type.FBX).setModelUri("file:///android_asset/banana.obj").setTextureUri("banana.lpg")
         );
         banana.setScale(new Vector(scale, scale, scale));
 
@@ -148,7 +165,7 @@ public class QuestModule {
                 1, "andy", "andy",
                 CollectionUtils.singleItemList(rose)
         );
-        andy.setVisualResource(new VisualResource(Object3D.Type.OBJ).setModelUri("andy.obj").setTextureUri("andy.png"));
+        andy.setVisualResource(new VisualResource(Object3D.Type.OBJ).setModelUri("file:///android_asset/andy.obj").setTextureUri("andy.png"));
         andy.setPosition(new Vector(0, 0, -0.5f));
         andy.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.3f));
 
@@ -226,7 +243,7 @@ public class QuestModule {
                 2, "white", "white",
                 CollectionUtils.singleItemList(banana)
         );
-        whiteGuy.setVisualResource(new VisualResource(Object3D.Type.OBJ).setModelUri("bigmax.obj").setTextureUri("bigmax.jpg"));
+        whiteGuy.setVisualResource(new VisualResource(Object3D.Type.OBJ).setModelUri("file:///android_asset/bigmax.obj").setTextureUri("bigmax.jpg"));
         whiteGuy.setPosition(new Vector(0.25f, 0, 0));
         whiteGuy.setScale(new Vector(0.003f, 0.003f, 0.003f));
         whiteGuy.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.3f));
