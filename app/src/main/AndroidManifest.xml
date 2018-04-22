@@ -51,6 +51,10 @@
             android:name=".auth.AuthActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
 
+        <activity
+            android:name=".quest.ARActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar" />
+
         <service
             android:name=".GeolocationService"
             android:enabled="true"

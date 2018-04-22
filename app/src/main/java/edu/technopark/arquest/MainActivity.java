@@ -50,7 +50,7 @@ import edu.technopark.arquest.model.Quest;
 import edu.technopark.arquest.network.Download;
 import edu.technopark.arquest.network.DownloadService;
 import edu.technopark.arquest.network.NetworkModule;
-import edu.technopark.arquest.quest.ARFragment;
+import edu.technopark.arquest.quest.ARActivity;
 import edu.technopark.arquest.quest.QuestFragment;
 import edu.technopark.arquest.quest.game.ActorPlayer;
 import edu.technopark.arquest.quest.game.QuestModule;
@@ -88,7 +88,6 @@ public class MainActivity extends AppCompatActivity {
     BottomNavigationView bottomNavigationView;
 
     private QuestsListFragment questsListFragment;
-    private ARFragment arFragment;
     private QuestFragment questFragment;
     private ItemsListFragment itemsListFragment;
     private JournalFragment journalFragment;
@@ -257,7 +256,7 @@ public class MainActivity extends AppCompatActivity {
 
         // the order of calls below is important
         try {
-            setUpArFragment();
+            initFragments();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -492,7 +491,7 @@ public class MainActivity extends AppCompatActivity {
         placeFragment = new PlaceFragment();
 
         questFragment = new QuestFragment();
-        questFragment.setOnARModeBtnClickListener(getSelectFragmentListener(arFragment));
+//        questFragment.setOnARModeBtnClickListener(getSelectFragmentListener(arFragment));
         questFragment.setOnJournalClickListener(getSelectFragmentListener(journalFragment));
         questFragment.setOnItemClickListener(chooseItemOnClickListener);
         questFragment.setOnPlacesClickListener(getSelectFragmentListener(placeFragment));
@@ -506,21 +505,11 @@ public class MainActivity extends AppCompatActivity {
         journal.addNow("Third record");
     }
 
-    private void setUpArFragment() throws FileNotFoundException {
+    private void initFragments() throws FileNotFoundException {
         journalFragment = new JournalFragment();
 
         itemsListFragment = new ItemsListFragment();
         itemsListFragment.setOnItemClickListener(chooseItemOnClickListener);
-
-        Place place = questModule.getNewStyleInteractionDemoPlace();
-
-        arFragment = new ARFragment();
-        arFragment.setToInventoryOnClickListener(getSelectFragmentListener(itemsListFragment));
-        arFragment.setToJournalOnClickListener(getSelectFragmentListener(journalFragment));
-
-        arFragment.setDecorations(place);
-
-        //arFragment.setCloseOnClickListener(onCloseARClickListener);
     }
 
     public void goToAuthActivity(View v) {
@@ -535,7 +524,9 @@ public class MainActivity extends AppCompatActivity {
         }
         Place currentPlace = gameModule.getCurrentQuest().getPlaceMap().values().iterator().next();
         gameModule.setCurrentPlace(currentPlace);
-        selectFragment(arFragment, ARFragment.TAG);
+
+        Intent intent = new Intent(this, ARActivity.class);
+        startActivity(intent);
     }
 
     public void goToCurrentQuest() {
@@ -628,7 +619,7 @@ public class MainActivity extends AppCompatActivity {
         } else if (PlaceFragment.TAG.equals(fragmentTag)) {
             bottomNavigationView.setSelectedItemId(R.id.action_current_quest);
 
-        } else if (ARFragment.TAG.equals(fragmentTag)) {
+        } else if (ARActivity.TAG.equals(fragmentTag)) {
             bottomNavigationView.setSelectedItemId(R.id.action_ar);
 
         } else if (SettingsFragment.TAG.equals(fragmentTag)) {
@@ -662,10 +653,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showOrHideBars(String tag) {
-        if (tag.equals(ARFragment.TAG) || tag.equals(PlaceFragment.TAG)
+        if (tag.equals(ARActivity.TAG) || tag.equals(PlaceFragment.TAG)
                 || tag.equals(JournalFragment.TAG) || tag.equals(ItemsListFragment.TAG)) {
             bottomNavigationView.setVisibility(View.GONE);
-            if (tag.equals(ARFragment.TAG)) {
+            if (tag.equals(ARActivity.TAG)) {
                 toolBar.setVisibility(View.GONE);
             } else {
                 toolBar.setVisibility(View.VISIBLE);

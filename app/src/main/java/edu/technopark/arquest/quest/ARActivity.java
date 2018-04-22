@@ -2,17 +2,14 @@ package edu.technopark.arquest.quest;
 
 
 import android.app.Activity;
-import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.BaseTransientBottomBar;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,9 +32,11 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import edu.technopark.arquest.App;
 import edu.technopark.arquest.GameModule;
 import edu.technopark.arquest.HintModule;
+import edu.technopark.arquest.MainActivity;
 import edu.technopark.arquest.PermissionHelper;
 import edu.technopark.arquest.R;
 import edu.technopark.arquest.common.ContinuousAction;
@@ -46,11 +45,12 @@ import edu.technopark.arquest.game.InteractiveObject;
 import edu.technopark.arquest.game.Place;
 import edu.technopark.arquest.game.slot.Slot;
 import edu.technopark.arquest.model.Quest;
+import edu.technopark.arquest.quest.items.ItemsListFragment;
+import edu.technopark.arquest.quest.journal.JournalFragment;
 
-public class ARFragment extends Fragment {
-    public static final String TAG = ARFragment.class.getSimpleName();
+public class ARActivity extends Activity {
+    public static final String TAG = ARActivity.class.getSimpleName();
 
-//    @BindView(R.id.viro_view)
     ViroView viroView;
 
     @BindView(R.id.collision_txt)
@@ -94,10 +94,7 @@ public class ARFragment extends Fragment {
             }
     );
 
-    private boolean installRequested;
     private Snackbar messageSnackbar;
-
-    private View.OnClickListener toInventoryOnClickListener;
 
     private List<InteractiveObject> collidedObjects = new ArrayList<>();
 
@@ -125,41 +122,22 @@ public class ARFragment extends Fragment {
 //        }
 //    };
 
-    private View.OnClickListener toJournalOnClickListener;
-    //private View.OnClickListener closeOnClickListener;
-
-    public ARFragment() {
+    public ARActivity() {
         super();
         App.getAppComponent().inject(this);
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        final RelativeLayout view = (RelativeLayout) inflater.inflate(R.layout.fragment_ar, container, false);
-        ButterKnife.bind(this, view);
-
-        toInventoryBtn.setOnClickListener(toInventoryOnClickListener);
-        toJournalBtn.setOnClickListener(toJournalOnClickListener);
-
-        toInventoryBtn.setOnClickListener(toInventoryOnClickListener);
-
-        // todo use clicks on objects to detect interactions
-//        interactBtn.setOnClickListener(interactor);
-
-        installRequested = false;
-        snackbarAction.startIfNotRunning();
-        setUpHints();
-
-        viroView = new ViroViewARCore(getActivity(), new ViroViewARCore.StartupListener() {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        viroView = new ViroViewARCore(this, new ViroViewARCore.StartupListener() {
             @Override
             public void onSuccess() {
-                ARScene scene = gameModule.getScene();
-                if (scene == null) {
-                    return;
-                }
-                viroView.dispose();
-                viroView.setScene(scene);
+//                ARScene scene = gameModule.getScene();
+//                if (scene == null) {
+//                    return;
+//                }
+                viroView.setScene(new ARScene());
             }
 
             @Override
@@ -167,9 +145,16 @@ public class ARFragment extends Fragment {
                 // todo add fail handling
             }
         });
-        view.addView(viroView);
+        setContentView(viroView);
+        View.inflate(this, R.layout.fragment_ar, viroView);
 
-        return view;
+        ButterKnife.bind(this);
+
+        // todo use clicks on objects to detect interactions
+//        interactBtn.setOnClickListener(interactor);
+
+//        snackbarAction.startIfNotRunning();
+//        setUpHints();
     }
 
     public void setDecorations(Place place) {
@@ -178,95 +163,101 @@ public class ARFragment extends Fragment {
         }
     }
 
-    public void setToInventoryOnClickListener(View.OnClickListener listener) {
-        toInventoryOnClickListener = listener;
-        if (toInventoryBtn != null) {
-            toInventoryBtn.setOnClickListener(toInventoryOnClickListener);
-        }
-    }
-
-    public void setToJournalOnClickListener(View.OnClickListener listener) {
-        toJournalOnClickListener = listener;
-        if (toJournalBtn != null) {
-            toJournalBtn.setOnClickListener(toJournalOnClickListener);
-        }
-    }
-
     @Override
     public void onStart() {
         super.onStart();
+        viroView.onActivityStarted(this);
         EventBus.getDefault().register(this);
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        viroView.onActivityResumed(this);
 
         // ARCore requires camera permissions to operate. If we did not yet obtain runtime
         // permission on Android M and above, now is a good time to ask the user for it.
-        if (PermissionHelper.hasPermissions(getActivity())) {
-            viroView.onActivityResumed(getActivity());
+        if (PermissionHelper.hasPermissions(this)) {
+            viroView.onActivityResumed(this);
         } else {
-            PermissionHelper.requestPermissions(getActivity());
+            PermissionHelper.requestPermissions(this);
         }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        viroView.onActivityPaused(getActivity());
+        viroView.onActivityPaused(this);
         hideSnackbarMessage();
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        viroView.onActivityStopped(getActivity());
+        viroView.onActivityStopped(this);
         snackbarAction.stopIfRunning();
         EventBus.getDefault().unregister(this);
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        viroView.onActivityDestroyed(this);
+    }
+
+    @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (!PermissionHelper.hasPermissions(getActivity())) {
-            Toast.makeText(getActivity(), "Camera permission is needed to run this application", Toast.LENGTH_LONG)
+        if (!PermissionHelper.hasPermissions(this)) {
+            Toast.makeText(this, "Camera permission is needed to run this application", Toast.LENGTH_LONG)
                     .show();
-            getActivity().finish();
+            finish();
         }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onInteractionResult(InteractionResult interactionResult) {
-        Activity activity = getActivity();
-        if (activity == null) {
-            return;
-        }
         switch (interactionResult.getType()) {
             case NEW_ITEMS:
-                onNewItemsResult(interactionResult, activity);
+                onNewItemsResult(interactionResult, this);
                 break;
             case TAKE_ITEMS:
-                onTakeItemsResult(interactionResult, activity);
+                onTakeItemsResult(interactionResult, this);
                 break;
             case JOURNAL_RECORD:
-                onJournalUpdateResult(interactionResult, activity);
+                onJournalUpdateResult(interactionResult, this);
                 break;
             case MESSAGE:
-                onMessageResult(interactionResult, activity);
+                onMessageResult(interactionResult, this);
                 break;
             case HINT:
-                onHintResult(interactionResult, activity);
+                onHintResult(interactionResult, this);
                 break;
             case NEXT_PURPOSE:
-                onNextPurposeResult(interactionResult, activity);
+                onNextPurposeResult(interactionResult, this);
                 break;
         }
+    }
+
+    @OnClick(R.id.inventory_btn)
+    void toInventory() {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setAction(ItemsListFragment.TAG);
+        startActivity(intent);
+        finish();
+    }
+
+    @OnClick(R.id.journal_btn)
+    void toJournal() {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setAction(JournalFragment.TAG);
+        startActivity(intent);
+        finish();
     }
 
     private void showSnackbarMessage(String message, boolean finishOnDismiss) {
         messageSnackbar =
                 Snackbar.make(
-                        getActivity().findViewById(android.R.id.content),
+                        findViewById(android.R.id.content),
                         message,
                         Snackbar.LENGTH_INDEFINITE);
         messageSnackbar.getView().setBackgroundColor(0xbf323232);
@@ -284,10 +275,7 @@ public class ARFragment extends Fragment {
                         @Override
                         public void onDismissed(Snackbar transientBottomBar, int event) {
                             super.onDismissed(transientBottomBar, event);
-                            Activity activity = getActivity();
-                            if (activity != null) {
-                                activity.finish();
-                            }
+                            finish();
                         }
                     });
         }
@@ -357,31 +345,25 @@ public class ARFragment extends Fragment {
             return;
         }
         gameModule.getCurrentQuest().setCurrPurpose(purpose);
-        Activity activity = getActivity();
-        if (activity != null) {
-            activity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    messageSnackbar.setText(purpose);
-                }
-            });
-        }
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                messageSnackbar.setText(purpose);
+            }
+        });
     }
 
     private HintModule.Hint getARScreenHint(final Function<ShowcaseView, Void> callable) {
         return new HintModule.Hint() {
             @Override
             public void setUpHint(final ShowcaseView sv) {
-                Activity activity = getActivity();
-                if (activity != null) {
-                    activity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            callable.apply(sv);
-                            hideSnackbarMessage();
-                        }
-                    });
-                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        callable.apply(sv);
+                        hideSnackbarMessage();
+                    }
+                });
             }
 
             @Override
@@ -391,15 +373,12 @@ public class ARFragment extends Fragment {
                     return;
                 }
 
-                Activity activity = getActivity();
-                if (activity != null && isVisible()) {
-                    activity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            showSnackbarMessage(quest.getCurrPurpose(), false);
-                        }
-                    });
-                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        showSnackbarMessage(quest.getCurrPurpose(), false);
+                    }
+                });
             }
         };
     }

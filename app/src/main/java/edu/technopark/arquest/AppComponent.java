@@ -4,7 +4,7 @@ package edu.technopark.arquest;
 import edu.technopark.arquest.auth.LoginFragment;
 import edu.technopark.arquest.auth.RegistrationFragment;
 import edu.technopark.arquest.network.NetworkModule;
-import edu.technopark.arquest.quest.ARFragment;
+import edu.technopark.arquest.quest.ARActivity;
 import edu.technopark.arquest.quest.QuestFragment;
 import edu.technopark.arquest.quest.game.QuestModule;
 import edu.technopark.arquest.quest.items.ItemAdapter;
@@ -28,7 +28,7 @@ public interface AppComponent {
     void inject(ItemAdapter itemAdapter);
     void inject(QuestAdapter adapter);
     void inject(MainActivity activity);
-    void inject(ARFragment fragment);
+    void inject(ARActivity fragment);
     void inject(QuestFragment fragment);
     void inject(QuestsListFragment fragment);
     void inject(QuestModule service);
