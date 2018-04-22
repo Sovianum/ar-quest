@@ -153,7 +153,6 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 gameModule.setCurrentQuest(quest);
-                gameModule.getScene().dispose();
             }
 
             MainActivity.this.runOnUiThread(new Runnable() {

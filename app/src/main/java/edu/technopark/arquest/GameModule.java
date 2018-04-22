@@ -32,28 +32,35 @@ public class GameModule {
     private ActorPlayer player;
     private ARScene scene;
     private Quest currentQuest;
+    private boolean withAR;
 
-    public GameModule() {
-        // load native libraries
-        System.loadLibrary("gvr");
-        System.loadLibrary("gvr_audio");
-        System.loadLibrary("viro_renderer");
-        System.loadLibrary("viro_arcore");
-
+    public GameModule(boolean withAR) {
         journals = new Journals();
         inventories = new Inventories();
+        this.withAR = withAR;
 
-        player = new ActorPlayer();
-        player.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.05f));
-        scene = new ARScene();
+        if (withAR) {
+            // load native libraries
+            System.loadLibrary("gvr");
+            System.loadLibrary("gvr_audio");
+            System.loadLibrary("viro_renderer");
+            System.loadLibrary("viro_arcore");
 
+            player = new ActorPlayer();
+            player.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.05f));
+            scene = new ARScene();
+        }
         EventBus.getDefault().register(this);
     }
 
     @Provides
     @Singleton
     public GameModule provideGameModule() {
-        return new GameModule();
+        return new GameModule(withAR);
+    }
+
+    public boolean isWithAR() {
+        return withAR;
     }
 
     public Quest getCurrentQuest() {
@@ -75,7 +82,7 @@ public class GameModule {
             journals.addJournal(currentQuest.getId(), new Journal<String>());
         }
 
-        if (inventories.getInventory(currentQuest.getId()) == null) {
+        if (inventories.getInventory(currentQuest.getId()) == null && withAR) {
             inventories.addInventory(currentQuest.getId(), new Slot(0, Player.INVENTORY, false));
         }
     }
@@ -103,7 +110,7 @@ public class GameModule {
     }
 
     public void setCurrentPlace(Place place) {
-        player.setPlace(place);
+        if (player != null) player.setPlace(place);
     }
 
     public ARScene getScene() {

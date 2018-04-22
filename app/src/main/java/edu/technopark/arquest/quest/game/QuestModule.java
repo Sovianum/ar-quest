@@ -7,6 +7,7 @@ import com.viro.core.PhysicsBody;
 import com.viro.core.PhysicsShapeSphere;
 import com.viro.core.Vector;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -52,8 +53,13 @@ public class QuestModule {
                 "Это демонстрационный квест из одного места." +
                         "Здесь вы можете опробовать взаимодействие с виртуальным объектами", 3
         );
-        q1.addPlace(getNewStyleInteractionDemoPlace());
         q1.setCurrPurpose("Подойдите к андроиду неподалеку");
+
+        if (gameModule.isWithAR()) {
+            q1.addPlace(getNewStyleInteractionDemoPlace());
+        } else {
+            q1.addPlace(new Place());
+        }
 
         return Collections.singletonList(q1);
     }

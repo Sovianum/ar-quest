@@ -19,7 +19,7 @@ public class App extends Application {
 
         appComponent = DaggerAppComponent.
                 builder().
-                gameModule(new GameModule()).
+                gameModule(new GameModule(false)).
                 networkModule(new NetworkModule(ServerInfo.BACKEND_URL)).
                 contextModule(new ContextModule(this)).
                 hintModule(new HintModule()).

@@ -130,24 +130,28 @@ public class ARActivity extends Activity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        viroView = new ViroViewARCore(this, new ViroViewARCore.StartupListener() {
-            @Override
-            public void onSuccess() {
+
+        if (gameModule.isWithAR()) {
+            viroView = new ViroViewARCore(this, new ViroViewARCore.StartupListener() {
+                @Override
+                public void onSuccess() {
 //                ARScene scene = gameModule.getScene();
 //                if (scene == null) {
 //                    return;
 //                }
-                viroView.setScene(new ARScene());
-            }
+                    viroView.setScene(new ARScene());
+                }
 
-            @Override
-            public void onFailure(ViroViewARCore.StartupError startupError, String s) {
-                // todo add fail handling
-            }
-        });
-        setContentView(viroView);
-        View.inflate(this, R.layout.fragment_ar, viroView);
-
+                @Override
+                public void onFailure(ViroViewARCore.StartupError startupError, String s) {
+                    // todo add fail handling
+                }
+            });
+            setContentView(viroView);
+            View.inflate(this, R.layout.fragment_ar, viroView);
+        } else {
+            setContentView(R.layout.fragment_ar);
+        }
         ButterKnife.bind(this);
 
         // todo use clicks on objects to detect interactions
@@ -166,19 +170,17 @@ public class ARActivity extends Activity {
     @Override
     public void onStart() {
         super.onStart();
-        viroView.onActivityStarted(this);
+        if (viroView != null) viroView.onActivityStarted(this);
         EventBus.getDefault().register(this);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        viroView.onActivityResumed(this);
-
         // ARCore requires camera permissions to operate. If we did not yet obtain runtime
         // permission on Android M and above, now is a good time to ask the user for it.
         if (PermissionHelper.hasPermissions(this)) {
-            viroView.onActivityResumed(this);
+            if (viroView != null) viroView.onActivityResumed(this);
         } else {
             PermissionHelper.requestPermissions(this);
         }
@@ -187,14 +189,14 @@ public class ARActivity extends Activity {
     @Override
     public void onPause() {
         super.onPause();
-        viroView.onActivityPaused(this);
+        if (viroView != null) viroView.onActivityPaused(this);
         hideSnackbarMessage();
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        viroView.onActivityStopped(this);
+        if (viroView != null) viroView.onActivityStopped(this);
         snackbarAction.stopIfRunning();
         EventBus.getDefault().unregister(this);
     }
@@ -202,7 +204,7 @@ public class ARActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        viroView.onActivityDestroyed(this);
+        if (viroView != null) viroView.onActivityDestroyed(this);
     }
 
     @Override
