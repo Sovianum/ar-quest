@@ -50,7 +50,7 @@ import edu.technopark.arquest.model.Quest;
 public class ARFragment extends Fragment {
     public static final String TAG = ARFragment.class.getSimpleName();
 
-    @BindView(R.id.viro_view)
+//    @BindView(R.id.viro_view)
     ViroView viroView;
 
     @BindView(R.id.collision_txt)
@@ -70,9 +70,6 @@ public class ARFragment extends Fragment {
 
     @Inject
     HintModule hintModule;
-
-    @Inject
-    Context context;
 
     ContinuousAction snackbarAction = new ContinuousAction(
             new Runnable() {
@@ -150,7 +147,11 @@ public class ARFragment extends Fragment {
         // todo use clicks on objects to detect interactions
 //        interactBtn.setOnClickListener(interactor);
 
-        viroView = new ViroViewARCore(context, new ViroViewARCore.StartupListener() {
+        installRequested = false;
+        snackbarAction.startIfNotRunning();
+        setUpHints();
+
+        viroView = new ViroViewARCore(getActivity(), new ViroViewARCore.StartupListener() {
             @Override
             public void onSuccess() {
                 ARScene scene = gameModule.getScene();
@@ -166,12 +167,8 @@ public class ARFragment extends Fragment {
                 // todo add fail handling
             }
         });
+        view.addView(viroView);
 
-        installRequested = false;
-
-        snackbarAction.startIfNotRunning();
-
-        setUpHints();
         return view;
     }
 

@@ -21,11 +21,11 @@
     android:layout_height="match_parent"
     tools:context=".quest.ARFragment">
 
-<com.viro.core.ViroViewARCore
-    android:id="@+id/viro_view"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:layout_gravity="top" />
+<!--<com.viro.core.ViroViewARCore-->
+    <!--android:id="@+id/viro_view"-->
+    <!--android:layout_width="fill_parent"-->
+    <!--android:layout_height="fill_parent"-->
+    <!--android:layout_gravity="top" />-->
 
 <!--<ImageButton
     android:id="@+id/close_btn"

@@ -34,6 +34,12 @@ public class GameModule {
     private Quest currentQuest;
 
     public GameModule() {
+        // load native libraries
+        System.loadLibrary("gvr");
+        System.loadLibrary("gvr_audio");
+        System.loadLibrary("viro_renderer");
+        System.loadLibrary("viro_arcore");
+
         journals = new Journals();
         inventories = new Inventories();
 
