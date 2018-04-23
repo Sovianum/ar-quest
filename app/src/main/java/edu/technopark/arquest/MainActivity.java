@@ -93,6 +93,8 @@ public class MainActivity extends AppCompatActivity {
     private JournalFragment journalFragment;
     private PlaceFragment placeFragment;
     private SettingsFragment settingsFragment;
+    private String fromARTag;
+    private String currentFragmentTag;
 
     @BindView(R.id.toolbar_actionbar)
     Toolbar toolBar;
@@ -224,7 +226,7 @@ public class MainActivity extends AppCompatActivity {
 
                     switch (item.getItemId()) {
                         case R.id.action_quests:
-                            selectFragment(questsListFragment, QuestsListFragment.TAG, false);
+                            selectFragment(questsListFragment, QuestsListFragment.TAG);
                             break;
                         case R.id.action_current_quest:
                             goToCurrentQuest();
@@ -232,9 +234,8 @@ public class MainActivity extends AppCompatActivity {
                         case R.id.action_ar:
                             goARFragment();
                             break;
-
                         case R.id.action_settings:
-                            selectFragment(settingsFragment, SettingsFragment.TAG, false);
+                            selectFragment(settingsFragment, SettingsFragment.TAG);
                             break;
                     }
                     return false;
@@ -259,7 +260,11 @@ public class MainActivity extends AppCompatActivity {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        setUpGameModule();
+
+        fromARTag = fromAR();
+        if (fromARTag == null) {
+            setUpGameModule();
+        }
         setUpQuestFragment();
 
         questsListFragment = new QuestsListFragment();
@@ -268,7 +273,9 @@ public class MainActivity extends AppCompatActivity {
 
         setSupportActionBar(toolBar);
 
-        bottomNavigationView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener);
+        //if (!fromARWithoutBottomNavBar(fromARTag)) {
+            bottomNavigationView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener);
+        //}
 
         settingsFragment = new SettingsFragment();
         settingsFragment.setOnLogoutClickListener(onLogoutClickListener);
@@ -276,7 +283,7 @@ public class MainActivity extends AppCompatActivity {
         //startService(new Intent(this, GeolocationService.class));
 
         //checkAuthorization(); //commented for focus group testing
-        selectFragment(questsListFragment, QuestsListFragment.TAG, false);
+
         registerDownloadReceiver();
     }
 
@@ -284,13 +291,24 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         showGreeting();
+        if (!isFirstLaunch()) {
+            showTutorialSuggestion = false;
+        }
+
         if (showTutorialSuggestion && PermissionHelper.hasPermissions(this)) {
             showTutorialSuggestion();
             showTutorialSuggestion = false;
         }
         setFirstLaunch(false);
         hintModule.setActivity(this);
-        selectFragmentByView(questsListFragment, QuestsListFragment.TAG);
+        if (fromARTag != null) {
+            //gameModule.getCurrentJournal().addNow("Найдена контрольная точка ");
+            selectFragmentByTag(fromARTag);
+            toolBar.setTitle(getResources().getString(R.string.journal_fragment_title));
+        } else {
+            selectFragment(questsListFragment, QuestsListFragment.TAG);
+
+        }
         EventBus.getDefault().register(this);
     }
 
@@ -302,7 +320,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        //System.out.println("Destroy activity");
+        bottomNavigationView.setOnNavigationItemSelectedListener(null);
+        System.out.println("Destroy activity");
         //stopService(new Intent(this, GeolocationService.class));
         super.onDestroy();
     }
@@ -337,6 +356,8 @@ public class MainActivity extends AppCompatActivity {
             setToolBarByFragment(fragmentsName.get(fragmentsName.size() - 2));
             showOrHideBars(fragmentsName.get(fragmentsName.size() - 2));
             super.onBackPressed();
+        } else if (fromARWithIntentToGoback(fromARTag)) {
+            goARFragment();
         } else {
             Intent startMain = new Intent(Intent.ACTION_MAIN);
             startMain.addCategory(Intent.CATEGORY_HOME);
@@ -360,7 +381,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.tool_bar, menu);
-        setToolBarTitle(getString(R.string.default_fragment_toolbar_title));
+        setToolBarByFragment(currentFragmentTag);
         return true;
     }
 
@@ -378,6 +399,38 @@ public class MainActivity extends AppCompatActivity {
     public void onInteractionResult(InteractionResult interactionResult) {
         if (interactionResult.getType().equals(InteractionResult.Type.QUEST_END)) {
             showCongratulation();
+        }
+    }
+
+    private String fromAR() {
+        try {
+            String tag = this.getIntent().getAction();
+            if (JournalFragment.TAG.equals(tag)) {
+                return tag;
+            } else if (ItemsListFragment.TAG.equals(tag)) {
+                return tag;
+            } else {
+                return null;
+            }
+        } catch (NullPointerException e) {
+            return null;
+        }
+    }
+
+    private boolean fromARWithIntentToGoback(String tag) {
+        if (JournalFragment.TAG.equals(tag)) {
+            return true;
+        } else if (ItemsListFragment.TAG.equals(tag)) {
+            return true;
+        }
+        return false;
+    }
+
+    private void selectFragmentByTag(String tag) {
+        if (JournalFragment.TAG.equals(tag)) {
+            selectFragment(journalFragment, JournalFragment.TAG);
+        } else if (ItemsListFragment.TAG.equals(tag)) {
+            selectFragment(itemsListFragment, ItemsListFragment.TAG);
         }
     }
 
@@ -560,17 +613,9 @@ public class MainActivity extends AppCompatActivity {
             }
         };
     }
-
     private void selectFragment(Fragment fragment, String tag) {
-        selectFragment(fragment, tag, true);
-    }
-
-    private void selectFragmentByView(Fragment fragment, String tag) {
-        selectFragment(fragment, tag, false);
-    }
-
-    private void selectFragment(Fragment fragment, String tag, boolean fromNav) {
         showOrHideBars(tag);
+        currentFragmentTag = tag;
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         int index = fragmentManager.getBackStackEntryCount() - 1;

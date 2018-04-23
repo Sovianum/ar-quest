@@ -294,6 +294,14 @@ public class ARActivity extends Activity {
 
     }
 
+    @OnClick(R.id.close_btn)
+    public void onCloseClickListener() {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setAction(QuestFragment.TAG);
+        startActivity(intent);
+        finish();
+    }
+
     private void showSnackbarMessage(String message, boolean finishOnDismiss) {
         messageSnackbar =
                 Snackbar.make(
