@@ -9,7 +9,8 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.BaseTransientBottomBar;
 import android.support.design.widget.Snackbar;
 import android.view.View;
-import android.widget.Button;
+import android.view.animation.AlphaAnimation;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -57,13 +58,28 @@ public class ARActivity extends Activity {
     TextView collisionText;
 
     @BindView(R.id.inventory_btn)
-    Button toInventoryBtn;
+    ImageButton toInventoryBtn;
 
     @BindView(R.id.journal_btn)
-    Button toJournalBtn;
+    ImageButton toJournalBtn;
 
     @BindView(R.id.interact_btn)
-    Button interactBtn;
+    ImageButton interactBtn;
+
+    @BindView(R.id.close_btn)
+    ImageButton closeBtn;
+
+    @BindView(R.id.help_btn)
+    ImageButton helpBtn;
+
+    @BindView(R.id.inventory_help_text)
+    TextView inventoryHelpTextView;
+
+    @BindView(R.id.journal_help_text)
+    TextView journalHelpTextView;
+
+    @BindView(R.id.interact_help_text)
+    TextView interactHelpTextView;
 
     @Inject
     GameModule gameModule;
@@ -256,6 +272,28 @@ public class ARActivity extends Activity {
         finish();
     }
 
+
+    @OnClick(R.id.help_btn)
+    public void onHelpClickListener() {
+        if (inventoryHelpTextView.getVisibility() == View.VISIBLE) {
+            inventoryHelpTextView.setVisibility(View.GONE);
+            journalHelpTextView.setVisibility(View.GONE);
+            interactHelpTextView.setVisibility(View.GONE);
+        } else {
+            inventoryHelpTextView.setVisibility(View.VISIBLE);
+            journalHelpTextView.setVisibility(View.VISIBLE);
+            interactHelpTextView.setVisibility(View.VISIBLE);
+            AlphaAnimation animation = new AlphaAnimation(0.2f, 1.0f);
+            animation.setDuration(100);
+            animation.setStartOffset(100);
+            animation.setFillAfter(true);
+            inventoryHelpTextView.startAnimation(animation);
+            journalHelpTextView.startAnimation(animation);
+            interactHelpTextView.startAnimation(animation);
+        }
+
+    }
+
     private void showSnackbarMessage(String message, boolean finishOnDismiss) {
         messageSnackbar =
                 Snackbar.make(
@@ -291,15 +329,15 @@ public class ARActivity extends Activity {
     }
 
     private void showButtons() {
-        toInventoryBtn.setAlpha(1);
-        toJournalBtn.setAlpha(1);
-        interactBtn.setAlpha(1);
+        toInventoryBtn.setVisibility(View.VISIBLE);
+        toJournalBtn.setVisibility(View.VISIBLE);
+        interactBtn.setVisibility(View.VISIBLE);
     }
 
     private void hideButtons() {
-        toInventoryBtn.setAlpha(0);
-        toJournalBtn.setAlpha(0);
-        interactBtn.setAlpha(0);
+        toInventoryBtn.setVisibility(View.GONE);
+        toJournalBtn.setVisibility(View.GONE);
+        interactBtn.setVisibility(View.GONE);
     }
 
     private void setUpHints() {

@@ -11,11 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
-import edu.technopark.arquest.App;
-import edu.technopark.arquest.GameModule;
-import edu.technopark.arquest.R;
-import edu.technopark.arquest.game.Item;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +18,10 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import edu.technopark.arquest.App;
+import edu.technopark.arquest.GameModule;
+import edu.technopark.arquest.R;
+import edu.technopark.arquest.game.Item;
 
 public class ItemsListFragment extends Fragment {
     public static final String TAG = ItemsListFragment.class.getSimpleName();
@@ -70,7 +69,11 @@ public class ItemsListFragment extends Fragment {
     }
 
     private void refreshItems() {
-        loadItems(gameModule.getCurrentInventory().getItems());
+        if (gameModule.getCurrentInventory() == null) { //stubs for compatibility!!!
+            loadItems(new ArrayList<Item>());
+        } else {
+            loadItems(gameModule.getCurrentInventory().getItems());
+        }
     }
 
 }

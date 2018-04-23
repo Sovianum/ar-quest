@@ -21,5 +21,10 @@
     <dimen name="layout_botom_margin_size">54dp</dimen>
     <dimen name="layout_top_margin_size">54dp</dimen>
 
+    <dimen name="round_button_size">60dp</dimen>
+    <dimen name="ar_button_margin_left_right">10dp</dimen>
+    <dimen name="ar_button_layout_margin_top">60dp</dimen>
+    <dimen name="ar_button_padding">4dp</dimen>
+
 
 </resources>

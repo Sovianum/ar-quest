@@ -8,4 +8,7 @@
     <color name="bottomNavBarColor">#66000000</color>
     <color name="red">#FF0000</color>
     <color name="transparent">#00000000</color>
+    <color name="roundButtonColor">#bdbdbd</color>
+    <color name="roundButtonColorFocusedStart">#e0e0e0</color>
+    <color name="roundButtonColorFocusedEnd">#d6d6d6</color>
 </resources>

@@ -11,15 +11,25 @@
     <!--android:layout_height="fill_parent"-->
     <!--android:layout_gravity="top" />-->
 
-<!--<ImageButton
-    android:id="@+id/close_btn"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_centerInParent="true"
-    android:layout_alignParentTop="true"
-    android:layout_alignParentEnd="true"
-    android:background="@null"
-    android:src = "@drawable/ic_clear_black_24dp"/>-->
+    <ImageButton
+        android:id="@+id/close_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:background="@null"
+        android:src = "@drawable/ic_clear_black_24dp"/>
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/help_btn"
+        android:src="@drawable/ic_help_outline_black_24dp"
+        android:background="@null"
+        android:gravity="center_horizontal"
+        android:padding="@dimen/ar_button_padding"
+        android:layout_marginBottom="30dp" />
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -38,34 +48,102 @@
         android:gravity="top"
         android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/inventory_btn"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:text="@string/inventory_str"
-            android:textSize="@dimen/button_text_size"
-            />
+        <Space
+            android:layout_width="@dimen/ar_button_margin_left_right"
+            android:layout_height="1dp">
+        </Space>
 
-        <Button
-            android:id="@+id/journal_btn"
+        <LinearLayout
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="@string/journal_str"
-            android:textSize="@dimen/button_text_size"
-            />
-        
-        <Button
-            android:id="@+id/interact_btn"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/inventory_btn"
+                android:src="@drawable/ic_bag"
+                android:background="@drawable/round_button_style"
+                android:gravity="center_horizontal"
+                android:padding="@dimen/ar_button_padding" />
+
+            <!--android:tint="@color/colorAccent"-->
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:id="@+id/inventory_help_text"
+                android:text="@string/inventory_help_str"
+                android:textColor="@color/roundButtonColor"
+                android:gravity="center_horizontal"
+                android:visibility="gone"
+                />
+
+        </LinearLayout>
+
+        <LinearLayout
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="@string/interact_str"
-            android:textSize="@dimen/button_text_size"
-            />
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/interact_btn"
+                android:src="@drawable/ic_touch_app_black_24dp"
+                android:background="@drawable/round_button_style"
+                android:gravity="center_horizontal"
+                android:padding="@dimen/ar_button_padding" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:id="@+id/interact_help_text"
+                android:text="@string/interact_help_str"
+                android:textColor="@color/roundButtonColor"
+                android:gravity="center_horizontal"
+                android:visibility="gone"
+                />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/journal_btn"
+                android:src="@drawable/ic_event_note_black_24dp"
+                android:background="@drawable/round_button_style"
+                android:gravity="center_horizontal"
+                android:padding="@dimen/ar_button_padding" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:id="@+id/journal_help_text"
+                android:text="@string/journal_help_str"
+                android:textColor="@color/roundButtonColor"
+                android:gravity="center_horizontal"
+                android:visibility="gone"
+                />
+
+        </LinearLayout>
 
 
+        <Space
+            android:layout_width="@dimen/ar_button_margin_left_right"
+            android:layout_height="1dp">
+        </Space>
     </LinearLayout>
 </LinearLayout>
 
