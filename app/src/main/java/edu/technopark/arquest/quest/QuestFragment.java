@@ -14,6 +14,12 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
+import javax.inject.Inject;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import edu.technopark.arquest.App;
 import edu.technopark.arquest.GameModule;
 import edu.technopark.arquest.R;
@@ -23,18 +29,14 @@ import edu.technopark.arquest.game.journal.TimestampRecord;
 import edu.technopark.arquest.quest.items.ItemAdapter;
 import edu.technopark.arquest.quest.place.PlacesAdapter;
 
-import java.util.ArrayList;
-
-import javax.inject.Inject;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
 public class QuestFragment extends Fragment {
     public static final String TAG = QuestFragment.class.getSimpleName();
 
     @BindView(R.id.to_ar_mode_btn)
     Button toARModeBtn;
+
+    @BindView(R.id.cancel_quest_btn)
+    Button cancelQuestBtn;
 
     @BindView(R.id.journal_txt)
     TextView journalText;
@@ -61,6 +63,7 @@ public class QuestFragment extends Fragment {
     RecyclerView recyclerViewPlaces;
 
     private View.OnClickListener onARModeBtnClickListener;
+    private View.OnClickListener onCancelBtnClickListener;
     private View.OnClickListener onJournalClickListener;
     private View.OnClickListener onPlacesClickListener;
     private View.OnClickListener onInventoryClickListener;
@@ -82,6 +85,9 @@ public class QuestFragment extends Fragment {
         ButterKnife.bind(this, view);
         if (onARModeBtnClickListener != null) {
             toARModeBtn.setOnClickListener(onARModeBtnClickListener);
+        }
+        if (onCancelBtnClickListener != null) {
+            cancelQuestBtn.setOnClickListener(onCancelBtnClickListener);
         }
         if (onJournalClickListener != null) {
             journalText.setOnClickListener(onJournalClickListener);
@@ -117,6 +123,13 @@ public class QuestFragment extends Fragment {
         onARModeBtnClickListener = listener;
         if (toARModeBtn != null) {
             toARModeBtn.setOnClickListener(listener);
+        }
+    }
+
+    public void setOnCancelBtnClickListener(View.OnClickListener listener) {
+        onCancelBtnClickListener = listener;
+        if (cancelQuestBtn != null) {
+            cancelQuestBtn.setOnClickListener(listener);
         }
     }
 

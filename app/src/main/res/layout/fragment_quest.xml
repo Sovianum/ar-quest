@@ -5,7 +5,9 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:layout_marginBottom="@dimen/layout_botom_margin_size"
-    android:layout_marginTop="@dimen/layout_top_margin_size">
+    android:layout_marginTop="@dimen/layout_top_margin_size"
+    android:layout_marginStart="@dimen/quest_layout_left_margin_size"
+    android:layout_marginEnd="@dimen/quest_layout_right_margin_size">
 
     <TextView
         android:id="@+id/journal_txt"
@@ -53,10 +55,30 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/spaces_login" />
 
-    <Button
-        android:id="@+id/to_ar_mode_btn"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/to_ar_fragment" />
+        android:gravity="center_horizontal"
+        android:layout_marginTop="20dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/cancel_quest_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/cancel_quest"
+            android:textColor="@color/red"
+            android:textSize="12sp"
+            style="?android:attr/borderlessButtonStyle" />
+
+        <Button
+            android:id="@+id/to_ar_mode_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:drawableBottom="@drawable/ic_camera_alt_black_24dp"
+            android:text="@string/to_ar_fragment"
+            android:textSize="12sp"/>
+
+    </LinearLayout>
 
 </LinearLayout>

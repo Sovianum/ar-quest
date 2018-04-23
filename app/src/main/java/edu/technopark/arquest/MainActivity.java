@@ -217,6 +217,20 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    private View.OnClickListener onARModeBtnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            goARFragment();
+        }
+    };
+
+    private View.OnClickListener onCancelQuestClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            showCancelAlert();
+        }
+    };
+
     private AlertDialog alertDialog;
 
     private BottomNavigationView.OnNavigationItemSelectedListener onNavigationItemSelectedListener =
@@ -304,10 +318,8 @@ public class MainActivity extends AppCompatActivity {
         if (fromARTag != null) {
             //gameModule.getCurrentJournal().addNow("Найдена контрольная точка ");
             selectFragmentByTag(fromARTag);
-            toolBar.setTitle(getResources().getString(R.string.journal_fragment_title));
         } else {
             selectFragment(questsListFragment, QuestsListFragment.TAG);
-
         }
         EventBus.getDefault().register(this);
     }
@@ -409,6 +421,8 @@ public class MainActivity extends AppCompatActivity {
                 return tag;
             } else if (ItemsListFragment.TAG.equals(tag)) {
                 return tag;
+            } else if (QuestFragment.TAG.equals(tag)) {
+                return tag;
             } else {
                 return null;
             }
@@ -431,6 +445,8 @@ public class MainActivity extends AppCompatActivity {
             selectFragment(journalFragment, JournalFragment.TAG);
         } else if (ItemsListFragment.TAG.equals(tag)) {
             selectFragment(itemsListFragment, ItemsListFragment.TAG);
+        } else if (QuestFragment.TAG.equals(tag)) {
+            selectFragment(questFragment, QuestFragment.TAG);
         }
     }
 
@@ -519,6 +535,32 @@ public class MainActivity extends AppCompatActivity {
         alertDialog.show();
     }
 
+    private void showCancelAlert() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.cancel_quest_message)
+                .setTitle(R.string.cancel_quest_title)
+                .setCancelable(true)
+                .setPositiveButton(android.R.string.yes,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                                selectFragment(questsListFragment, QuestsListFragment.TAG);
+                                //TODO cancel current quest
+                            }
+                        });
+        builder.setNegativeButton(android.R.string.no,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+
+                    }
+                });
+
+
+        alertDialog = builder.create();
+        alertDialog.show();
+    }
+
     private void checkAndRequestPermissions() {
         if (!PermissionHelper.hasPermissions(this)) {
             PermissionHelper.requestPermissions(this);
@@ -543,7 +585,8 @@ public class MainActivity extends AppCompatActivity {
         placeFragment = new PlaceFragment();
 
         questFragment = new QuestFragment();
-//        questFragment.setOnARModeBtnClickListener(getSelectFragmentListener(arFragment));
+        questFragment.setOnARModeBtnClickListener(onARModeBtnClickListener);
+        questFragment.setOnCancelBtnClickListener(onCancelQuestClickListener);
         questFragment.setOnJournalClickListener(getSelectFragmentListener(journalFragment));
         questFragment.setOnItemClickListener(chooseItemOnClickListener);
         questFragment.setOnPlacesClickListener(getSelectFragmentListener(placeFragment));

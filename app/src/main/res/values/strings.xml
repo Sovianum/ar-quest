@@ -20,7 +20,8 @@
     <string name="journal_str">Journal</string>
     <string name="release_str">Release</string>
     <string name="to_quest_fragment">Back to quest</string>
-    <string name="to_ar_fragment">AR mode</string>
+    <string name="to_ar_fragment">Дополненная реальность</string>
+    <string name="cancel_quest">Завершить квест</string>
 
     <string name="auth_activity_btn">Auth Activity</string>
     <string name="ar_activity_btn">AR Fragment</string>
@@ -77,6 +78,8 @@
     Для работы приложения требуются разрешения на использование камеры и геоданных.</string>
     <string name="help_title">Обучение</string>
     <string name="help_message">Хотите пройти обучение? </string>
+    <string name="cancel_quest_title">Прервать квест</string>
+    <string name="cancel_quest_message">Завершение квеста приведет к потере текущего прогресса. Продолжить? </string>
     <string name="congratulation_title">Поздравляем</string>
     <string name="congratulation_message">Вы прошли первый квест. Хотите вернуться к выбору квестов?</string>
     <string name="non_permission_title">Необходимы разрешения</string>

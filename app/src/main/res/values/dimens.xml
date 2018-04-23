@@ -25,6 +25,8 @@
     <dimen name="ar_button_margin_left_right">10dp</dimen>
     <dimen name="ar_button_layout_margin_top">60dp</dimen>
     <dimen name="ar_button_padding">4dp</dimen>
+    <dimen name="quest_layout_left_margin_size">6dp</dimen>
+    <dimen name="quest_layout_right_margin_size">6dp</dimen>
 
 
 </resources>
