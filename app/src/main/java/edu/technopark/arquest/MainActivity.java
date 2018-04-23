@@ -622,6 +622,7 @@ public class MainActivity extends AppCompatActivity {
 
         Intent intent = new Intent(this, ARActivity.class);
         startActivity(intent);
+        overridePendingTransition( R.anim.from_up_to_center_anim, R.anim.stationary_anim);
     }
 
     public void goToCurrentQuest() {

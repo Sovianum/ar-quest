@@ -299,6 +299,7 @@ public class ARActivity extends Activity {
         Intent intent = new Intent(this, MainActivity.class);
         intent.setAction(QuestFragment.TAG);
         startActivity(intent);
+        overridePendingTransition( R.anim.from_down_to_center, R.anim.from_center_to_up_anim);
         finish();
     }
 
