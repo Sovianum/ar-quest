@@ -5,11 +5,31 @@
     android:layout_height="match_parent"
     tools:context=".quest.ARActivity">
 
-<!--<com.viro.core.ViroViewARCore-->
+
+
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/ar_fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <include layout="@layout/toolbar" />
+    </RelativeLayout>
+
+
+    <!--<com.viro.core.ViroViewARCore-->
     <!--android:id="@+id/viro_view"-->
     <!--android:layout_width="fill_parent"-->
     <!--android:layout_height="fill_parent"-->
     <!--android:layout_gravity="top" />-->
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@id/ar_buttons_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:gravity="top">
 
     <ImageButton
         android:id="@+id/close_btn"
@@ -32,11 +52,13 @@
         android:padding="@dimen/ar_button_padding"
         android:layout_marginBottom="30dp"
         android:layout_marginTop="20dp"/>
+    </RelativeLayout>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:id="@id/ar_controls_layout"
     android:gravity="top">
 
     <TextView
@@ -79,7 +101,7 @@
                 android:layout_height="match_parent"
                 android:id="@+id/inventory_help_text"
                 android:text="@string/inventory_help_str"
-                android:textColor="@color/roundButtonColor"
+                android:textColor="@color/helpTextColor"
                 android:gravity="center_horizontal"
                 android:visibility="gone"
                 />
@@ -107,7 +129,7 @@
                 android:layout_height="match_parent"
                 android:id="@+id/interact_help_text"
                 android:text="@string/interact_help_str"
-                android:textColor="@color/roundButtonColor"
+                android:textColor="@color/helpTextColor"
                 android:gravity="center_horizontal"
                 android:visibility="gone"
                 />
@@ -135,7 +157,7 @@
                 android:layout_height="match_parent"
                 android:id="@+id/journal_help_text"
                 android:text="@string/journal_help_str"
-                android:textColor="@color/roundButtonColor"
+                android:textColor="@color/helpTextColor"
                 android:gravity="center_horizontal"
                 android:visibility="gone"
                 />

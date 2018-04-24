@@ -8,4 +8,6 @@
     <item name="inventory_item_hint" type="id" />
     <item name="release_btn_hint" type="id" />
     <item name="interact_btn_hint" type="id" />
+    <item name="ar_buttons_layout" type="id" />
+    <item name="ar_controls_layout" type="id" />
 </resources>

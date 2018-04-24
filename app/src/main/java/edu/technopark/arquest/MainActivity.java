@@ -197,7 +197,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onItemClick(Item item) {
             gameModule.getPlayer().hold(item);
-            Toast.makeText(MainActivity.this, "You selected: " + item.getName(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, "Вы выбрали: " + item.getName(), Toast.LENGTH_SHORT).show();
             //TODO action to choose element
         }
     };
@@ -595,9 +595,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void setUpGameModule() {
         Journal<String> journal = new Journal<>();
-        journal.addNow("First record");
-        journal.addNow("Second record");
-        journal.addNow("Third record");
+        journal.addNow("Квест запущен!");
     }
 
     private void initFragments() throws FileNotFoundException {
