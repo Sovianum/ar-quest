@@ -85,6 +85,9 @@ public class ARActivity extends AppCompatActivity {
     @BindView(R.id.interact_btn)
     ImageButton interactBtn;
 
+    @BindView(R.id.return_inventory_btn)
+    ImageButton returnItemToInventoryBtn;
+
     @BindView(R.id.close_btn)
     ImageButton closeBtn;
 
@@ -99,6 +102,9 @@ public class ARActivity extends AppCompatActivity {
 
     @BindView(R.id.interact_help_text)
     TextView interactHelpTextView;
+
+    @BindView(R.id.return_inventory_help_text)
+    TextView returnItemToInventoryHelpTextView;
 
     @BindView(R.id.toolbar_actionbar)
     Toolbar toolBar;
@@ -300,6 +306,11 @@ public class ARActivity extends AppCompatActivity {
         gameModule.interactLastCollided();
     }
 
+    @OnClick(R.id.return_inventory_btn)
+    void interactReturn() {
+        gameModule.getPlayer().release();
+    }
+
     @OnClick(R.id.inventory_btn)
     void toInventory() {
         changeToFragmentLayout();
@@ -319,6 +330,10 @@ public class ARActivity extends AppCompatActivity {
             inventoryHelpTextView.setVisibility(View.GONE);
             journalHelpTextView.setVisibility(View.GONE);
             interactHelpTextView.setVisibility(View.GONE);
+            if (returnItemToInventoryBtn.getVisibility() == View.VISIBLE) {
+                returnItemToInventoryHelpTextView.setVisibility(View.GONE);
+            }
+
         } else {
             inventoryHelpTextView.setVisibility(View.VISIBLE);
             journalHelpTextView.setVisibility(View.VISIBLE);
@@ -327,11 +342,14 @@ public class ARActivity extends AppCompatActivity {
             animation.setDuration(100);
             animation.setStartOffset(100);
             animation.setFillAfter(true);
+            if (returnItemToInventoryBtn.getVisibility() == View.VISIBLE) {
+                returnItemToInventoryHelpTextView.setVisibility(View.VISIBLE);
+                returnItemToInventoryHelpTextView.startAnimation(animation);
+            }
             inventoryHelpTextView.startAnimation(animation);
             journalHelpTextView.startAnimation(animation);
             interactHelpTextView.startAnimation(animation);
         }
-
     }
 
     @OnClick(R.id.close_btn)
@@ -343,11 +361,28 @@ public class ARActivity extends AppCompatActivity {
         finish();
     }
 
+    @OnClick(R.id.return_inventory_btn)
+    public void onReturnItemToInventoryClickListener() {
+        gameModule.interactLastCollided();
+    }
+
     private void initFragments() throws FileNotFoundException {
         journalFragment = new JournalFragment();
 
         itemsListFragment = new ItemsListFragment();
         itemsListFragment.setOnItemClickListener(chooseItemOnClickListener);
+    }
+
+    private void showReturnItemViews() {
+        returnItemToInventoryBtn.setVisibility(View.VISIBLE);
+        if (inventoryHelpTextView.getVisibility() == View.VISIBLE) {
+            inventoryHelpTextView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void hideReturnItemViews() {
+        returnItemToInventoryBtn.setVisibility(View.GONE);
+        inventoryHelpTextView.setVisibility(View.GONE);
     }
 
     private void showSnackbarMessage(String message, boolean finishOnDismiss) {

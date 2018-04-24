@@ -110,6 +110,7 @@
     <string name="inventory_help_str">Инвентарь</string>
     <string name="journal_help_str">Журнал событий</string>
     <string name="interact_help_str">Действие</string>
+    <string name="return_inventory_help_str">Вернуть в инвентарь</string>
     <string name="inventory_empty_text">Инвентарь пуст</string>
     <string name="journal_empty_text">Нет событий</string>
     <string name="checkpoints_empty_text">Места не найдены</string>

@@ -210,6 +210,20 @@ public class GameModule {
 //        }
     }
 
+    public void returnToInventory() {
+        if (lastCollision == null) {
+            return;
+        }
+        InteractionArgument argument;
+        Item item = player.getItem();
+        if (item != null) {
+            argument = new InteractionArgument(null, Collections.singletonList(new Slot.RepeatedItem(item)));
+            for (InteractionResult result : lastCollision.object.interact(argument)) {
+                EventBus.getDefault().post(result);
+            }
+        }
+    }
+
     @Subscribe
     public void handleInteractiveObjectCollisionEvent(final InteractiveObject.InteractiveObjectCollisionEvent event) {
         collisionMap.put(event.object.getName(), event);
