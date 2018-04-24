@@ -157,7 +157,7 @@ public class ARActivity extends Activity {
         } else {
             setContentView(R.layout.fragment_ar);
         }
-
+        ButterKnife.bind(this);
 //        snackbarAction.startIfNotRunning();
 //        setUpHints();
     }
@@ -228,16 +228,13 @@ public class ARActivity extends Activity {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onCanInteract(GameModule.CanInteract canInteractEvent) {
         if (canInteractEvent.canInteract) {
-            interactBtn.setText(R.string.interact_str);
             interactBtn.setEnabled(true);
             return;
         }
         if (gameModule.getPlayer().getItem() != null) {
-            interactBtn.setText(R.string.release_str);
             interactBtn.setEnabled(true);
             return;
         }
-        interactBtn.setText(R.string.interact_str);
         interactBtn.setEnabled(false);
     }
 
