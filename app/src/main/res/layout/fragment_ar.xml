@@ -94,6 +94,11 @@
                 android:gravity="center_horizontal"
                 android:padding="@dimen/ar_button_padding" />
 
+            <Space
+                android:layout_width="1dp"
+                android:layout_height="@dimen/ar_button_help_text_space_size">
+            </Space>
+
             <!--android:tint="@color/colorAccent"-->
 
             <TextView
@@ -102,6 +107,7 @@
                 android:id="@+id/inventory_help_text"
                 android:text="@string/inventory_help_str"
                 android:textColor="@color/helpTextColor"
+                android:background="@drawable/round_text_view_style"
                 android:gravity="center_horizontal"
                 android:visibility="gone"
                 />
@@ -124,12 +130,18 @@
                 android:gravity="center_horizontal"
                 android:padding="@dimen/ar_button_padding" />
 
+            <Space
+                android:layout_width="1dp"
+                android:layout_height="@dimen/ar_button_help_text_space_size">
+            </Space>
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:id="@+id/interact_help_text"
                 android:text="@string/interact_help_str"
                 android:textColor="@color/helpTextColor"
+                android:background="@drawable/round_text_view_style"
                 android:gravity="center_horizontal"
                 android:visibility="gone"
                 />
@@ -152,12 +164,18 @@
                 android:gravity="center_horizontal"
                 android:padding="@dimen/ar_button_padding" />
 
+            <Space
+                android:layout_width="1dp"
+                android:layout_height="@dimen/ar_button_help_text_space_size">
+            </Space>
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:id="@+id/journal_help_text"
                 android:text="@string/journal_help_str"
                 android:textColor="@color/helpTextColor"
+                android:background="@drawable/round_text_view_style"
                 android:gravity="center_horizontal"
                 android:visibility="gone"
                 />
