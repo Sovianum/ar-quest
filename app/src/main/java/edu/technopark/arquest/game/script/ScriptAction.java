@@ -7,16 +7,16 @@ import java.util.Collection;
 
 public class ScriptAction {
     public static class StateTransition {
-        private int targetObjectID;
+        private String targetObjectName;
         private int targetStateID;
 
-        public StateTransition(int targetObjectID, int targetStateID) {
-            this.targetObjectID = targetObjectID;
+        public StateTransition(String targetObjectName, int targetStateID) {
+            this.targetObjectName = targetObjectName;
             this.targetStateID = targetStateID;
         }
 
-        public int getTargetObjectID() {
-            return targetObjectID;
+        public String getTargetObjectName() {
+            return targetObjectName;
         }
 
         public int getTargetStateID() {

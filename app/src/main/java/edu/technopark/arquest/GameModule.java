@@ -10,8 +10,6 @@ import com.viro.core.Vector;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -55,6 +53,7 @@ public class GameModule {
     private Quest currentQuest;
     private boolean withAR;
     private Map<String, InteractiveObject.InteractiveObjectCollisionEvent> collisionMap;
+    private InteractiveObject.InteractiveObjectCollisionEvent lastCollision;
 
     @Inject
     AssetModule assetModule;
@@ -168,38 +167,53 @@ public class GameModule {
         }
     }
 
-    public void interactClosestInRange() {
-        InteractiveObject closest = null;
-        float minDistance = 1e10f;
-
-        Vector playerPosition = player.getPositionRealtime();
-        for (InteractiveObject.InteractiveObjectCollisionEvent event : collisionMap.values()) {
-            float distance = event.position.distance(playerPosition);
-            if (distance <= player.getAccessRange() && distance < minDistance) {
-                minDistance = distance;
-                closest = event.object;
-            }
+    public void interactLastCollided() {
+        if (lastCollision == null) {
+            return;
+        }
+        InteractionArgument argument;
+        Item item = player.getItem();
+        if (item != null) {
+            argument = new InteractionArgument(null, Collections.singletonList(new Slot.RepeatedItem(item)));
+        } else {
+            argument = new InteractionArgument(null, null);
+        }
+        for (InteractionResult result : lastCollision.object.interact(argument)) {
+            EventBus.getDefault().post(result);
         }
 
-        if (closest != null) {
-            InteractionArgument argument;
-            Item item = player.getItem();
-            if (item != null) {
-                argument = new InteractionArgument(null, Collections.singletonList(new Slot.RepeatedItem(item)));
-            } else {
-                argument = new InteractionArgument(null, null);
-            }
-            Collection<InteractionResult> results = closest.interact(argument);
-
-            for (InteractionResult result : results) {
-                EventBus.getDefault().post(result);
-            }
-        }
+//        InteractiveObject closest = null;
+//        float minDistance = 1e10f;
+//
+//        Vector playerPosition = player.getPositionRealtime();
+//        for (InteractiveObject.InteractiveObjectCollisionEvent event : collisionMap.values()) {
+//            float distance = event.position.distance(playerPosition);
+//            if (distance <= player.getAccessRange() && distance < minDistance) {
+//                minDistance = distance;
+//                closest = event.object;
+//            }
+//        }
+//
+//        if (closest != null) {
+//            InteractionArgument argument;
+//            Item item = player.getItem();
+//            if (item != null) {
+//                argument = new InteractionArgument(null, Collections.singletonList(new Slot.RepeatedItem(item)));
+//            } else {
+//                argument = new InteractionArgument(null, null);
+//            }
+//            Collection<InteractionResult> results = closest.interact(argument);
+//
+//            for (InteractionResult result : results) {
+//                EventBus.getDefault().post(result);
+//            }
+//        }
     }
 
     @Subscribe
     public void handleInteractiveObjectCollisionEvent(final InteractiveObject.InteractiveObjectCollisionEvent event) {
         collisionMap.put(event.object.getName(), event);
+        lastCollision = event;
     }
 
     @Subscribe
@@ -210,6 +224,9 @@ public class GameModule {
                     @Override
                     public void onComplete(boolean b) {
                         EventBus.getDefault().post(new CanInteract(b));
+                        if (!b) {
+                            lastCollision = null;
+                        }
                     }
                 }
         );
@@ -240,7 +257,7 @@ public class GameModule {
         Map<String, InteractiveObject> interactiveObjectMap = currPlace.getInteractiveObjects();
         for (ScriptAction.StateTransition transition : result.getTransitions()) {
             interactiveObjectMap
-                    .get(transition.getTargetObjectID())
+                    .get(transition.getTargetObjectName())
                     .setCurrentStateID(transition.getTargetStateID());
         }
     }

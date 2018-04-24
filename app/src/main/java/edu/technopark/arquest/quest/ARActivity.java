@@ -8,7 +8,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BaseTransientBottomBar;
 import android.support.design.widget.Snackbar;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.widget.ImageButton;
@@ -18,13 +17,7 @@ import android.widget.Toast;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.google.common.base.Function;
-import com.viro.core.ARHitTestListener;
-import com.viro.core.ARHitTestResult;
-import com.viro.core.ARScene;
 import com.viro.core.CameraListener;
-import com.viro.core.Node;
-import com.viro.core.Object3D;
-import com.viro.core.PhysicsBody;
 import com.viro.core.Vector;
 import com.viro.core.ViroViewARCore;
 
@@ -32,8 +25,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
 import javax.inject.Inject;
@@ -49,8 +40,6 @@ import edu.technopark.arquest.PermissionHelper;
 import edu.technopark.arquest.R;
 import edu.technopark.arquest.common.ContinuousAction;
 import edu.technopark.arquest.game.InteractionResult;
-import edu.technopark.arquest.game.InteractiveObject;
-import edu.technopark.arquest.game.Place;
 import edu.technopark.arquest.game.slot.Slot;
 import edu.technopark.arquest.model.Quest;
 import edu.technopark.arquest.quest.items.ItemsListFragment;
@@ -264,7 +253,7 @@ public class ARActivity extends Activity {
 
     @OnClick(R.id.interact_btn)
     void interact() {
-        gameModule.interactClosestInRange();
+        gameModule.interactLastCollided();
     }
 
     @OnClick(R.id.inventory_btn)

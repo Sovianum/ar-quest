@@ -165,6 +165,11 @@ public class QuestModule {
                 1, "andy", "andy",
                 CollectionUtils.singleItemList(rose)
         );
+        final InteractiveObject whiteGuy = new InteractiveObject(
+                2, "white", "white",
+                CollectionUtils.singleItemList(banana)
+        );
+
         andy.setVisualResource(new VisualResource(Object3D.Type.OBJ).setModelUri("file:///android_asset/andy.obj").setTextureUri("andy.png"));
         andy.setPosition(new Vector(0, 0, -0.5f));
         andy.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.3f));
@@ -178,8 +183,8 @@ public class QuestModule {
                                 InteractionResult.nextPurposeResult("Найдите неподалеку белого человека и попросите поесть"),
                                 InteractionResult.transitionsResult(
                                         CollectionUtils.listOf(
-                                                new ScriptAction.StateTransition(1, 2),
-                                                new ScriptAction.StateTransition(2, 1)
+                                                new ScriptAction.StateTransition(andy.getName(), 2),
+                                                new ScriptAction.StateTransition(whiteGuy.getName(), 1)
                                         )
                                 ),
                                 InteractionResult.hintResult(R.id.journal_btn_hint)
@@ -204,7 +209,7 @@ public class QuestModule {
                                 InteractionResult.takeItemsResult(new Slot.RepeatedItem(banana)),
                                 InteractionResult.transitionsResult(
                                         CollectionUtils.listOf(
-                                                new ScriptAction.StateTransition(1, 3)
+                                                new ScriptAction.StateTransition(andy.getName(), 3)
                                         )
                                 )
                         )
@@ -239,10 +244,6 @@ public class QuestModule {
         andy.setStates(CollectionUtils.listOf(andyState1, andyState2, andyState3));
 
 
-        final InteractiveObject whiteGuy = new InteractiveObject(
-                2, "white", "white",
-                CollectionUtils.singleItemList(banana)
-        );
         whiteGuy.setVisualResource(new VisualResource(Object3D.Type.OBJ).setModelUri("file:///android_asset/bigmax.obj").setTextureUri("bigmax.jpg"));
         whiteGuy.setPosition(new Vector(0.25f, 0, 0));
         whiteGuy.setScale(new Vector(0.003f, 0.003f, 0.003f));
@@ -262,7 +263,7 @@ public class QuestModule {
                                 InteractionResult.nextPurposeResult("Передайте банан андроиду"),
                                 InteractionResult.hintResult(R.id.inventory_btn_hint),
                                 InteractionResult.transitionsResult(CollectionUtils.listOf(
-                                        new ScriptAction.StateTransition(2, 2)
+                                        new ScriptAction.StateTransition(whiteGuy.getName(), 2)
                                 ))
                         )
                 )
@@ -281,7 +282,7 @@ public class QuestModule {
                                 InteractionResult.nextPurposeResult(""),
                                 InteractionResult.questEndResult(),
                                 InteractionResult.transitionsResult(CollectionUtils.listOf(
-                                        new ScriptAction.StateTransition(2, 3)
+                                        new ScriptAction.StateTransition(whiteGuy.getName(), 3)
                                 ))
                         )
                 )
