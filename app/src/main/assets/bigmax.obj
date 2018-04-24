@@ -1,8 +1,6 @@
 # 3ds Max Wavefront OBJ Exporter v0.97b - (c)2007 guruware
 # File Created: 26.12.2014 14:21:46
 
-mtllib Bigmax_White_OBJ.mtl
-
 #
 # object Chest_Belly
 #
@@ -416,7 +414,6 @@ vt 0.0694 1.0000 0.0000
 # 28 texture coords
 
 g Chest_Belly
-usemtl wire_198224087
 s off
 f 1/1/1 2/1/1 3/1/1 4/1/1 
 f 5/1/2 6/1/2 7/1/2 8/1/2 
@@ -1385,7 +1382,6 @@ vn -0.0572 -0.9980 0.0251
 # 472 vertex normals
 
 g LeftLeg
-usemtl wire_177027088
 s 1
 f 151//225 152//226 153//227 154//228 
 s 4
@@ -2594,7 +2590,6 @@ vn -0.8165 -0.4354 0.3791
 # 465 vertex normals
 
 g LeftArm
-usemtl wire_027177027
 s 4
 f 433//697 434//698 435//699 436//700 
 s 2
@@ -3804,7 +3799,6 @@ vn -0.8165 0.4354 -0.3791
 # 465 vertex normals
 
 g RightArm
-usemtl wire_027177027
 s 4
 f 764//1165 763//1164 762//1163 761//1162 
 s 2
@@ -4974,7 +4968,6 @@ vn -0.4487 -0.3231 -0.8332
 # 471 vertex normals
 
 g RightLeg
-usemtl wire_177027088
 s 1
 f 1092//1630 1091//1629 1090//1628 1089//1627 
 s 4
@@ -5671,7 +5664,6 @@ vt 0.3284 1.0000 0.0000
 # 26 texture coords
 
 g Stamp
-usemtl wire_214229166
 s 1
 f 1371/29/2098 1372/30/2098 1373/31/2098 1374/32/2098 
 s off
@@ -6170,7 +6162,6 @@ vt 0.5055 0.4745 0.3706
 # 122 texture coords
 
 g Head
-usemtl wire_198224087
 s 1
 f 1547/55/2175 1548/56/2175 1549/57/2175 1550/58/2175 
 s 4

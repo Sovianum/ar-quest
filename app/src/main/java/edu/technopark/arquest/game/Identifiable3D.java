@@ -2,9 +2,12 @@ package edu.technopark.arquest.game;
 
 import com.viro.core.Object3D;
 
+import edu.technopark.arquest.model.VisualResource;
+
 public class Identifiable3D extends Object3D implements IEnabled {
-    protected boolean isEnabled;
     protected int id;
+    private boolean isEnabled;
+    private VisualResource visualResource;
 
     public Identifiable3D(String name) {
         this(0, name, true);
@@ -15,6 +18,14 @@ public class Identifiable3D extends Object3D implements IEnabled {
         this.id = id;
         this.isEnabled = isEnabled;
         setName(name);
+    }
+
+    public VisualResource getVisualResource() {
+        return visualResource;
+    }
+
+    public void setVisualResource(VisualResource visualResource) {
+        this.visualResource = visualResource;
     }
 
     @Override

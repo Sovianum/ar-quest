@@ -10,6 +10,7 @@ public class Item extends Identifiable3D {
         super(id, name, false);
         this.description = description;
         this.visualResource = visualResource;
+        setVisible(false);
     }
 
     public String getDescription() {

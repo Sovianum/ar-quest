@@ -3,6 +3,7 @@ package edu.technopark.arquest.game;
 import android.location.Location;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,6 +65,10 @@ public class Place {
             result.addAll(obj.getItems());
         }
         return result;
+    }
+
+    public Collection<InteractiveObject> getInteractive() {
+        return interactiveObjects.values();
     }
 
     public List<Identifiable3D> getAllVisible() {
