@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BaseTransientBottomBar;
 import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -16,12 +17,14 @@ import android.widget.Toast;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.google.common.base.Function;
+import com.viro.core.ARHitTestListener;
+import com.viro.core.ARHitTestResult;
 import com.viro.core.ARScene;
-import com.viro.core.Box;
-import com.viro.core.Material;
+import com.viro.core.CameraListener;
 import com.viro.core.Node;
 import com.viro.core.Object3D;
-import com.viro.core.ViroView;
+import com.viro.core.PhysicsBody;
+import com.viro.core.Vector;
 import com.viro.core.ViroViewARCore;
 
 import org.greenrobot.eventbus.EventBus;
@@ -29,7 +32,6 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -56,7 +58,19 @@ import edu.technopark.arquest.quest.journal.JournalFragment;
 public class ARActivity extends Activity {
     public static final String TAG = ARActivity.class.getSimpleName();
 
-    ViroView viroView;
+    public static class CameraUpdateEvent {
+        public Vector position;
+        public Vector rotation;
+        public Vector forward;
+
+        public CameraUpdateEvent(Vector position, Vector rotation, Vector forward) {
+            this.position = position;
+            this.rotation = rotation;
+            this.forward = forward;
+        }
+    }
+
+    ViroViewARCore viroView;
 
     @BindView(R.id.collision_txt)
     TextView collisionText;
@@ -101,32 +115,6 @@ public class ARActivity extends Activity {
 
     private Snackbar messageSnackbar;
 
-    private List<InteractiveObject> collidedObjects = new ArrayList<>();
-
-    // todo use clicks on objects to detect interactions
-//    private DeferredClickListener interactor = new DeferredClickListener() {
-//        private boolean needActualize = false;
-//
-//        @Override
-//        public void actualize() {
-//            if (needActualize) {
-//                gameModule.getScene().getPhysicsWorld().
-//                gameModule.getScene().getCollisions(gameModule.getPlayer().getCollider(), collidedObjects);
-//                if (interact() == null) {   // user intended to release item
-//                    gameModule.getPlayer().release();
-//                }
-//
-//                collidedObjects.clear();
-//                needActualize = false;
-//            }
-//        }
-//
-//        @Override
-//        public void onClick(View v) {
-//            needActualize = true;
-//        }
-//    };
-
     public ARActivity() {
         super();
         App.getAppComponent().inject(this);
@@ -139,7 +127,9 @@ public class ARActivity extends Activity {
         if (gameModule.isWithAR()) {
             viroView = new ViroViewARCore(this, new ViroViewARCore.StartupListener() {
                 @Override
-                public void onSuccess() {viroView.setScene(gameModule.getScene());}
+                public void onSuccess() {
+                    viroView.setScene(gameModule.getNewScene());
+                }
 
                 @Override
                 public void onFailure(ViroViewARCore.StartupError startupError, String s) {
@@ -151,10 +141,6 @@ public class ARActivity extends Activity {
         } else {
             setContentView(R.layout.fragment_ar);
         }
-        ButterKnife.bind(this);
-
-        // todo use clicks on objects to detect interactions
-//        interactBtn.setOnClickListener(interactor);
 
 //        snackbarAction.startIfNotRunning();
 //        setUpHints();
@@ -179,14 +165,24 @@ public class ARActivity extends Activity {
         }
 
         if (gameModule.isWithAR()) {
-            loadPlace(gameModule.getCurrentPlace());
+            gameModule.loadCurrentPlace();
+
+            viroView.getRenderer().setCameraListener(new CameraListener() {
+                @Override
+                public void onTransformUpdate(Vector position, Vector rotation, Vector forward) {
+                    EventBus.getDefault().post(new CameraUpdateEvent(position, rotation, forward));
+                }
+            });
         }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        if (viroView != null) viroView.onActivityPaused(this);
+        if (viroView != null) {
+            viroView.onActivityPaused(this);
+            viroView.getRenderer().setCameraListener(null);
+        }
         hideSnackbarMessage();
     }
 
@@ -213,14 +209,20 @@ public class ARActivity extends Activity {
         }
     }
 
-    private void loadPlace(Place place) {
-        if (place == null) {
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onCanInteract(GameModule.CanInteract canInteractEvent) {
+        if (canInteractEvent.canInteract) {
+            interactBtn.setText(R.string.interact_str);
+            interactBtn.setEnabled(true);
             return;
         }
-        Node root = gameModule.getScene().getRootNode();
-        for (Object3D object3D : place.getAll()) {
-            root.addChildNode(object3D);
+        if (gameModule.getPlayer().getItem() != null) {
+            interactBtn.setText(R.string.release_str);
+            interactBtn.setEnabled(true);
+            return;
         }
+        interactBtn.setText(R.string.interact_str);
+        interactBtn.setEnabled(false);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -245,6 +247,11 @@ public class ARActivity extends Activity {
                 onNextPurposeResult(interactionResult, this);
                 break;
         }
+    }
+
+    @OnClick(R.id.interact_btn)
+    void interact() {
+        gameModule.interactClosestInRange();
     }
 
     @OnClick(R.id.inventory_btn)

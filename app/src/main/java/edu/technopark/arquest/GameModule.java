@@ -1,12 +1,19 @@
 package edu.technopark.arquest;
 
 import com.viro.core.ARScene;
-import com.viro.core.PhysicsBody;
+import com.viro.core.Node;
+import com.viro.core.Object3D;
 import com.viro.core.PhysicsShapeSphere;
+import com.viro.core.PhysicsWorld;
+import com.viro.core.Vector;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -14,14 +21,17 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
+import edu.technopark.arquest.game.InteractionArgument;
 import edu.technopark.arquest.game.InteractionResult;
 import edu.technopark.arquest.game.InteractiveObject;
+import edu.technopark.arquest.game.Item;
 import edu.technopark.arquest.game.Place;
 import edu.technopark.arquest.game.Player;
 import edu.technopark.arquest.game.journal.Journal;
 import edu.technopark.arquest.game.script.ScriptAction;
 import edu.technopark.arquest.game.slot.Slot;
 import edu.technopark.arquest.model.Quest;
+import edu.technopark.arquest.quest.ARActivity;
 import edu.technopark.arquest.quest.AssetModule;
 import edu.technopark.arquest.quest.game.ActorPlayer;
 import edu.technopark.arquest.storage.Inventories;
@@ -29,12 +39,22 @@ import edu.technopark.arquest.storage.Journals;
 
 @Module
 public class GameModule {
+    public static final String PLAYER_COLLISION_TAG = "PLAYER_COLLISION";
+    public static class CanInteract{
+        public boolean canInteract;
+
+        public CanInteract(boolean canInteract) {
+            this.canInteract = canInteract;
+        }
+    }
+
     private Journals journals;
     private Inventories inventories;
     private ActorPlayer player;
     private ARScene scene;
     private Quest currentQuest;
     private boolean withAR;
+    private Map<String, InteractiveObject.InteractiveObjectCollisionEvent> collisionMap;
 
     @Inject
     AssetModule assetModule;
@@ -51,9 +71,12 @@ public class GameModule {
             System.loadLibrary("viro_renderer");
             System.loadLibrary("viro_arcore");
 
-            player = new ActorPlayer();
-            player.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.05f));
             scene = new ARScene();
+            scene.getPhysicsWorld().setGravity(new Vector(0,0, 0));
+            player = new ActorPlayer();
+            player.setShape(new PhysicsShapeSphere(0.3f));
+            scene.getRootNode().addChildNode(player);
+            collisionMap = new HashMap<>();
         }
         EventBus.getDefault().register(this);
     }
@@ -122,8 +145,76 @@ public class GameModule {
         assetModule.loadPlace(place);
     }
 
-    public ARScene getScene() {
+    public ARScene getNewScene() {
+        scene = new ARScene();
+        loadCurrentPlace();
         return scene;
+    }
+
+    public void loadCurrentPlace() {
+        Place place = getCurrentPlace();
+        if (place == null || scene == null) {
+            return;
+        }
+        Node root = scene.getRootNode();
+        for (Object3D object3D : place.getAll()) {
+            root.addChildNode(object3D);
+        }
+
+        for (InteractiveObject obj : place.getInteractive()) {
+            if (obj.getPhysicsBody() != null) {
+                obj.setDefaultCollisionListener();
+            }
+        }
+    }
+
+    public void interactClosestInRange() {
+        InteractiveObject closest = null;
+        float minDistance = 1e10f;
+
+        Vector playerPosition = player.getPositionRealtime();
+        for (InteractiveObject.InteractiveObjectCollisionEvent event : collisionMap.values()) {
+            float distance = event.position.distance(playerPosition);
+            if (distance <= player.getAccessRange() && distance < minDistance) {
+                minDistance = distance;
+                closest = event.object;
+            }
+        }
+
+        if (closest != null) {
+            InteractionArgument argument;
+            Item item = player.getItem();
+            if (item != null) {
+                argument = new InteractionArgument(null, Collections.singletonList(new Slot.RepeatedItem(item)));
+            } else {
+                argument = new InteractionArgument(null, null);
+            }
+            Collection<InteractionResult> results = closest.interact(argument);
+
+            for (InteractionResult result : results) {
+                EventBus.getDefault().post(result);
+            }
+        }
+    }
+
+    @Subscribe
+    public void handleInteractiveObjectCollisionEvent(final InteractiveObject.InteractiveObjectCollisionEvent event) {
+        collisionMap.put(event.object.getName(), event);
+    }
+
+    @Subscribe
+    public void handleCameraUpdateEvent(final ARActivity.CameraUpdateEvent event) {
+        scene.getPhysicsWorld().findCollisionsWithShapeAsync(
+                event.position, event.position, player.getShape(),
+                PLAYER_COLLISION_TAG, new PhysicsWorld.HitTestListener() {
+                    @Override
+                    public void onComplete(boolean b) {
+                        EventBus.getDefault().post(new CanInteract(b));
+                    }
+                }
+        );
+        player.setPosition(event.position);
+        player.setRotation(event.rotation);
     }
 
     @Subscribe

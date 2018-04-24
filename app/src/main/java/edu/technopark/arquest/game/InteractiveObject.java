@@ -1,23 +1,55 @@
 package edu.technopark.arquest.game;
 
 
+import com.viro.core.PhysicsBody;
+import com.viro.core.Vector;
+
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
+import edu.technopark.arquest.GameModule;
 import edu.technopark.arquest.common.CollectionUtils;
 import edu.technopark.arquest.game.script.ObjectState;
 import edu.technopark.arquest.game.script.ScriptAction;
-import edu.technopark.arquest.model.VisualResource;
 
 public class InteractiveObject extends Identifiable3D {
+    public static class InteractiveObjectCollisionEvent {
+        public InteractiveObject object;
+        public Vector position;
+
+        public InteractiveObjectCollisionEvent(InteractiveObject object, Vector position) {
+            this.object = object;
+            this.position = position;
+        }
+    }
+
     private final String description;
     private Action action;
     private Collection<Item> items;
 
     private int currentStateID;
     private Map<Integer, ObjectState> states;
+
+    // all interactive objects tell if they have collided with player
+    private PhysicsBody.CollisionListener defaultCollisionListener = new PhysicsBody.CollisionListener() {
+        @Override
+        public void onCollided(String tag, Vector position, Vector normal) {
+            if (Objects.equals(tag, GameModule.PLAYER_COLLISION_TAG)) {
+                EventBus.getDefault().post(
+                        new InteractiveObjectCollisionEvent(
+                                InteractiveObject.this,
+                                position
+                        )
+                );
+            }
+        }
+    };
+
 
     public InteractiveObject(int id, String name, String description) {
         this(id, name, description, new ArrayList<Item>());
@@ -34,6 +66,10 @@ public class InteractiveObject extends Identifiable3D {
             return CollectionUtils.singleItemList(InteractionResult.errorResult(""));
         }
         return action.act(argument);
+    }
+
+    public void setDefaultCollisionListener() {
+        getPhysicsBody().setCollisionListener(defaultCollisionListener);
     }
 
     public Collection<Item> getItems() {
