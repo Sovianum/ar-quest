@@ -304,11 +304,13 @@ public class ARActivity extends AppCompatActivity {
     @OnClick(R.id.interact_btn)
     void interact() {
         gameModule.interactLastCollided();
+        showReturnItemViews();
     }
 
     @OnClick(R.id.return_inventory_btn)
     void interactReturn() {
         gameModule.getPlayer().release();
+        hideReturnItemViews();
     }
 
     @OnClick(R.id.inventory_btn)
@@ -359,11 +361,6 @@ public class ARActivity extends AppCompatActivity {
         startActivity(intent);
         overridePendingTransition( R.anim.from_down_to_center, R.anim.from_center_to_up_anim);
         finish();
-    }
-
-    @OnClick(R.id.return_inventory_btn)
-    public void onReturnItemToInventoryClickListener() {
-        gameModule.interactLastCollided();
     }
 
     private void initFragments() throws FileNotFoundException {
