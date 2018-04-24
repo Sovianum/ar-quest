@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -57,10 +56,16 @@ public class QuestFragment extends Fragment {
     TextView messageDateView;
 
     @BindView(R.id.itemsRecyclerView)
-    RecyclerView recyclerViewItems;
+    EmptyRecyclerView recyclerViewItems;
 
     @BindView(R.id.placesRecyclerView)
-    RecyclerView recyclerViewPlaces;
+    EmptyRecyclerView recyclerViewPlaces;
+
+    @BindView(R.id.empty_view_inventory)
+    TextView emptyTextViewInventory;
+
+    @BindView(R.id.empty_view_places)
+    TextView emptyTextViewPlaces;
 
     private View.OnClickListener onARModeBtnClickListener;
     private View.OnClickListener onCancelBtnClickListener;
@@ -104,12 +109,13 @@ public class QuestFragment extends Fragment {
         recyclerViewItems.setLayoutManager(manager);
         itemAdapter = new ItemAdapter(new ArrayList<Item>(), onItemClickListener);
         recyclerViewItems.setAdapter(itemAdapter);
+        recyclerViewItems.setEmptyView(emptyTextViewInventory);
 
         LinearLayoutManager managerPlaces = new LinearLayoutManager(getActivity());
         recyclerViewPlaces.setLayoutManager(managerPlaces);
         placesAdapter = new PlacesAdapter();
         recyclerViewPlaces.setAdapter(placesAdapter);
-
+        recyclerViewPlaces.setEmptyView(emptyTextViewPlaces);
         return view;
     }
 

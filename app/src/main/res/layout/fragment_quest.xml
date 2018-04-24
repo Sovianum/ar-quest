@@ -13,7 +13,7 @@
         android:id="@+id/journal_txt"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/journal_title"
+        android:text="@string/journal_one_message_title"
         android:textAlignment="center" />
 
     <include layout="@layout/item_message_card"
@@ -47,19 +47,17 @@
         android:textAlignment="center" />
 
     <include layout="@layout/fragment_checkpoints"
-        android:id="@+id/checkpoints_card"
+        android:id="@+id/places_list_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
-
-    <Space
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/spaces_login" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
+        android:layout_gravity="bottom"
         android:orientation="horizontal">
 
         <Button
@@ -80,5 +78,10 @@
             android:textSize="12sp"/>
 
     </LinearLayout>
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/spaces_login" />
+
 
 </LinearLayout>

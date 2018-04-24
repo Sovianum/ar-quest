@@ -5,11 +5,11 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +22,7 @@ import edu.technopark.arquest.App;
 import edu.technopark.arquest.GameModule;
 import edu.technopark.arquest.R;
 import edu.technopark.arquest.game.Item;
+import edu.technopark.arquest.quest.EmptyRecyclerView;
 
 public class ItemsListFragment extends Fragment {
     public static final String TAG = ItemsListFragment.class.getSimpleName();
@@ -29,8 +30,11 @@ public class ItemsListFragment extends Fragment {
     private ItemAdapter adapter;
 
     @BindView(R.id.itemsRecyclerView)
-    RecyclerView recyclerView;
+    EmptyRecyclerView recyclerView;
     private ItemAdapter.OnItemClickListener onItemClickListener;
+
+    @BindView(R.id.empty_view_inventory)
+    TextView emptyTextView;
 
     @Inject
     GameModule gameModule;
@@ -48,6 +52,7 @@ public class ItemsListFragment extends Fragment {
 
         adapter = new ItemAdapter(new ArrayList<Item>(), onItemClickListener);
         recyclerView.setAdapter(adapter);
+        recyclerView.setEmptyView(emptyTextView);
 
         return view;
     }

@@ -5,20 +5,20 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-
-import edu.technopark.arquest.App;
-import edu.technopark.arquest.GameModule;
+import android.widget.TextView;
 
 import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import edu.technopark.arquest.App;
+import edu.technopark.arquest.GameModule;
 import edu.technopark.arquest.R;
+import edu.technopark.arquest.quest.EmptyRecyclerView;
 
 public class JournalFragment extends Fragment {
     public static final String TAG = JournalFragment.class.getSimpleName();
@@ -26,7 +26,10 @@ public class JournalFragment extends Fragment {
     private JournalMessageAdapter adapter;
 
     @BindView(R.id.journalRecyclerView)
-    RecyclerView recyclerView;
+    EmptyRecyclerView recyclerView;
+
+    @BindView(R.id.empty_view_journal)
+    TextView emptyTextView;
 
     @Inject
     GameModule gameModule;
@@ -42,6 +45,7 @@ public class JournalFragment extends Fragment {
 
         adapter = new JournalMessageAdapter();
         recyclerView.setAdapter(adapter);
+        recyclerView.setEmptyView(emptyTextView);
 
         return view;
     }

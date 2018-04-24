@@ -51,6 +51,7 @@
     <string name="duplicate_user_str">Пользовтель с таким именем уже существует</string>
     <string name="user_not_found_str">Пользователь не найден (что странно)</string>
     <string name="journal_title">Журнал событий</string>
+    <string name="journal_one_message_title">Последнее событие</string>
     <string name="inventory_title">Инвентарь</string>
     <string name="checkpoint_title">Список контрольных точек</string>
 
@@ -109,7 +110,9 @@
     <string name="inventory_help_str">Инвентарь</string>
     <string name="journal_help_str">Журнал событий</string>
     <string name="interact_help_str">Действие</string>
-
+    <string name="inventory_empty_text">Инвентарь пуст</string>
+    <string name="journal_empty_text">Нет событий</string>
+    <string name="checkpoints_empty_text">Места не найдены</string>
 
 
 </resources>
