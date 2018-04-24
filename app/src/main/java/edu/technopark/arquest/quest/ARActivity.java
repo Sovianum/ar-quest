@@ -254,8 +254,8 @@ public class ARActivity extends AppCompatActivity {
     public void onBackPressed() {
         if (getSupportFragmentManager().getBackStackEntryCount() >= 1) {
             changeToActivityLayout();
-            super.onBackPressed();
         }
+        super.onBackPressed();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
