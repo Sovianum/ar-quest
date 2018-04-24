@@ -8,9 +8,11 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BaseTransientBottomBar;
 import android.support.design.widget.Snackbar;
+import android.support.v7.widget.LinearLayoutManager;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -43,6 +45,7 @@ import edu.technopark.arquest.game.InteractionResult;
 import edu.technopark.arquest.game.slot.Slot;
 import edu.technopark.arquest.model.Quest;
 import edu.technopark.arquest.quest.items.ItemsListFragment;
+import edu.technopark.arquest.quest.items.ItemsListView;
 import edu.technopark.arquest.quest.journal.JournalFragment;
 
 public class ARActivity extends Activity {
@@ -258,10 +261,17 @@ public class ARActivity extends Activity {
 
     @OnClick(R.id.inventory_btn)
     void toInventory() {
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.setAction(ItemsListFragment.TAG);
-        startActivity(intent);
-        finish();
+        ItemsListView view = new ItemsListView(this);
+        setContentView(view);
+
+//        LinearLayout layoutView = (LinearLayout) View.inflate(this, R.layout.fragment_items_list, null);
+//        LinearLayoutManager manager = new LinearLayoutManager(this);
+//        ItemsListView itemsListView = new ItemsListView(this, manager);
+//        setContentView(itemsListView);
+////        Intent intent = new Intent(this, MainActivity.class);
+////        intent.setAction(ItemsListFragment.TAG);
+////        startActivity(intent);
+////        finish();
     }
 
     @OnClick(R.id.journal_btn)

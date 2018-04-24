@@ -10,6 +10,7 @@ import edu.technopark.arquest.quest.QuestFragment;
 import edu.technopark.arquest.quest.game.QuestModule;
 import edu.technopark.arquest.quest.items.ItemAdapter;
 import edu.technopark.arquest.quest.items.ItemsListFragment;
+import edu.technopark.arquest.quest.items.ItemsListView;
 import edu.technopark.arquest.quest.journal.JournalFragment;
 import edu.technopark.arquest.quest.journal.JournalMessageAdapter;
 import edu.technopark.arquest.quest.place.PlaceFragment;
@@ -25,6 +26,7 @@ import dagger.Component;
 @Singleton
 @Component(modules = {GameModule.class, QuestModule.class, NetworkModule.class, ContextModule.class, HintModule.class, AssetModule.class})
 public interface AppComponent {
+    void inject(ItemsListView view);
     void inject(GameModule module);
     void inject(AssetModule module);
     void inject(HintModule module);
