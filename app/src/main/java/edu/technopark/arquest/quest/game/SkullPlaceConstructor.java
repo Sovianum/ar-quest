@@ -244,7 +244,8 @@ public class SkullPlaceConstructor {
                                                 new ScriptAction.StateTransition(bottleSmall.getName(), 2),
                                                 new ScriptAction.StateTransition(skull.getName(), 4)
                                         )
-                                )
+                                ),
+                                InteractionResult.takeItemsResult(new Slot.RepeatedItem(bottleItem))
                         )
                 ),
                 new ScriptAction(
@@ -275,7 +276,8 @@ public class SkullPlaceConstructor {
                                 InteractionResult.transitionsResult(Arrays.asList(
                                         new ScriptAction.StateTransition(skull.getName(), 5),
                                         new ScriptAction.StateTransition(glassSmall.getName(), 2)
-                                ))
+                                )),
+                                InteractionResult.takeItemsResult(new Slot.RepeatedItem(glassItem))
                         )
                 ),
                 new ScriptAction(
@@ -308,7 +310,8 @@ public class SkullPlaceConstructor {
                                                 new ScriptAction.StateTransition(columnHelmet.getName(), 2),
                                                 new ScriptAction.StateTransition(skull.getName(), 6)
                                         )
-                                )
+                                ),
+                                InteractionResult.takeItemsResult(new Slot.RepeatedItem(helmetItem))
                         )
                 ),
                 new ScriptAction(
