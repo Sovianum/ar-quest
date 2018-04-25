@@ -14,6 +14,7 @@ public class Place {
     private String description;
     private Map<String, InteractiveObject> interactiveObjects;
     private Location location;
+    private String startPurpose;
 
     public Place() {
         interactiveObjects = new HashMap<>();
@@ -31,6 +32,14 @@ public class Place {
         location.setLatitude(0.0);
         location.setLongitude(0.0);
         interactiveObjects = new HashMap<>();
+    }
+
+    public String getStartPurpose() {
+        return startPurpose;
+    }
+
+    public void setStartPurpose(String startPurpose) {
+        this.startPurpose = startPurpose;
     }
 
     public InteractiveObject getInteractiveObject(int id) {

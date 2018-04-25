@@ -12,6 +12,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
@@ -22,7 +23,11 @@ import android.widget.Toast;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.google.common.base.Function;
+import com.viro.core.ARHitTestListener;
+import com.viro.core.ARHitTestResult;
+import com.viro.core.ARScene;
 import com.viro.core.CameraListener;
+import com.viro.core.Scene;
 import com.viro.core.Vector;
 import com.viro.core.ViroViewARCore;
 
@@ -47,6 +52,7 @@ import edu.technopark.arquest.R;
 import edu.technopark.arquest.common.ContinuousAction;
 import edu.technopark.arquest.game.InteractionResult;
 import edu.technopark.arquest.game.Item;
+import edu.technopark.arquest.game.Place;
 import edu.technopark.arquest.game.slot.Slot;
 import edu.technopark.arquest.model.Quest;
 import edu.technopark.arquest.quest.items.ItemAdapter;
@@ -70,6 +76,38 @@ public class ARActivity extends AppCompatActivity {
             this.forward = forward;
         }
     }
+
+    private ARHitTestListener planeDetector = new ARHitTestListener() {
+        @Override
+        public void onHitTestFinished(ARHitTestResult[] arHitTestResults) {
+            if (arHitTestResults == null || arHitTestResults.length ==0) {
+                return;
+            }
+
+            final Vector cameraPos  = viroView.getLastCameraPositionRealtime();
+
+            // Grab the closest ar hit target
+            float closestDistance = Float.MAX_VALUE;
+            ARHitTestResult result = null;
+            for (ARHitTestResult currentResult : arHitTestResults) {
+                float distance = currentResult.getPosition().distance(cameraPos);
+                if (distance < closestDistance && distance > .3 && distance < 5) {
+                    result = currentResult;
+                    closestDistance = distance;
+                }
+            }
+
+            // if found plane, stop tracking planes
+            if (result != null){
+//                viroView.setScene(gameModule.getNewScene(result.getPosition()));
+//                viroView.setScene(new ARScene());
+                snackbarAction.stopIfRunning();
+                gameModule.getScene().displayPointCloud(false);
+                gameModule.loadCurrentPlace(result.getPosition());
+                viroView.setCameraARHitTestListener(null);
+            }
+        }
+    };
 
     ViroViewARCore viroView;
 
@@ -126,13 +164,13 @@ public class ARActivity extends AppCompatActivity {
             new Runnable() {
                 @Override
                 public void run() {
-                    Quest quest = gameModule.getCurrentQuest();
-                    String currPurpose = null;
-                    if (quest != null) {
-                        currPurpose = quest.getCurrPurpose();
+                    Place place = gameModule.getCurrentPlace();
+                    String currPurpose = place.getStartPurpose();
+                    if (currPurpose != null) {
+                        setPurpose(currPurpose);
+                    } else {
+                        setPurpose("Осмотритесь и попытайте счастье :)");
                     }
-                    currPurpose = currPurpose == null ? "Найдите объект дополненной реальности неподалеку" : currPurpose;
-                    setPurpose(currPurpose);
                     showButtons();
                 }
             }
@@ -161,12 +199,16 @@ public class ARActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        snackbarAction.startIfNotRunning();
 
         if (gameModule.isWithAR()) {
             viroView = new ViroViewARCore(this, new ViroViewARCore.StartupListener() {
                 @Override
                 public void onSuccess() {
-                    viroView.setScene(gameModule.getNewScene());
+                    ARScene scene = gameModule.getNewFreeScene();
+                    scene.displayPointCloud(true);
+                    viroView.setScene(scene);
+                    viroView.setCameraARHitTestListener(planeDetector);
                 }
 
                 @Override
@@ -188,7 +230,6 @@ public class ARActivity extends AppCompatActivity {
         setSupportActionBar(toolBar);
         changeToActivityLayout();
         //toolBar.setVisibility(View.GONE);
-        snackbarAction.startIfNotRunning();
 //        setUpHints();
     }
 
@@ -211,7 +252,7 @@ public class ARActivity extends AppCompatActivity {
         }
 
         if (gameModule.isWithAR()) {
-            gameModule.loadCurrentPlace();
+//            gameModule.loadCurrentPlace();
 
             viroView.setCameraListener(new CameraListener() {
                 @Override

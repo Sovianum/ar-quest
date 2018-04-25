@@ -43,7 +43,7 @@ public class ActorPlayer extends Player {
             previousPosition = currPosition;
 
             AnimationTransaction.begin();
-            AnimationTransaction.setAnimationDuration(timeDelta*10);
+            AnimationTransaction.setAnimationDuration(timeDelta);
             AnimationTransaction.setTimingFunction(AnimationTimingFunction.EaseOut);
             item.setPosition(currPosition);
             item.setRotation(rotation);

@@ -115,6 +115,7 @@ public class SkullPlaceConstructor {
                 helmetContainer, columnHelmet,
                 axeContainer, column, map, skull, pig
         ));
+        place.setStartPurpose("Подойдите к свину и поговорите с ним по поводу карты");
         return place;
     }
 
