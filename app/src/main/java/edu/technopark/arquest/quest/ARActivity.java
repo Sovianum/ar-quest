@@ -13,6 +13,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.widget.ImageButton;
@@ -141,7 +142,7 @@ public class ARActivity extends AppCompatActivity {
     private ItemAdapter.OnItemClickListener chooseItemOnClickListener = new ItemAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(Item item) {
-            gameModule.getPlayer().hold(item);
+            gameModule.takePlayerItem(item);
             Toast.makeText(ARActivity.this, "Вы выбрали: " + item.getName(), Toast.LENGTH_SHORT).show();
             //TODO action to choose element
         }
@@ -211,7 +212,7 @@ public class ARActivity extends AppCompatActivity {
         if (gameModule.isWithAR()) {
             gameModule.loadCurrentPlace();
 
-            viroView.getRenderer().setCameraListener(new CameraListener() {
+            viroView.setCameraListener(new CameraListener() {
                 @Override
                 public void onTransformUpdate(Vector position, Vector rotation, Vector forward) {
                     EventBus.getDefault().post(new CameraUpdateEvent(position, rotation, forward));
@@ -225,7 +226,7 @@ public class ARActivity extends AppCompatActivity {
         super.onPause();
         if (viroView != null) {
             viroView.onActivityPaused(this);
-            viroView.getRenderer().setCameraListener(null);
+            viroView.setCameraListener(null);
         }
         hideSnackbarMessage();
     }
