@@ -471,7 +471,7 @@ public class SkullPlaceConstructor {
         // group of objects related to helmet
         helmetItem = new Item(
                 300, "Шлем", "Классный мотоциклетный шлем",
-                new VisualResource(Object3D.Type.FBX).setModelUri(asset("helmet.vrx"))   // todo another model here
+                new VisualResource(Object3D.Type.FBX).setModelUri(asset("helmet2.vrx"))
         );
         helmetItem.setUniformScale(smallScale);
 
@@ -479,7 +479,7 @@ public class SkullPlaceConstructor {
                 301, "Контейнер для шлема", "Здесь можно взять шлем", Collections.singletonList(helmetItem)
         );
         helmetContainer.setVisualResource(
-                new VisualResource(Object3D.Type.FBX).setModelUri(asset("helmet.vrx"))   // todo another model here
+                new VisualResource(Object3D.Type.FBX).setModelUri(asset("helmet2.vrx"))
         );
         helmetContainer.setUniformScale(mainScale);
         helmetContainer.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.5f));
