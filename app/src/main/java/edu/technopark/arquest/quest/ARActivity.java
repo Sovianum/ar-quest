@@ -373,13 +373,13 @@ public class ARActivity extends AppCompatActivity {
     private void showReturnItemViews() {
         returnItemToInventoryBtn.setVisibility(View.VISIBLE);
         if (inventoryHelpTextView.getVisibility() == View.VISIBLE) {
-            inventoryHelpTextView.setVisibility(View.VISIBLE);
+            returnItemToInventoryHelpTextView.setVisibility(View.VISIBLE);
         }
     }
 
     private void hideReturnItemViews() {
         returnItemToInventoryBtn.setVisibility(View.GONE);
-        inventoryHelpTextView.setVisibility(View.GONE);
+        returnItemToInventoryHelpTextView.setVisibility(View.GONE);
     }
 
     private void showSnackbarMessage(String message, boolean finishOnDismiss) {
