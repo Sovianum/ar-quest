@@ -128,6 +128,23 @@ public class GameModule {
         return player;
     }
 
+    public void takePlayerItem(Item item) {
+        if (player == null) return;
+
+        player.hold(item);
+        scene.getRootNode().addChildNode(item);
+    }
+
+    public void releasePlayerItem() {
+        if (player == null) return;
+
+        Item item = player.getItem();
+        if (item == null) return;
+
+        item.removeFromParentNode();
+        player.release();
+    }
+
     public Journal<String> getCurrentJournal() {
         if (currentQuest == null) {
             return null;
@@ -249,8 +266,7 @@ public class GameModule {
                     }
                 }
         );
-        player.setPosition(event.position);
-        player.setRotation(event.rotation);
+        player.updateOrientation(event.position, event.rotation, event.forward);
     }
 
     @Subscribe
@@ -289,7 +305,7 @@ public class GameModule {
     private void onTakeItemsResult(final InteractionResult result) {
         Slot.RepeatedItem repeatedItem = result.getItems();
         getCurrentInventory().remove(repeatedItem.getItem().getId(), repeatedItem.getCnt());
-        getPlayer().release();
+        releasePlayerItem();
     }
 
     private void onJournalUpdateResult(final InteractionResult result) {
