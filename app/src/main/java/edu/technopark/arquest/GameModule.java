@@ -1,17 +1,27 @@
 package edu.technopark.arquest;
 
+import android.graphics.Color;
+import android.net.Uri;
+
 import com.viro.core.ARScene;
+import com.viro.core.AmbientLight;
+import com.viro.core.Material;
 import com.viro.core.Node;
 import com.viro.core.Object3D;
+import com.viro.core.OmniLight;
 import com.viro.core.PhysicsShapeSphere;
 import com.viro.core.PhysicsWorld;
+import com.viro.core.Texture;
 import com.viro.core.Vector;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -146,6 +156,30 @@ public class GameModule {
 
     public ARScene getNewScene() {
         scene = new ARScene();
+
+        List<Vector> lightPositions = new ArrayList<Vector>();
+        lightPositions.add(new Vector(-10,  10, 1));
+        lightPositions.add(new Vector(10,  10, 1));
+
+        float intensity = 300;
+        List<Integer> lightColors = new ArrayList();
+        lightColors.add(Color.WHITE);
+        lightColors.add(Color.WHITE);
+
+        for (int i = 0; i < lightPositions.size(); i++) {
+            OmniLight light = new OmniLight();
+            light.setColor(lightColors.get(i));
+            light.setPosition(lightPositions.get(i));
+            light.setAttenuationStartDistance(20);
+            light.setAttenuationEndDistance(30);
+            light.setIntensity(intensity);
+            scene.getRootNode().addLight(light);
+        }
+
+        //Add an HDR environment map to give the Android's more interesting ambient lighting.
+        Texture environment = Texture.loadRadianceHDRTexture(Uri.parse("file:///android_asset/ibl_newport_loft.hdr"));
+        scene.setLightingEnvironment(environment);
+
         loadCurrentPlace();
         return scene;
     }
@@ -161,9 +195,7 @@ public class GameModule {
         }
 
         for (InteractiveObject obj : place.getInteractive()) {
-            if (obj.getPhysicsBody() != null) {
-                obj.setDefaultCollisionListener();
-            }
+            obj.setCurrentStateID(obj.getCurrentStateID()); // init visual conditions
         }
     }
 
@@ -181,33 +213,6 @@ public class GameModule {
         for (InteractionResult result : lastCollision.object.interact(argument)) {
             EventBus.getDefault().post(result);
         }
-
-//        InteractiveObject closest = null;
-//        float minDistance = 1e10f;
-//
-//        Vector playerPosition = player.getPositionRealtime();
-//        for (InteractiveObject.InteractiveObjectCollisionEvent event : collisionMap.values()) {
-//            float distance = event.position.distance(playerPosition);
-//            if (distance <= player.getAccessRange() && distance < minDistance) {
-//                minDistance = distance;
-//                closest = event.object;
-//            }
-//        }
-//
-//        if (closest != null) {
-//            InteractionArgument argument;
-//            Item item = player.getItem();
-//            if (item != null) {
-//                argument = new InteractionArgument(null, Collections.singletonList(new Slot.RepeatedItem(item)));
-//            } else {
-//                argument = new InteractionArgument(null, null);
-//            }
-//            Collection<InteractionResult> results = closest.interact(argument);
-//
-//            for (InteractionResult result : results) {
-//                EventBus.getDefault().post(result);
-//            }
-//        }
     }
 
     public void returnToInventory() {

@@ -15,6 +15,7 @@ import com.viro.core.Texture;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Collections;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -66,14 +67,17 @@ public class AssetModule {
             @Override
             public void onObject3DLoaded(final Object3D object, final Object3D.Type type) {
                 // When the model is loaded, set the texture associated with this OBJ
-                Bitmap bitmap = getBitmapFromAsset(visualResource.getDiffuseUri());
+                String diffuse = visualResource.getDiffuseUri();
+                if (diffuse == null || diffuse.equals("")) return;
+
+                Bitmap bitmap = getBitmapFromAsset(diffuse);
                 if (bitmap == null) {
                     return;
                 }
                 Texture objectTexture = new Texture(bitmap, Texture.Format.RGBA8, false, false);
                 Material material = new Material();
                 material.setDiffuseTexture(objectTexture);
-                object.getGeometry().setMaterials(Arrays.asList(material));
+                object.getGeometry().setMaterials(Collections.singletonList(material));
             }
 
             @Override
@@ -86,8 +90,7 @@ public class AssetModule {
     private void loadFBX(Object3D object3D, VisualResource visualResource) {
         object3D.loadModel(Uri.parse(visualResource.getModelUri()), visualResource.getType(), new AsyncObject3DListener() {
             @Override
-            public void onObject3DLoaded(final Object3D object, final Object3D.Type type) {
-            }
+            public void onObject3DLoaded(final Object3D object, final Object3D.Type type) {}
 
             @Override
             public void onObject3DFailed(String s) {

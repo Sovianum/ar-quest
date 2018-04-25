@@ -62,7 +62,8 @@ public class Place {
         result.addAll(interactiveObjects.values());
 
         for (InteractiveObject obj : interactiveObjects.values()) {
-            result.addAll(obj.getItems());
+            Collection<Item> items = obj.getItems();
+            if (items != null) result.addAll(items);
         }
         return result;
     }

@@ -1,6 +1,8 @@
 package edu.technopark.arquest.game;
 
 
+import android.util.Log;
+
 import com.viro.core.PhysicsBody;
 import com.viro.core.Vector;
 
@@ -50,7 +52,6 @@ public class InteractiveObject extends Identifiable3D {
         }
     };
 
-
     public InteractiveObject(int id, String name, String description) {
         this(id, name, description, new ArrayList<Item>());
     }
@@ -65,6 +66,7 @@ public class InteractiveObject extends Identifiable3D {
         if (!isEnabled()) {
             return CollectionUtils.singleItemList(InteractionResult.errorResult(""));
         }
+        Log.e("INTERACTION", getName());
         return action.act(argument);
     }
 
@@ -118,7 +120,7 @@ public class InteractiveObject extends Identifiable3D {
         for (ObjectState state : states) {
             if (state.isDefault()) {
                 if (!foundDefault) {
-                    updateState(state);
+                    currentStateID = state.getId();
                     foundDefault = true;
                 } else {
                     throw new RuntimeException("found multiple default states");
@@ -132,7 +134,18 @@ public class InteractiveObject extends Identifiable3D {
     }
 
     private void updateState(ObjectState state) {
-        currentStateID = state.getId();
         setEnabled(state.isEnabled());
+        setVisible(state.isVisible());
+
+        if (getPhysicsBody() == null) {
+            Log.e("ANALYSIS", getName());
+            return;
+        }
+
+        if (state.isCollidable()) {
+            getPhysicsBody().setCollisionListener(defaultCollisionListener);
+        } else {
+            getPhysicsBody().setCollisionListener(null);
+        }
     }
 }

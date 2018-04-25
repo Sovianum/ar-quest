@@ -1,6 +1,7 @@
 package edu.technopark.arquest.game;
 
 import com.viro.core.Object3D;
+import com.viro.core.Vector;
 
 import edu.technopark.arquest.model.VisualResource;
 
@@ -26,6 +27,10 @@ public class Identifiable3D extends Object3D implements IEnabled {
 
     public void setVisualResource(VisualResource visualResource) {
         this.visualResource = visualResource;
+    }
+
+    public void setUniformScale(float scale) {
+        setScale(new Vector(scale, scale, scale));
     }
 
     @Override

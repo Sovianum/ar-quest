@@ -2,6 +2,7 @@ package edu.technopark.arquest.quest.game;
 
 import android.content.Context;
 
+import com.viro.core.Material;
 import com.viro.core.Object3D;
 import com.viro.core.PhysicsBody;
 import com.viro.core.PhysicsShapeSphere;
@@ -58,8 +59,9 @@ public class QuestModule {
         q1.setCurrPurpose("Подойдите к андроиду неподалеку");
 
         if (gameModule.isWithAR()) {
-            q1.addPlace(getNewStyleInteractionDemoPlace());
+//            q1.addPlace(getNewStyleInteractionDemoPlace());
 //            q1.addPlace(getSingleObjectPlace());
+            q1.addPlace(getSkullPlace());
         } else {
             q1.addPlace(new Place());
         }
@@ -67,76 +69,12 @@ public class QuestModule {
         return Collections.singletonList(q1);
     }
 
-//    public Place getNewStyleInteractionDemoPlaceFromScript() {
-//        InputStream in;
-//        try {
-//            in = context.getAssets().open("scripts/inter_place.json");
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//
-//        Reader reader = new InputStreamReader(in);
-//
-//        GsonBuilder gsonBuilder = new GsonBuilder();
-//        gsonBuilder.registerTypeAdapter(
-//                Shape.class,
-//                new JsonDeserializer<Shape>() {
-//                    @Override
-//                    public Shape deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-//                        return new Sphere(
-//                                json.getAsJsonObject().get("radius").getAsFloat()
-//                        );
-//                    }
-//                }
-//        );
-//        gsonBuilder.registerTypeAdapter(
-//                IDrawable.class,
-//                new JsonDeserializer<IDrawable>() {
-//                    @Override
-//                    public IDrawable deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-//                        JsonObject jsonObject = json.getAsJsonObject();
-//                        return new TextureDrawable(
-//                                jsonObject.get("modelName").getAsString(),
-//                                jsonObject.get("textureName").getAsString()
-//                        );
-//                    }
-//                }
-//        );
-//        gsonBuilder.registerTypeAdapter(
-//                Item.class,
-//                new JsonDeserializer<Item>() {
-//                    @Override
-//                    public Item deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-//                        JsonObject jsonObject = json.getAsJsonObject();
-//                        Item item = new Item(
-//                                jsonObject.get("id").getAsInt(),
-//                                jsonObject.get("name").getAsString(),
-//                                jsonObject.get("description").getAsString(),
-//                                jsonObject.get("modelName").getAsString(),
-//                                jsonObject.get("textureName").getAsString()
-//                        );
-//                        item.getGeom().setScale(jsonObject.get("geom").getAsJsonObject().get("scale").getAsFloat());
-//                        return item;
-//                    }
-//                }
-//        );
-//
-//        Gson gson = gsonBuilder.create();
-//        Place place = gson.fromJson(reader, Place.class);
-//
-//        for (Map.Entry<Integer, InteractiveObject> entry : place.getInteractiveObjects().entrySet()) {
-//            InteractiveObject obj = entry.getValue();
-//            obj.setAction(obj.getActionFromStates());
-//        }
-//
-//        return place;
-//    }
-
     public Place getSingleObjectPlace() {
         InteractiveObject andy = new InteractiveObject(
-                1, "andy", "andy"
+                1, "obj", "obj"
         );
-        andy.setVisualResource(new VisualResource(Object3D.Type.OBJ).setModelUri("file:///android_asset/andy.obj").setTextureUri("andy.png"));
+        andy.setScale(new Vector(0.0003, 0.0003, 0.0003));
+        andy.setVisualResource(new VisualResource(Object3D.Type.FBX).setModelUri("file:///android_asset/helmet_skull.vrx"));
         andy.setPosition(new Vector(0, 0, -0.5f));
         andy.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.3f));
 
@@ -144,6 +82,15 @@ public class QuestModule {
         place.loadInteractiveObjects(CollectionUtils.listOf(andy));
 
         return place;
+    }
+
+    public Place getSkullPlace() {
+        final float mainScale = 0.0003f;
+        final float smallScale = mainScale / 3;
+        final String assetPrefix = "file:///android_asset/scene/";
+
+        SkullPlaceConstructor constructor = new SkullPlaceConstructor(mainScale, smallScale, assetPrefix);
+        return constructor.getPlace();
     }
 
     public Place getNewStyleInteractionDemoPlace() {
