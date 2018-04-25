@@ -2,6 +2,7 @@ package edu.technopark.arquest.quest.game;
 
 import com.viro.core.Object3D;
 import com.viro.core.PhysicsBody;
+import com.viro.core.PhysicsShapeBox;
 import com.viro.core.PhysicsShapeSphere;
 import com.viro.core.Vector;
 
@@ -429,7 +430,7 @@ public class SkullPlaceConstructor {
                 new VisualResource(Object3D.Type.FBX).setModelUri(asset("bottle_big.vrx"))
         );
         bottleContainer.setUniformScale(mainScale);
-        bottleContainer.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.3f));
+        bottleContainer.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.5f));
         bottleContainer.setPosition(new Vector(-1, 0, 0));
 
         bottleSmall = new InteractiveObject(
@@ -439,7 +440,7 @@ public class SkullPlaceConstructor {
                 new VisualResource(Object3D.Type.FBX).setModelUri(asset("bottle_small.vrx"))
         );
         bottleSmall.setUniformScale(mainScale);
-        bottleSmall.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.3f));
+        bottleSmall.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.5f));
 
         // group of objects related to glass
         glassItem = new Item(
@@ -455,8 +456,8 @@ public class SkullPlaceConstructor {
                 new VisualResource(Object3D.Type.FBX).setModelUri(asset("glass_big.vrx"))
         );
         glassContainer.setUniformScale(mainScale);
-        glassContainer.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.3f));
-        glassContainer.setPosition(new Vector(-0.5, 0, 0));
+        glassContainer.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.5f));
+        glassContainer.setPosition(new Vector(-2, 0, 0));
 
         glassSmall = new InteractiveObject(
                 202, "Стакан на постаменте", "Из этого стакана пьет череп"
@@ -465,7 +466,7 @@ public class SkullPlaceConstructor {
                 new VisualResource(Object3D.Type.FBX).setModelUri(asset("glass_small.vrx"))
         );
         glassSmall.setUniformScale(mainScale);
-        glassSmall.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.3f));
+        glassSmall.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.5f));
 
         // group of objects related to helmet
         helmetItem = new Item(
@@ -481,8 +482,8 @@ public class SkullPlaceConstructor {
                 new VisualResource(Object3D.Type.FBX).setModelUri(asset("helmet.vrx"))   // todo another model here
         );
         helmetContainer.setUniformScale(mainScale);
-        helmetContainer.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.3f));
-        helmetContainer.setPosition(new Vector(0, 0, -0.5));
+        helmetContainer.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.5f));
+        helmetContainer.setPosition(new Vector(0, 0, -2));
 
         columnHelmet = new InteractiveObject(
                 302, "Шлем на черепе", "Шлем на черепе"
@@ -491,7 +492,7 @@ public class SkullPlaceConstructor {
                 new VisualResource(Object3D.Type.FBX).setModelUri(asset("helmet.vrx"))
         );
         columnHelmet.setUniformScale(mainScale);
-        columnHelmet.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.3f));
+        columnHelmet.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.5f));
 
         axeItem = new Item(
                 400, "Топор", "Отличный топор",
@@ -507,8 +508,8 @@ public class SkullPlaceConstructor {
                 new VisualResource(Object3D.Type.FBX).setModelUri(asset("axe.vrx"))
         );
         axeContainer.setUniformScale(mainScale);
-        axeContainer.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.3f));
-        axeContainer.setPosition(new Vector(0, 0, -1));
+        axeContainer.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.5f));
+        axeContainer.setPosition(new Vector(0, 0, -4));
 
         column = new InteractiveObject(
                 1001, "Колонна", "Колонна, на которой лежит череп"
@@ -517,7 +518,7 @@ public class SkullPlaceConstructor {
                 new VisualResource(Object3D.Type.FBX).setModelUri(assetPrefix + "column.vrx")
         );
         column.setUniformScale(mainScale);
-        column.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.3f));
+        column.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.5f));
 
         map = new InteractiveObject(
                 1002, "Карта", "Карта"
@@ -526,7 +527,7 @@ public class SkullPlaceConstructor {
                 new VisualResource(Object3D.Type.FBX).setModelUri(assetPrefix + "map.vrx")
         );
         map.setUniformScale(mainScale);
-        map.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.3f));
+        map.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.5f));
 
         skull = new InteractiveObject(
                 1003, "Череп", "Череп"
@@ -535,7 +536,7 @@ public class SkullPlaceConstructor {
                 new VisualResource(Object3D.Type.FBX).setModelUri(assetPrefix + "skull.vrx")
         );
         skull.setUniformScale(mainScale);
-        skull.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.3f));
+        skull.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeBox(0.5f, 2f, 0.5f));
 
         pig = new InteractiveObject(
                 1004, "Свин", "Свин"
@@ -544,8 +545,8 @@ public class SkullPlaceConstructor {
                 new VisualResource(Object3D.Type.FBX).setModelUri(assetPrefix + "pig.vrx")
         );
         pig.setUniformScale(mainScale);
-        pig.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.3f));
-        pig.setPosition(new Vector(0.5, 0, 0.5));
+        pig.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeBox(0.5f, 2f, 0.5f));
+        pig.setPosition(new Vector(0.5, 0.5, 2.5));
     }
 
     private String asset(String name) {

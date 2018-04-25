@@ -85,7 +85,7 @@ public class QuestModule {
     }
 
     public Place getSkullPlace() {
-        final float mainScale = 0.0003f;
+        final float mainScale = 0.0005f;
         final float smallScale = mainScale / 3;
         final String assetPrefix = "file:///android_asset/scene/";
 

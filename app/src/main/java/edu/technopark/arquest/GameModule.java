@@ -83,7 +83,7 @@ public class GameModule {
             scene = new ARScene();
             scene.getPhysicsWorld().setGravity(new Vector(0,0, 0));
             player = new ActorPlayer();
-            player.setShape(new PhysicsShapeSphere(0.3f));
+            player.setShape(new PhysicsShapeSphere(0.5f));
             scene.getRootNode().addChildNode(player);
             collisionMap = new HashMap<>();
         }
