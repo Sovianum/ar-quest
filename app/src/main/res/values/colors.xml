@@ -13,4 +13,5 @@
     <color name="roundButtonColorFocusedEnd">#d6d6d6</color>
     <color name="roundButtonColorDisable">#777777</color>
     <color name="helpTextColor">#000000</color>
+    <color name="colorARFragmentBackgroundLayout">#303030</color>
 </resources>
