@@ -16,10 +16,6 @@ import android.widget.TextView;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.Target;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
-import edu.technopark.arquest.App;
-import edu.technopark.arquest.HintModule;
-import edu.technopark.arquest.R;
-import edu.technopark.arquest.model.Quest;
 
 import java.io.File;
 import java.util.HashMap;
@@ -30,6 +26,10 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import edu.technopark.arquest.App;
+import edu.technopark.arquest.HintModule;
+import edu.technopark.arquest.R;
+import edu.technopark.arquest.model.Quest;
 
 import static edu.technopark.arquest.network.DownloadService.fileNameStubs;
 
@@ -54,6 +54,7 @@ public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
     private final QuestsListFragment.OnQuestReactor onItemClickListener;
     private final QuestsListFragment.OnQuestReactor startQuestClickListener;
+    private int countLinesChar = 40;
 
     @Inject
     HintModule hintModule;
@@ -162,7 +163,7 @@ public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             }
         });
 
-        if(cardHolder.expanderView.getLineCount() < cardHolder.defaultMaxLines) {
+        if(cardHolder.descriptionView.length() < cardHolder.defaultMaxLines * countLinesChar) {
             cardHolder.expanderView.setVisibility(View.GONE);
         }
         //cardHolder.startQuestTextView.setOnClickListener(new View.OnClickListener() {

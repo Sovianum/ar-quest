@@ -2,16 +2,13 @@ package edu.technopark.arquest.quest.game;
 
 import android.content.Context;
 
-import com.viro.core.Material;
 import com.viro.core.Object3D;
 import com.viro.core.PhysicsBody;
 import com.viro.core.PhysicsShapeSphere;
 import com.viro.core.Vector;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Queue;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -32,7 +29,6 @@ import edu.technopark.arquest.game.script.ScriptAction;
 import edu.technopark.arquest.game.slot.Slot;
 import edu.technopark.arquest.model.Quest;
 import edu.technopark.arquest.model.VisualResource;
-import edu.technopark.arquest.quest.AssetModule;
 
 @Module
 public class QuestModule {
@@ -50,11 +46,19 @@ public class QuestModule {
     }
 
     public List<Quest> getQuests() {
+        //Quest q1 = new Quest(
+        //        2,
+        //        "Демо-квест взаимодействие с персонажами",
+        //        "Это демонстрационный квест из одного места." +
+        //                "Здесь вы можете опробовать взаимодействие с виртуальным объектами", 3
+        //);
         Quest q1 = new Quest(
                 2,
-                "Демо-квест взаимодействие с персонажами",
-                "Это демонстрационный квест из одного места." +
-                        "Здесь вы можете опробовать взаимодействие с виртуальным объектами", 3
+                "Раздобудьте карту",
+                "Вы попадаете в очень странное место с загадочными персонажами. Ваша цель " +
+                        "покинуть это место. Распросив разных существ, вы понимаете, что вам нужна таинственная карта," +
+                        "которую можно найти у местного свина-торговца. Удастся ли вам договориться и выбраться?",
+                3
         );
         q1.setCurrPurpose("Подойдите к андроиду неподалеку");
 

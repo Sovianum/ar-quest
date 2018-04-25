@@ -18,7 +18,8 @@ public class Place {
 
     public Place() {
         interactiveObjects = new HashMap<>();
-        name = "default";
+        name = "Начальная точка";
+        description="Единственное место действия в данном квесте";
         location = new Location("");
         location.setLatitude(0.0);
         location.setLongitude(0.0);
