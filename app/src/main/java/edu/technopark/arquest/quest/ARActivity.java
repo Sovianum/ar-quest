@@ -12,8 +12,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.widget.ImageButton;
@@ -27,7 +25,6 @@ import com.viro.core.ARHitTestListener;
 import com.viro.core.ARHitTestResult;
 import com.viro.core.ARScene;
 import com.viro.core.CameraListener;
-import com.viro.core.Scene;
 import com.viro.core.Vector;
 import com.viro.core.ViroViewARCore;
 
@@ -325,6 +322,7 @@ public class ARActivity extends AppCompatActivity {
                 break;
             case TAKE_ITEMS:
                 onTakeItemsResult(interactionResult);
+                hideReturnItemViews();
                 break;
             case JOURNAL_RECORD:
                 onJournalUpdateResult(interactionResult);
