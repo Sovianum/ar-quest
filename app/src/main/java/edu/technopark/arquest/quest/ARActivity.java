@@ -268,10 +268,10 @@ public class ARActivity extends AppCompatActivity {
             interactBtnAndTextViewSetEnable(true);
             return;
         }
-        if (gameModule.getPlayer().getItem() != null) {
-            interactBtnAndTextViewSetEnable(true);
-            return;
-        }
+        //if (gameModule.getPlayer().getItem() != null) {
+        //    interactBtnAndTextViewSetEnable(true);
+        //    return;
+        //}
         interactBtnAndTextViewSetEnable(false);
     }
 
