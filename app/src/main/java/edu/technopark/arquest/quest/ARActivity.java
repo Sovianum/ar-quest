@@ -142,6 +142,8 @@ public class ARActivity extends AppCompatActivity {
         public void onItemClick(Item item) {
             gameModule.getPlayer().hold(item);
             Toast.makeText(ARActivity.this, "Вы выбрали: " + item.getName(), Toast.LENGTH_SHORT).show();
+            //EventBus.getDefault().post();
+            showReturnItemViews();
             //TODO action to choose element
         }
     };
@@ -300,11 +302,6 @@ public class ARActivity extends AppCompatActivity {
     @OnClick(R.id.interact_btn)
     void interact() {
         gameModule.interactLastCollided();
-        showReturnItemViews();
-        ///returnItemToInventoryBtn.setEnabled(false);
-        //returnItemToInventoryHelpTextView.setBackgroundColor(getResources()
-        //        .getColor(R.color.roundButtonColorDisable, this.getTheme()));
-        //returnItemToInventoryBtn.getBackground().setColorFilter(0xFF00FF00, PorterDuff.Mode.MULTIPLY);
     }
 
     @OnClick(R.id.return_inventory_btn)
@@ -564,12 +561,14 @@ public class ARActivity extends AppCompatActivity {
     private void changeToFragmentLayout() {
         findViewById(R.id.ar_buttons_layout).setVisibility(View.GONE);
         findViewById(R.id.ar_controls_layout).setVisibility(View.GONE);
+        findViewById(R.id.return_item_layout).setVisibility(View.GONE);
         findViewById(R.id.ar_fragment_container).setVisibility(View.VISIBLE);
     }
 
     private void changeToActivityLayout() {
         findViewById(R.id.ar_buttons_layout).setVisibility(View.VISIBLE);
         findViewById(R.id.ar_controls_layout).setVisibility(View.VISIBLE);
+        findViewById(R.id.return_item_layout).setVisibility(View.VISIBLE);
         findViewById(R.id.ar_fragment_container).setVisibility(View.GONE);
     }
 
