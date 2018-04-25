@@ -120,7 +120,7 @@ public class ARActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     showSnackbarMessage(getString(R.string.direct_camera_to_floor_str), false);
-                    hideButtons();
+//                    hideButtons();
                 }
             },
             new Runnable() {
@@ -184,12 +184,9 @@ public class ARActivity extends AppCompatActivity {
         }
         ButterKnife.bind(this);
         setSupportActionBar(toolBar);
-        gameModule.getCurrentJournal().addNow("Hello ");
-        gameModule.getCurrentJournal().addNow("Hello ");
-        gameModule.getCurrentJournal().addNow("Hello ");
         changeToActivityLayout();
         //toolBar.setVisibility(View.GONE);
-//        snackbarAction.startIfNotRunning();
+        snackbarAction.startIfNotRunning();
 //        setUpHints();
     }
 
@@ -281,22 +278,22 @@ public class ARActivity extends AppCompatActivity {
     public void onInteractionResult(InteractionResult interactionResult) {
         switch (interactionResult.getType()) {
             case NEW_ITEMS:
-                onNewItemsResult(interactionResult, this);
+                onNewItemsResult(interactionResult);
                 break;
             case TAKE_ITEMS:
-                onTakeItemsResult(interactionResult, this);
+                onTakeItemsResult(interactionResult);
                 break;
             case JOURNAL_RECORD:
-                onJournalUpdateResult(interactionResult, this);
+                onJournalUpdateResult(interactionResult);
                 break;
             case MESSAGE:
-                onMessageResult(interactionResult, this);
+                onMessageResult(interactionResult);
                 break;
             case HINT:
-                onHintResult(interactionResult, this);
+                onHintResult(interactionResult);
                 break;
             case NEXT_PURPOSE:
-                onNextPurposeResult(interactionResult, this);
+                onNextPurposeResult(interactionResult);
                 break;
         }
     }
@@ -472,26 +469,16 @@ public class ARActivity extends AppCompatActivity {
         if (purpose == null) {
             return;
         }
+        messageSnackbar.setText(purpose);
         gameModule.getCurrentQuest().setCurrPurpose(purpose);
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                messageSnackbar.setText(purpose);
-            }
-        });
     }
 
     private HintModule.Hint getARScreenHint(final Function<ShowcaseView, Void> callable) {
         return new HintModule.Hint() {
             @Override
             public void setUpHint(final ShowcaseView sv) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        callable.apply(sv);
-                        hideSnackbarMessage();
-                    }
-                });
+                callable.apply(sv);
+                hideSnackbarMessage();
             }
 
             @Override
@@ -500,68 +487,52 @@ public class ARActivity extends AppCompatActivity {
                 if (quest == null) {
                     return;
                 }
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        showSnackbarMessage(quest.getCurrPurpose(), false);
-                    }
-                });
+                showSnackbarMessage(quest.getCurrPurpose(), false);
             }
         };
     }
 
-    private void onNewItemsResult(final InteractionResult result, final Activity activity) {
+    private void onNewItemsResult(final InteractionResult result) {
         Slot.RepeatedItem repeatedItem = result.getItems();
         showMsg(
                 String.format(
                         Locale.ENGLISH,
-                        activity.getString(R.string.inventory_updated_str),
+                        getString(R.string.inventory_updated_str),
                         repeatedItem.getCnt(), repeatedItem.getItem().getName()
-                ), activity
+                )
         );
     }
 
-    private void onTakeItemsResult(final InteractionResult result, final Activity activity) {
+    private void onTakeItemsResult(final InteractionResult result) {
         Slot.RepeatedItem repeatedItem = result.getItems();
         showMsg(
                 String.format(
                         Locale.ENGLISH,
-                        "%d instanses of %s were taken",
+                        "%d %s изъяты из инвентаря",
                         repeatedItem.getCnt(), repeatedItem.getItem().getName()
-                ), activity
+                )
         );
     }
 
-    private void onJournalUpdateResult(final InteractionResult result, final Activity activity) {
-        showMsg(result.getMsg(), activity);
-        showMsg(activity.getString(R.string.journal_updated_str), activity);
+    private void onJournalUpdateResult(final InteractionResult result) {
+        showMsg(result.getMsg());
+        showMsg(getString(R.string.journal_updated_str));
     }
 
-    private void onMessageResult(final InteractionResult result, final Activity activity) {
-        showMsg(result.getMsg(), activity);
+    private void onMessageResult(final InteractionResult result) {
+        showMsg(result.getMsg());
     }
 
-    private void onHintResult(final InteractionResult result, final Activity activity) {
-        activity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                hintModule.showHintOnce(result.getEntityID());
-            }
-        });
+    private void onHintResult(final InteractionResult result) {
+        hintModule.showHintOnce(result.getEntityID());
     }
 
-    private void onNextPurposeResult(final InteractionResult result, final Activity activity) {
+    private void onNextPurposeResult(final InteractionResult result) {
         setPurpose(result.getMsg());
     }
 
-    private void showMsg(final String msg, final Activity activity) {
-        activity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(activity, msg, Toast.LENGTH_SHORT).show();
-            }
-        });
+    private void showMsg(final String msg) {
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 
     private void selectFragment(Fragment fragment, String tag) {

@@ -219,7 +219,7 @@ public class SkullPlaceConstructor {
                         Arrays.asList(
                                 InteractionResult.journalRecordResult("Череп сказал: Карта? Я бы рад, да в горле что-то совсем пересохло. Принеси мне чего-нибудь выпить, чувак."),
                                 InteractionResult.nextPurposeResult("Дайте черепу бутылку с выпивкой. Она должна быть неподалеку"),
-                                InteractionResult.transitionsResult(Arrays.asList(
+                                InteractionResult.transitionsResult(Collections.singletonList(
                                         new ScriptAction.StateTransition(skull.getName(), 3)
                                 ))
                         )
@@ -233,7 +233,7 @@ public class SkullPlaceConstructor {
         ));
 
         ObjectState state3 = new ObjectState(3, false);
-        state2.setActions(Arrays.asList(
+        state3.setActions(Arrays.asList(
                 new ScriptAction(
                         1,
                         Arrays.asList(
@@ -289,7 +289,7 @@ public class SkullPlaceConstructor {
                 Arrays.asList(1, 2),
                 Arrays.asList(
                         new ActionCondition(Collections.singletonList(
-                                new ActionCondition.ItemInfo(bottleItem.getId(), 1)
+                                new ActionCondition.ItemInfo(glassItem.getId(), 1)
                         ),4),
                         new ActionCondition(4)
                 )
@@ -353,8 +353,9 @@ public class SkullPlaceConstructor {
                                 InteractionResult.journalRecordResult("Вы подумали: сразу бы так"),
                                 InteractionResult.nextPurposeResult("Вы получили данные о новых квестах"),
                                 InteractionResult.transitionsResult(
-                                        Collections.singletonList(
-                                                new ScriptAction.StateTransition(skull.getName(), 7)
+                                        Arrays.asList(
+                                                new ScriptAction.StateTransition(skull.getName(), 7),
+                                                new ScriptAction.StateTransition(map.getName(), 2)
                                         )
                                 ),
                                 InteractionResult.questEndResult()
@@ -391,7 +392,7 @@ public class SkullPlaceConstructor {
                 Collections.singletonList(new ActionCondition(7))
         ));
 
-        ObjectState state8 = new ObjectState(7,false);
+        ObjectState state8 = new ObjectState(8,false);
         state7.setActions(Collections.singletonList(
                 new ScriptAction(
                         1,
@@ -540,7 +541,7 @@ public class SkullPlaceConstructor {
         );
         pig.setUniformScale(mainScale);
         pig.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.3f));
-        pig.setPosition(new Vector(0.5, 0, 0));
+        pig.setPosition(new Vector(0.5, 0, 0.5));
     }
 
     private String asset(String name) {

@@ -65,47 +65,51 @@ public class ActionCondition {
         }
     }
 
-    public boolean checkStrings(List<String> strings, int stateID) {
+    public int checkStrings(List<String> strings, int stateID) {
         return check(new ArrayList<Slot.RepeatedItem>(), strings, stateID);
     }
 
-    public boolean checkItems(Collection<Slot.RepeatedItem> argItems, int stateID) {
+    public int checkItems(Collection<Slot.RepeatedItem> argItems, int stateID) {
         return check(argItems, new ArrayList<String>(), stateID);
     }
 
-    public boolean check(Collection<Slot.RepeatedItem> argItems, List<String> argStrings, int stateID) {
+    public int check(Collection<Slot.RepeatedItem> argItems, List<String> argStrings, int stateID) {
+        int matchRate = 0;
+
         if (stateID != sourceStateID) {
-            return false;
+            return -1;
         }
 
         if (itemInfoMap.size() > 0 && (argItems == null || argItems.size() != itemInfoMap.size())) {
-            return false;
+            return -1;
         }
 
         if (itemInfoMap.size() > 0) {
             for (Slot.RepeatedItem item : argItems) {
                 ItemInfo itemInfo = itemInfoMap.get(item.getItem().getId());
                 if (itemInfo == null) {
-                    return false;
+                    return -1;
                 }
                 if (itemInfo.getItemCnt() < item.getCnt()) {
-                    return false;
+                    return -1;
                 }
             }
+            matchRate += itemInfoMap.size();
         }
 
         if (strings.size() > 0 && (argStrings == null || argStrings.size() != strings.size())) {
-            return false;
+            return -1;
         }
 
         if (strings.size() > 0) {
             for (int i = 0; i != argStrings.size(); ++i) {
                 if (!argStrings.get(i).equals(strings.get(i))) {
-                    return false;
+                    return -1;
                 }
             }
+            matchRate += strings.size();
         }
 
-        return true;
+        return matchRate;
     }
 }

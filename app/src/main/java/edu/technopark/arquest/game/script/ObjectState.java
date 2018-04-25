@@ -33,12 +33,17 @@ public class ObjectState {
     }
 
     public ScriptAction getMatchingAction(Collection<Slot.RepeatedItem> items, List<String> strings) {
+        int maxMatchRate = -1;
+        ScriptAction result = null;
+
         for (Map.Entry<Integer, ActionCondition> entry : conditions.entrySet()) {
-            if (entry.getValue().check(items, strings, id)) {
-                return actions.get(entry.getKey());
+            int matchRate = entry.getValue().check(items, strings, id);
+            if (matchRate >= 0 && matchRate > maxMatchRate) {
+                maxMatchRate = matchRate;
+                result = actions.get(entry.getKey());
             }
         }
-        return null;
+        return result;
     }
 
     public int getId() {
