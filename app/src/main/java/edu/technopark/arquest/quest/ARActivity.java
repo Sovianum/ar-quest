@@ -1,7 +1,6 @@
 package edu.technopark.arquest.quest;
 
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -264,14 +263,14 @@ public class ARActivity extends AppCompatActivity {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onCanInteract(GameModule.CanInteract canInteractEvent) {
         if (canInteractEvent.canInteract) {
-            interactBtn.setEnabled(true);
+            interactBtnAndTextViewSetEnable(true);
             return;
         }
         if (gameModule.getPlayer().getItem() != null) {
-            interactBtn.setEnabled(true);
+            interactBtnAndTextViewSetEnable(true);
             return;
         }
-        interactBtn.setEnabled(false);
+        interactBtnAndTextViewSetEnable(false);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -302,6 +301,10 @@ public class ARActivity extends AppCompatActivity {
     void interact() {
         gameModule.interactLastCollided();
         showReturnItemViews();
+        ///returnItemToInventoryBtn.setEnabled(false);
+        //returnItemToInventoryHelpTextView.setBackgroundColor(getResources()
+        //        .getColor(R.color.roundButtonColorDisable, this.getTheme()));
+        //returnItemToInventoryBtn.getBackground().setColorFilter(0xFF00FF00, PorterDuff.Mode.MULTIPLY);
     }
 
     @OnClick(R.id.return_inventory_btn)
@@ -613,6 +616,17 @@ public class ARActivity extends AppCompatActivity {
                 toolBar.setNavigationOnClickListener(null);
             }
         });
+    }
+
+    private void interactBtnAndTextViewSetEnable(boolean enable) {
+        interactBtn.setEnabled(enable);
+        if (enable) {
+            interactHelpTextView.setBackground(getResources().getDrawable(
+                    R.drawable.round_text_view_style, this.getTheme()));
+        } else {
+            interactHelpTextView.setBackground(getResources().getDrawable(
+                    R.drawable.round_text_view_disable_style, this.getTheme()));
+        }
     }
 
 }
