@@ -9,6 +9,8 @@ import com.viro.core.Material;
 import com.viro.core.Node;
 import com.viro.core.Object3D;
 import com.viro.core.OmniLight;
+import com.viro.core.PhysicsBody;
+import com.viro.core.PhysicsShape;
 import com.viro.core.PhysicsShapeSphere;
 import com.viro.core.PhysicsWorld;
 import com.viro.core.Texture;
@@ -64,6 +66,8 @@ public class GameModule {
     private boolean withAR;
     private Map<String, InteractiveObject.InteractiveObjectCollisionEvent> collisionMap;
     private InteractiveObject.InteractiveObjectCollisionEvent lastCollision;
+
+    private Vector previousSceneOrigin;
 
     @Inject
     AssetModule assetModule;
@@ -176,6 +180,7 @@ public class GameModule {
     }
 
     public ARScene getNewFreeScene() {
+        scene.dispose();
         scene = new ARScene();
 
         List<Vector> lightPositions = new ArrayList<Vector>();
@@ -245,9 +250,24 @@ public class GameModule {
         }
         Node root = scene.getRootNode();
         for (Object3D object3D : place.getAll()) {
-            object3D.setPosition(object3D.getPositionRealtime().add(origin));
+            if (previousSceneOrigin == null) {
+                previousSceneOrigin = new Vector(0, 0, 0);
+            }
+            object3D.setPosition(object3D.getPositionRealtime().subtract(previousSceneOrigin).add(origin));
+            object3D.removeFromParentNode();
+
+            PhysicsBody body = object3D.getPhysicsBody();
+            if (body != null) {
+                PhysicsBody.RigidBodyType type = body.getRigidBodyType();
+                PhysicsShape shape = body.getShape();
+                float mass = body.getMass();
+
+                object3D.clearPhysicsBody();
+                object3D.initPhysicsBody(type, mass, shape);
+            }
             root.addChildNode(object3D);
         }
+        previousSceneOrigin = origin;
 
         for (InteractiveObject obj : place.getInteractive()) {
             obj.setCurrentStateID(obj.getCurrentStateID()); // init visual conditions

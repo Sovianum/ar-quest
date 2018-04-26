@@ -288,7 +288,10 @@ public class ARActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        if (viroView != null) viroView.onActivityDestroyed(this);
+        if (viroView != null) {
+            viroView.onActivityDestroyed(this);
+//            viroView.dispose();
+        }
         super.onDestroy();
     }
 
