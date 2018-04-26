@@ -6,8 +6,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.location.Location;
-import android.location.LocationListener;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -19,7 +17,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -531,7 +528,14 @@ public class MainActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();
                                 selectFragment(questsListFragment, QuestsListFragment.TAG);
-                                //TODO cancel current quest
+                                try {
+                                    gameModule.getPlayer().release();
+                                    gameModule.getCurrentInventory().clear();
+                                    gameModule.getCurrentJournal().clear();
+                                    gameModule.resetCurrentQuest();
+                                } catch (NullPointerException e) {
+                                    gameModule.resetCurrentQuest();
+                                }
                             }
                         });
         builder.setNegativeButton(android.R.string.no,
