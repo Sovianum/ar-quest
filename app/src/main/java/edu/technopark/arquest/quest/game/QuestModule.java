@@ -7,6 +7,7 @@ import com.viro.core.PhysicsBody;
 import com.viro.core.PhysicsShapeSphere;
 import com.viro.core.Vector;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -52,25 +53,22 @@ public class QuestModule {
         //        "Это демонстрационный квест из одного места." +
         //                "Здесь вы можете опробовать взаимодействие с виртуальным объектами", 3
         //);
-        Quest q1 = new Quest(
+
+        Quest q2 = new Quest(
                 2,
-                "Раздобудьте карту",
+                "Тайна пьяного черепа",
                 "Вы попадаете в очень странное место с загадочными персонажами. Ваша цель " +
                         "покинуть это место. Распросив разных существ, вы понимаете, что вам нужна таинственная карта," +
-                        "которую можно найти у местного свина-торговца. Удастся ли вам договориться и выбраться?",
-                3
+                        "которую можно найти у местного свина-торговца. Удастся ли вам договориться и выбраться?", 3
         );
-        q1.setCurrPurpose("Подойдите к андроиду неподалеку");
 
         if (gameModule.isWithAR()) {
-//            q1.addPlace(getNewStyleInteractionDemoPlace());
-//            q1.addPlace(getSingleObjectPlace());
-            q1.addPlace(getSkullPlace());
+            q2.addPlace(getSkullPlace());
         } else {
-            q1.addPlace(new Place());
+            q2.addPlace(new Place());
         }
 
-        return Collections.singletonList(q1);
+        return Collections.singletonList(q2);
     }
 
     public Place getSingleObjectPlace() {
@@ -108,7 +106,7 @@ public class QuestModule {
 
         final Item banana = new Item(
                 10, "banana", "banana",
-                new VisualResource(Object3D.Type.FBX).setModelUri("file:///android_asset/banana.obj").setTextureUri("banana.lpg")
+                new VisualResource(Object3D.Type.OBJ).setModelUri("file:///android_asset/banana.obj").setTextureUri("banana.lpg")
         );
         banana.setScale(new Vector(scale, scale, scale));
 
@@ -116,10 +114,16 @@ public class QuestModule {
                 1, "andy", "andy",
                 CollectionUtils.singleItemList(rose)
         );
+        andy.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.3f));
+
         final InteractiveObject whiteGuy = new InteractiveObject(
                 2, "white", "white",
                 CollectionUtils.singleItemList(banana)
         );
+        whiteGuy.setVisualResource(new VisualResource(Object3D.Type.OBJ).setModelUri("file:///android_asset/bigmax.obj").setTextureUri("bigmax.jpg"));
+        whiteGuy.setPosition(new Vector(0.25f, 0, 0));
+        whiteGuy.setScale(new Vector(0.003f, 0.003f, 0.003f));
+        whiteGuy.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.3f));
 
         andy.setVisualResource(new VisualResource(Object3D.Type.OBJ).setModelUri("file:///android_asset/andy.obj").setTextureUri("andy.png"));
         andy.setPosition(new Vector(0, 0, -0.5f));
@@ -193,13 +197,6 @@ public class QuestModule {
         ));
 
         andy.setStates(CollectionUtils.listOf(andyState1, andyState2, andyState3));
-
-
-        whiteGuy.setVisualResource(new VisualResource(Object3D.Type.OBJ).setModelUri("file:///android_asset/bigmax.obj").setTextureUri("bigmax.jpg"));
-        whiteGuy.setPosition(new Vector(0.25f, 0, 0));
-        whiteGuy.setScale(new Vector(0.003f, 0.003f, 0.003f));
-        whiteGuy.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.3f));
-        whiteGuy.setStates(CollectionUtils.listOf(ObjectState.enableObjectState(0, true, false)));
 
         ObjectState guyState0 = new ObjectState(0, true);
         guyState0.setEnabled(false);

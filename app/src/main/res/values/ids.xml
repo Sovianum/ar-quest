@@ -10,4 +10,11 @@
     <item name="interact_btn_hint" type="id" />
     <item name="ar_buttons_layout" type="id" />
     <item name="ar_controls_layout" type="id" />
+    <item name="quests_list_hint" type="id" />
+    <item name="current_quest_hint" type="id" />
+    <item name="settings_hint" type="id" />
+    <item name="start_quest_hint" type="id" />
+    <item name="first_item_hint" type="id" />
+    <item name="first_journal_message_hint" type="id" />
+    <item name="release_item_hint" type="id" />
 </resources>

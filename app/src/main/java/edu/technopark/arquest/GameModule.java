@@ -160,7 +160,7 @@ public class GameModule {
     }
 
     public Place getCurrentPlace() {
-        return player.getPlace();
+        return player == null ? null : player.getPlace();
     }
 
     public void setCurrentPlace(Place place) {

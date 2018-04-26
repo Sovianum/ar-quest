@@ -19,6 +19,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -62,27 +63,7 @@ import edu.technopark.arquest.quest.quests.QuestsListFragment;
 import edu.technopark.arquest.settings.SettingsFragment;
 
 public class MainActivity extends AppCompatActivity {
-    private LocationListener onLocationChangeListener = new LocationListener() {
-        @Override
-        public void onLocationChanged(Location location) {
-
-        }
-
-        @Override
-        public void onStatusChanged(String s, int i, Bundle bundle) {
-
-        }
-
-        @Override
-        public void onProviderEnabled(String s) {
-
-        }
-
-        @Override
-        public void onProviderDisabled(String s) {
-
-        }
-    };
+    public static final String TAG = MainActivity.class.getSimpleName();
 
     @BindView(R.id.bottom_navigation)
     BottomNavigationView bottomNavigationView;
@@ -306,12 +287,15 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
         showGreeting();
         if (!isFirstLaunch()) {
-            showTutorialSuggestion = false;
+//            showTutorialSuggestion = false;
         }
 
         if (showTutorialSuggestion && PermissionHelper.hasPermissions(this)) {
-            showTutorialSuggestion();
-            showTutorialSuggestion = false;
+            if (showTutorialSuggestion && !hintModule.getCallerSet().contains(TAG)) {
+                showTutorialSuggestion();
+                showTutorialSuggestion = false;
+                hintModule.getCallerSet().add(TAG);
+            }
         }
         setFirstLaunch(false);
         hintModule.setActivity(this);
@@ -383,9 +367,10 @@ public class MainActivity extends AppCompatActivity {
         if (!PermissionHelper.hasPermissions(this)) {
             showNoPermission();
         } else {
-            if (showTutorialSuggestion) {
+            if (showTutorialSuggestion && !hintModule.getCallerSet().contains(TAG)) {
                 showTutorialSuggestion();
                 showTutorialSuggestion = false;
+                hintModule.getCallerSet().add(TAG);
             }
         }
     }
@@ -402,6 +387,7 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.action_help:
                 showTutorialSuggestion();
+                hintModule.getCallerSet().add(TAG);
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -642,6 +628,7 @@ public class MainActivity extends AppCompatActivity {
         hintModule.clearHints();
         hintModule.setEnabled(true);
         setUpTutorial();
+        hintModule.showHintChainOnce(R.id.quests_list_hint, R.id.current_quest_hint, R.id.settings_hint, R.id.start_quest_hint);
     }
 
     private <F extends Fragment> View.OnClickListener getSelectFragmentListener(final F fragment) {
@@ -818,7 +805,44 @@ public class MainActivity extends AppCompatActivity {
                 sv.setContentText(getString(R.string.start_ar_str));
             }
         });
-        hintModule.requestHint(R.id.select_quest_hint_name);
+        hintModule.addHint(R.id.quests_list_hint, new HintModule.NoCompleteHint() {
+            @Override
+            public void setUpHint(ShowcaseView sv) {
+                sv.setTarget(new ViewTarget(
+                        bottomNavigationView.findViewById(R.id.action_quests)
+                ));
+                sv.setContentText("Здесь вы можете посмотреть список квестов");
+            }
+        });
+        hintModule.addHint(R.id.current_quest_hint, new HintModule.NoCompleteHint() {
+            @Override
+            public void setUpHint(ShowcaseView sv) {
+                sv.setTarget(new ViewTarget(
+                        bottomNavigationView.findViewById(R.id.action_current_quest)
+                ));
+                sv.setContentText("Здесь вы можете посмотреть информацию по текущему квесту");
+            }
+        });
+        hintModule.addHint(R.id.settings_hint, new HintModule.NoCompleteHint() {
+            @Override
+            public void setUpHint(ShowcaseView sv) {
+                sv.setTarget(new ViewTarget(
+                        bottomNavigationView.findViewById(R.id.action_settings)
+                ));
+                sv.setContentText("Здесь находятся настройки");
+            }
+        });
+        hintModule.addHint(R.id.start_quest_hint, new HintModule.NoCompleteHint() {
+            @Override
+            public void setUpHint(ShowcaseView sv) {
+                sv.setTarget(new ViewTarget(
+                        findViewById(R.id.start_or_download_quest_btn)
+                ));
+                sv.setContentText("Для того, чтобы начать свой первый квест, нажмите сюда!");
+            }
+        });
+
+//        hintModule.requestHint(R.id.select_quest_hint_name);
     }
 
     private boolean isForegroundTracking() {

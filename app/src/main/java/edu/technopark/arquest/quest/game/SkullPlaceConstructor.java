@@ -6,9 +6,12 @@ import com.viro.core.PhysicsShapeBox;
 import com.viro.core.PhysicsShapeSphere;
 import com.viro.core.Vector;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
+import edu.technopark.arquest.R;
 import edu.technopark.arquest.game.InteractionResult;
 import edu.technopark.arquest.game.InteractiveObject;
 import edu.technopark.arquest.game.Item;
@@ -20,24 +23,23 @@ import edu.technopark.arquest.game.slot.Slot;
 import edu.technopark.arquest.model.VisualResource;
 
 public class SkullPlaceConstructor {
-    private static void setContainerStates(InteractiveObject container, Slot.RepeatedItem item) {
+    private static void setContainerStates(InteractiveObject container, Slot.RepeatedItem item, InteractionResult... extraResults) {
         ObjectState state1 = new ObjectState(1, true);
         state1.setVisible(true);
         state1.setCollidable(true);
 
+        List<InteractionResult> baseResults = new ArrayList<>();
+        baseResults.add(InteractionResult.newItemsResult(item));
+        baseResults.add(InteractionResult.transitionsResult(
+                Collections.singletonList(
+                        new ScriptAction.StateTransition(container.getName(), 2)
+                )
+        ));
+        baseResults.addAll(Arrays.asList(extraResults));
+
         state1.setActions(
                 Collections.singletonList(
-                        new ScriptAction(
-                                1,
-                                Arrays.asList(
-                                        InteractionResult.newItemsResult(item),
-                                        InteractionResult.transitionsResult(
-                                                Collections.singletonList(
-                                                        new ScriptAction.StateTransition(container.getName(), 2)
-                                                )
-                                        )
-                                )
-                        )
+                        new ScriptAction(1, baseResults)
                 )
         );
         state1.setConditions(ActionCondition.makeConditionMap(

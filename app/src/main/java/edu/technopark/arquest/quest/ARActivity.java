@@ -13,6 +13,8 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -96,8 +98,6 @@ public class ARActivity extends AppCompatActivity {
 
             // if found plane, stop tracking planes
             if (result != null){
-//                viroView.setScene(gameModule.getNewScene(result.getPosition()));
-//                viroView.setScene(new ARScene());
                 snackbarAction.stopIfRunning();
                 gameModule.getScene().displayPointCloud(false);
                 gameModule.loadCurrentPlace(result.getPosition());
@@ -162,6 +162,9 @@ public class ARActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     Place place = gameModule.getCurrentPlace();
+                    if (place == null) {
+                        return;
+                    }
                     String currPurpose = place.getStartPurpose();
                     if (currPurpose != null) {
                         setPurpose(currPurpose);
@@ -169,6 +172,7 @@ public class ARActivity extends AppCompatActivity {
                         setPurpose("Осмотритесь и попытайте счастье :)");
                     }
                     showButtons();
+                    hintModule.showHintChain(R.id.interact_btn_hint);
                 }
             }
     );
@@ -196,6 +200,9 @@ public class ARActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
         snackbarAction.startIfNotRunning();
 
         if (gameModule.isWithAR()) {
@@ -226,8 +233,7 @@ public class ARActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         setSupportActionBar(toolBar);
         changeToActivityLayout();
-        //toolBar.setVisibility(View.GONE);
-//        setUpHints();
+        setUpHints();
     }
 
     @Override
@@ -235,6 +241,7 @@ public class ARActivity extends AppCompatActivity {
         super.onStart();
         if (viroView != null) viroView.onActivityStarted(this);
         EventBus.getDefault().register(this);
+        hintModule.setActivity(this);
     }
 
     @Override
@@ -280,8 +287,8 @@ public class ARActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         if (viroView != null) viroView.onActivityDestroyed(this);
+        super.onDestroy();
     }
 
     @Override
@@ -299,6 +306,9 @@ public class ARActivity extends AppCompatActivity {
             changeToActivityLayout();
         }
         super.onBackPressed();
+        if (returnItemToInventoryBtn.getVisibility() == View.VISIBLE) {
+            hintModule.showHintOnce(R.id.release_item_hint);
+        }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -365,30 +375,7 @@ public class ARActivity extends AppCompatActivity {
 
     @OnClick(R.id.help_btn)
     public void onHelpClickListener() {
-        if (inventoryHelpTextView.getVisibility() == View.VISIBLE) {
-            inventoryHelpTextView.setVisibility(View.GONE);
-            journalHelpTextView.setVisibility(View.GONE);
-            interactHelpTextView.setVisibility(View.GONE);
-            if (returnItemToInventoryBtn.getVisibility() == View.VISIBLE) {
-                returnItemToInventoryHelpTextView.setVisibility(View.GONE);
-            }
-
-        } else {
-            inventoryHelpTextView.setVisibility(View.VISIBLE);
-            journalHelpTextView.setVisibility(View.VISIBLE);
-            interactHelpTextView.setVisibility(View.VISIBLE);
-            AlphaAnimation animation = new AlphaAnimation(0.2f, 1.0f);
-            animation.setDuration(100);
-            animation.setStartOffset(100);
-            animation.setFillAfter(true);
-            if (returnItemToInventoryBtn.getVisibility() == View.VISIBLE) {
-                returnItemToInventoryHelpTextView.setVisibility(View.VISIBLE);
-                returnItemToInventoryHelpTextView.startAnimation(animation);
-            }
-            inventoryHelpTextView.startAnimation(animation);
-            journalHelpTextView.startAnimation(animation);
-            interactHelpTextView.startAnimation(animation);
-        }
+        hintModule.showHintChain(R.id.interact_btn_hint, R.id.inventory_btn_hint, R.id.journal_btn_hint);
     }
 
     @OnClick(R.id.close_btn)
@@ -457,6 +444,8 @@ public class ARActivity extends AppCompatActivity {
         toInventoryBtn.setVisibility(View.VISIBLE);
         toJournalBtn.setVisibility(View.VISIBLE);
         interactBtn.setVisibility(View.VISIBLE);
+
+        EventBus.getDefault().post(InteractionResult.hintResult(R.id.interact_btn_hint));
     }
 
     private void hideButtons() {
@@ -466,7 +455,7 @@ public class ARActivity extends AppCompatActivity {
     }
 
     private void setUpHints() {
-        hintModule.addHint(R.id.interact_btn_hint, getARScreenHint(new Function<ShowcaseView, Void>() {
+        hintModule.replaceHint(R.id.interact_btn_hint, getARScreenHint(new Function<ShowcaseView, Void>() {
             @Override
             public Void apply(@NonNull ShowcaseView input) {
                 input.setContentText(getString(R.string.act_btn_hint_str));
@@ -475,7 +464,7 @@ public class ARActivity extends AppCompatActivity {
             }
         }));
 
-        hintModule.addHint(R.id.journal_btn_hint, getARScreenHint(new Function<ShowcaseView, Void>() {
+        hintModule.replaceHint(R.id.journal_btn_hint, getARScreenHint(new Function<ShowcaseView, Void>() {
             @Override
             public Void apply(@NonNull ShowcaseView input) {
                 input.setContentText("Нажмите на эту кнопку, чтобы посмотреть список событий данного квеста");
@@ -484,7 +473,7 @@ public class ARActivity extends AppCompatActivity {
             }
         }));
 
-        hintModule.addHint(R.id.inventory_btn_hint, getARScreenHint(new Function<ShowcaseView, Void>() {
+        hintModule.replaceHint(R.id.inventory_btn_hint, getARScreenHint(new Function<ShowcaseView, Void>() {
             @Override
             public Void apply(@NonNull ShowcaseView input) {
                 input.setContentText("Нажмите на эту кнопку, чтобы посмотреть вещи в инвентаре");
@@ -493,11 +482,35 @@ public class ARActivity extends AppCompatActivity {
             }
         }));
 
-        hintModule.addHint(R.id.release_btn_hint, getARScreenHint(new Function<ShowcaseView, Void>() {
+        hintModule.replaceHint(R.id.release_btn_hint, getARScreenHint(new Function<ShowcaseView, Void>() {
             @Override
             public Void apply(@NonNull ShowcaseView input) {
                 input.setContentText("Нажмите на эту кнопку, чтобы вернуть предмет в инвентарь");
-                input.setTarget(new ViewTarget(interactBtn));
+                input.setTarget(new ViewTarget(returnItemToInventoryBtn));
+                return null;
+            }
+        }));
+        hintModule.replaceHint(R.id.first_item_hint, getARScreenHint(new Function<ShowcaseView, Void>() {
+            @Override
+            public Void apply(@NonNull ShowcaseView input) {
+                input.setContentText("Вы получили предмет. Для того, чтобы взять его в руки, перейдите в инвентарь и нажмите на карточку предмета");
+                input.setTarget(new ViewTarget(toInventoryBtn));
+                return null;
+            }
+        }));
+        hintModule.replaceHint(R.id.first_journal_message_hint, getARScreenHint(new Function<ShowcaseView, Void>() {
+            @Override
+            public Void apply(@NonNull ShowcaseView input) {
+                input.setContentText("Ваш журнал обновлен. Для того, чтобы посмотреть записи, нажмите на эту кнопку");
+                input.setTarget(new ViewTarget(toJournalBtn));
+                return null;
+            }
+        }));
+        hintModule.replaceHint(R.id.release_item_hint, getARScreenHint(new Function<ShowcaseView, Void>() {
+            @Override
+            public Void apply(@NonNull ShowcaseView input) {
+                input.setContentText("Вы держите предмет в руках. Если вы хотите применить его к виртуальному объекту, подойдите к нему и нажмите на кнопку действия. Если вы хотите положить его обратно в инвентарь, нажмите на указанную кнопку");
+                input.setTarget(new ViewTarget(returnItemToInventoryBtn));
                 return null;
             }
         }));
@@ -518,7 +531,6 @@ public class ARActivity extends AppCompatActivity {
             @Override
             public void setUpHint(final ShowcaseView sv) {
                 callable.apply(sv);
-                hideSnackbarMessage();
             }
 
             @Override
@@ -541,6 +553,7 @@ public class ARActivity extends AppCompatActivity {
                         repeatedItem.getCnt(), repeatedItem.getItem().getName()
                 )
         );
+        hintModule.showHintOnce(R.id.first_item_hint);
     }
 
     private void onTakeItemsResult(final InteractionResult result) {
@@ -557,6 +570,7 @@ public class ARActivity extends AppCompatActivity {
     private void onJournalUpdateResult(final InteractionResult result) {
         showMsg(result.getMsg());
         showMsg(getString(R.string.journal_updated_str));
+        hintModule.showHintOnce(R.id.first_journal_message_hint);
     }
 
     private void onMessageResult(final InteractionResult result) {
@@ -572,7 +586,7 @@ public class ARActivity extends AppCompatActivity {
     }
 
     private void showMsg(final String msg) {
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
     }
 
     private void selectFragment(Fragment fragment, String tag) {
