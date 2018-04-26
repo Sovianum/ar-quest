@@ -350,7 +350,7 @@ public class ARActivity extends AppCompatActivity {
             case QUEST_END:
                 showCongratulation();
                 Intent intent = new Intent(ARActivity.this, MainActivity.class);
-                intent.setAction(QuestFragment.TAG);
+                intent.setAction(QuestsListFragment.TAG);
                 startActivity(intent);
                 overridePendingTransition( R.anim.from_down_to_center, R.anim.from_center_to_up_anim);
                 finish();
@@ -393,7 +393,7 @@ public class ARActivity extends AppCompatActivity {
         intent.setAction(QuestFragment.TAG);
         startActivity(intent);
         overridePendingTransition( R.anim.from_down_to_center, R.anim.from_center_to_up_anim);
-        finish();
+        //finish();
     }
 
     private void initFragments() throws FileNotFoundException {
