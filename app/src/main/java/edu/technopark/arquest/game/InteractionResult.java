@@ -1,9 +1,9 @@
 package edu.technopark.arquest.game;
 
+import java.util.Collection;
+
 import edu.technopark.arquest.game.script.ScriptAction;
 import edu.technopark.arquest.game.slot.Slot;
-
-import java.util.Collection;
 
 public class InteractionResult {
     public enum Type {
@@ -17,6 +17,7 @@ public class InteractionResult {
         HINT,
         NEXT_PURPOSE,
         ERROR,
+        LOSE
     }
 
     public static InteractionResult newItemsResult(Slot.RepeatedItem items) {
@@ -57,6 +58,10 @@ public class InteractionResult {
 
     public static InteractionResult questEndResult() {
         return new InteractionResult(Type.QUEST_END);
+    }
+
+    public static InteractionResult questLoseResult() {
+        return new InteractionResult(Type.LOSE);
     }
 
     public static InteractionResult nextPurposeResult(String msg) {

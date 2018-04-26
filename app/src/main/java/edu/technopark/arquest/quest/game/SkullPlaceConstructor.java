@@ -11,7 +11,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import edu.technopark.arquest.R;
 import edu.technopark.arquest.game.InteractionResult;
 import edu.technopark.arquest.game.InteractiveObject;
 import edu.technopark.arquest.game.Item;
@@ -323,7 +322,8 @@ public class SkullPlaceConstructor {
                         Arrays.asList(
                                 InteractionResult.journalRecordResult("Череп сказал: Не, так дело не пойдет"),
                                 InteractionResult.nextPurposeResult("Больше делать нечего. Приду в другой раз"),
-                                InteractionResult.questEndResult(),
+                                InteractionResult.questLoseResult(),
+                                //InteractionResult.questEndResult(),
                                 InteractionResult.transitionsResult(
                                         Collections.singletonList(
                                                 new ScriptAction.StateTransition(skull.getName(), 8)
@@ -404,8 +404,13 @@ public class SkullPlaceConstructor {
                 new ScriptAction(
                         1,
                         Collections.singletonList(
-                                InteractionResult.messageResult("Череп сказал: Не, я так не играю.")
+                                InteractionResult.messageResult("Череп сказал: Не, я так не играю.")//,
+                                //InteractionResult.questLoseResult()
                         )
+                        //Arrays.asList(
+                        //        InteractionResult.messageResult("Череп сказал: Не, я так не играю."),
+                        //        InteractionResult.questLoseResult()
+                        //)
                 )
         ));
         state8.setConditions(ActionCondition.makeConditionMap(

@@ -349,11 +349,9 @@ public class ARActivity extends AppCompatActivity {
                 break;
             case QUEST_END:
                 showCongratulation();
-                Intent intent = new Intent(ARActivity.this, MainActivity.class);
-                intent.setAction(QuestsListFragment.TAG);
-                startActivity(intent);
-                overridePendingTransition( R.anim.from_down_to_center, R.anim.from_center_to_up_anim);
-                finish();
+                break;
+            case LOSE:
+                showDefeat();
                 break;
         }
     }
@@ -695,7 +693,7 @@ public class ARActivity extends AppCompatActivity {
 
     private void showCongratulation() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(R.string.congrat_msg)
+        builder.setMessage(R.string.congrat_msg_skull)
                 .setTitle(R.string.congrat_title)
                 .setCancelable(false)
                 .setPositiveButton(android.R.string.yes,
@@ -706,6 +704,33 @@ public class ARActivity extends AppCompatActivity {
                                 gameModule.getCurrentInventory().clear();
                                 gameModule.getCurrentJournal().clear();
                                 gameModule.resetCurrentQuest();
+                                Intent intent = new Intent(ARActivity.this, MainActivity.class);
+                                intent.setAction(QuestsListFragment.TAG);
+                                startActivity(intent);
+
+                            }
+                        });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    private void showDefeat() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.defeat_msg_skull)
+                .setTitle(R.string.defeat_title)
+                .setCancelable(false)
+                .setPositiveButton(android.R.string.yes,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                                gameModule.getPlayer().release();
+                                gameModule.getCurrentInventory().clear();
+                                gameModule.getCurrentJournal().clear();
+                                gameModule.resetCurrentQuest();
+                                Intent intent = new Intent(ARActivity.this, MainActivity.class);
+                                intent.setAction(QuestsListFragment.TAG);
+                                startActivity(intent);
+
                             }
                         });
         AlertDialog alertDialog = builder.create();
