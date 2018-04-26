@@ -1,6 +1,7 @@
 package edu.technopark.arquest.quest;
 
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -10,12 +11,12 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.animation.AlphaAnimation;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -346,6 +347,14 @@ public class ARActivity extends AppCompatActivity {
             case NEXT_PURPOSE:
                 onNextPurposeResult(interactionResult);
                 break;
+            case QUEST_END:
+                showCongratulation();
+                Intent intent = new Intent(ARActivity.this, MainActivity.class);
+                intent.setAction(QuestFragment.TAG);
+                startActivity(intent);
+                overridePendingTransition( R.anim.from_down_to_center, R.anim.from_center_to_up_anim);
+                finish();
+                break;
         }
     }
 
@@ -615,6 +624,7 @@ public class ARActivity extends AppCompatActivity {
     private void changeToFragmentLayout() {
         findViewById(R.id.ar_buttons_layout).setVisibility(View.GONE);
         findViewById(R.id.ar_controls_layout).setVisibility(View.GONE);
+        findViewById(R.id.ar_interact_button_layout).setVisibility(View.GONE);
         findViewById(R.id.return_item_layout).setVisibility(View.GONE);
         findViewById(R.id.ar_fragment_container).setVisibility(View.VISIBLE);
     }
@@ -623,6 +633,7 @@ public class ARActivity extends AppCompatActivity {
         findViewById(R.id.ar_buttons_layout).setVisibility(View.VISIBLE);
         findViewById(R.id.ar_controls_layout).setVisibility(View.VISIBLE);
         findViewById(R.id.return_item_layout).setVisibility(View.VISIBLE);
+        findViewById(R.id.ar_interact_button_layout).setVisibility(View.VISIBLE);
         findViewById(R.id.ar_fragment_container).setVisibility(View.GONE);
     }
 
@@ -680,6 +691,25 @@ public class ARActivity extends AppCompatActivity {
             interactHelpTextView.setBackground(getResources().getDrawable(
                     R.drawable.round_text_view_disable_style, this.getTheme()));
         }
+    }
+
+    private void showCongratulation() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.congrat_msg)
+                .setTitle(R.string.congrat_title)
+                .setCancelable(false)
+                .setPositiveButton(android.R.string.yes,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                                gameModule.getPlayer().release();
+                                gameModule.getCurrentInventory().clear();
+                                gameModule.getCurrentJournal().clear();
+                                gameModule.resetCurrentQuest();
+                            }
+                        });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
     }
 
 }

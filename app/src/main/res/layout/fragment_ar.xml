@@ -39,6 +39,7 @@
         android:layout_centerInParent="true"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
+        android:padding="@dimen/ar_button_padding"
         android:background="@null"
         android:src = "@drawable/ic_clear_black_24dp"
         android:layout_marginTop="20dp"/>
@@ -127,38 +128,6 @@
                 android:orientation="vertical">
 
                 <ImageButton
-                    android:id="@+id/interact_btn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/round_button_style"
-                    android:gravity="center_horizontal"
-                    android:padding="@dimen/ar_button_padding"
-                    android:src="@drawable/ic_touch_app_black_24dp" />
-
-                <Space
-                    android:layout_width="1dp"
-                    android:layout_height="@dimen/ar_button_help_text_space_size" />
-
-                <TextView
-                    android:id="@+id/interact_help_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:background="@drawable/round_text_view_style"
-                    android:gravity="center_horizontal"
-                    android:text="@string/interact_help_str"
-                    android:textColor="@color/helpTextColor"
-                    android:visibility="gone" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center_horizontal"
-                android:orientation="vertical">
-
-                <ImageButton
                     android:id="@+id/journal_btn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -236,5 +205,41 @@
             />
 
     </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ar_interact_button_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="60dp"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <ImageButton
+            android:id="@+id/interact_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/round_button_style"
+            android:gravity="center_horizontal"
+            android:padding="@dimen/ar_button_padding"
+            android:src="@drawable/ic_touch_app_black_24dp" />
+
+        <Space
+            android:layout_width="1dp"
+            android:layout_height="@dimen/ar_button_help_text_space_size" />
+
+        <TextView
+            android:id="@+id/interact_help_text"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:background="@drawable/round_text_view_style"
+            android:gravity="center_horizontal"
+            android:text="@string/interact_help_str"
+            android:textColor="@color/helpTextColor"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
 
 </RelativeLayout>
