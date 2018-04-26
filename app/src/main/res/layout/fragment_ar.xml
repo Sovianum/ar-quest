@@ -34,25 +34,30 @@
 
     <ImageButton
         android:id="@+id/close_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/ar_button_control_size"
+        android:layout_height="@dimen/ar_button_control_size"
         android:layout_centerInParent="true"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
-        android:padding="@dimen/ar_button_padding"
+        android:adjustViewBounds="true"
+        android:padding="@dimen/ar_button_control_padding"
+        android:scaleType="fitCenter"
         android:background="@null"
         android:src = "@drawable/ic_clear_black_24dp"
-        android:layout_marginTop="20dp"/>
+        android:layout_marginTop="20dp"
+        />
 
     <ImageButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:id="@+id/help_btn"
-        android:src="@drawable/ic_help_outline_black_24dp"
-        android:background="@null"
+        android:layout_width="@dimen/ar_button_control_size"
+        android:layout_height="@dimen/ar_button_control_size"
         android:gravity="center_horizontal"
-        android:padding="@dimen/ar_button_padding"
         android:layout_marginBottom="30dp"
+        android:adjustViewBounds="true"
+        android:padding="@dimen/ar_button_control_padding"
+        android:scaleType="fitCenter"
+        android:background="@null"
+        android:src="@drawable/ic_help_outline_black_24dp"
         android:layout_marginTop="20dp"/>
     </RelativeLayout>
 
@@ -172,7 +177,7 @@
         android:orientation="vertical">
 
         <Space
-            android:layout_width="115dp"
+            android:layout_width="@dimen/ar_button_return_item_margin_left"
             android:layout_height="0dp">
         </Space>
 
