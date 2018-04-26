@@ -390,10 +390,11 @@ public class ARActivity extends AppCompatActivity {
 
     @OnClick(R.id.close_btn)
     public void onCloseClickListener() {
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.setAction(QuestFragment.TAG);
-        startActivity(intent);
-        overridePendingTransition( R.anim.from_down_to_center, R.anim.from_center_to_up_anim);
+        showCancelAlert();
+        //Intent intent = new Intent(this, MainActivity.class);
+        //intent.setAction(QuestFragment.TAG);
+        //startActivity(intent);
+        //overridePendingTransition( R.anim.from_down_to_center, R.anim.from_center_to_up_anim);
         //finish();
     }
 
@@ -721,6 +722,59 @@ public class ARActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(R.string.defeat_msg_skull)
                 .setTitle(R.string.defeat_title)
+                .setCancelable(false)
+                .setPositiveButton(android.R.string.yes,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                                gameModule.getPlayer().release();
+                                gameModule.getCurrentInventory().clear();
+                                gameModule.getCurrentJournal().clear();
+                                gameModule.resetCurrentQuest();
+                                Intent intent = new Intent(ARActivity.this, MainActivity.class);
+                                intent.setAction(QuestsListFragment.TAG);
+                                startActivity(intent);
+
+                            }
+                        });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    private void showCancelAlert() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.cancel_quest_message)
+                .setTitle(R.string.cancel_quest_title)
+                .setCancelable(true)
+                .setPositiveButton(android.R.string.yes,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                                gameModule.getPlayer().release();
+                                gameModule.getCurrentInventory().clear();
+                                gameModule.getCurrentJournal().clear();
+                                gameModule.resetCurrentQuest();
+                                Intent intent = new Intent(ARActivity.this, MainActivity.class);
+                                intent.setAction(QuestsListFragment.TAG);
+                                startActivity(intent);
+                            }
+                        });
+        builder.setNegativeButton(android.R.string.no,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+
+
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    private void showCancel() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.congrat_msg_skull)
+                .setTitle(R.string.congrat_title)
                 .setCancelable(false)
                 .setPositiveButton(android.R.string.yes,
                         new DialogInterface.OnClickListener() {
