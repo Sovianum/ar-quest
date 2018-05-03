@@ -17,6 +17,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -61,6 +63,7 @@ import edu.technopark.arquest.quest.journal.JournalFragment;
 import edu.technopark.arquest.quest.place.PlaceFragment;
 import edu.technopark.arquest.quest.quests.QuestsListFragment;
 import edu.technopark.arquest.settings.SettingsFragment;
+import edu.technopark.arquest.ui.ButtonBounceInterpolator;
 
 public class ARActivity extends AppCompatActivity {
     public static final String TAG = ARActivity.class.getSimpleName();
@@ -396,6 +399,12 @@ public class ARActivity extends AppCompatActivity {
         //startActivity(intent);
         //overridePendingTransition( R.anim.from_down_to_center, R.anim.from_center_to_up_anim);
         //finish();
+    }
+
+    public void bounceButton(View view) {
+        final Animation bounceAnim = AnimationUtils.loadAnimation(this, R.anim.bounce_button);
+        bounceAnim.setInterpolator(new ButtonBounceInterpolator(0.2, 20));
+        view.startAnimation(bounceAnim);
     }
 
     private void initFragments() throws FileNotFoundException {
