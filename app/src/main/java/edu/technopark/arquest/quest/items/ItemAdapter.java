@@ -1,6 +1,8 @@
 package edu.technopark.arquest.quest.items;
 
 import android.content.Context;
+import android.content.res.AssetManager;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -11,20 +13,23 @@ import android.widget.TextView;
 
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
-import edu.technopark.arquest.App;
-import edu.technopark.arquest.HintModule;
-import edu.technopark.arquest.R;
-import edu.technopark.arquest.game.Item;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import edu.technopark.arquest.App;
+import edu.technopark.arquest.HintModule;
+import edu.technopark.arquest.R;
+import edu.technopark.arquest.game.Item;
 
 public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private List<Item> items;
+    AssetManager assets;
 
     @Inject
     HintModule hintModule;
@@ -81,6 +86,7 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         App.getAppComponent().inject(this);
         Context context = parent.getContext();
+        assets = context.getAssets();
         int CARD_ID = R.layout.item_card;
         View view = LayoutInflater.from(context).inflate(CARD_ID, parent, false);
         return new ItemAdapter.CardViewHolder(view);
@@ -93,7 +99,14 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         final CardViewHolder cardHolder = (CardViewHolder) holder;
         cardHolder.nameView.setText(item.getName());
         cardHolder.descriptionView.setText(item.getDescription());
-        // todo add image loading
+        try {
+            InputStream ims = assets.open(item.getAvatar());
+            Drawable d = Drawable.createFromStream(ims, null);
+            cardHolder.imageView.setImageDrawable(d);
+        }
+        catch(IOException ex) {
+
+        }
         cardHolder.bind(item, onItemClickListener);
     }
 
