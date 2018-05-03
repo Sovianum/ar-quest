@@ -249,11 +249,10 @@ public class GameModule {
             return;
         }
         Node root = scene.getRootNode();
+        if (previousSceneOrigin == null) {
+            previousSceneOrigin = new Vector(0, 0, 0);
+        }
         for (Object3D object3D : place.getAll()) {
-            if (previousSceneOrigin == null) {
-                previousSceneOrigin = new Vector(0, 0, 0);
-            }
-            object3D.setPosition(object3D.getPositionRealtime().subtract(previousSceneOrigin).add(origin));
             object3D.removeFromParentNode();
 
             PhysicsBody body = object3D.getPhysicsBody();
@@ -266,6 +265,7 @@ public class GameModule {
                 object3D.initPhysicsBody(type, mass, shape);
             }
             root.addChildNode(object3D);
+//            object3D.setPosition(object3D.getPositionRealtime().subtract(previousSceneOrigin).add(origin));
         }
         previousSceneOrigin = origin;
 

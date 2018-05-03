@@ -57,6 +57,7 @@ import edu.technopark.arquest.game.Item;
 import edu.technopark.arquest.game.Place;
 import edu.technopark.arquest.game.slot.Slot;
 import edu.technopark.arquest.model.Quest;
+import edu.technopark.arquest.quest.game.QuestModule;
 import edu.technopark.arquest.quest.items.ItemAdapter;
 import edu.technopark.arquest.quest.items.ItemsListFragment;
 import edu.technopark.arquest.quest.journal.JournalFragment;
@@ -149,6 +150,9 @@ public class ARActivity extends AppCompatActivity {
     GameModule gameModule;
 
     @Inject
+    QuestModule questModule;
+
+    @Inject
     HintModule hintModule;
 
     ContinuousAction snackbarAction = new ContinuousAction(
@@ -164,8 +168,24 @@ public class ARActivity extends AppCompatActivity {
                 public void run() {
                     Place place = gameModule.getCurrentPlace();
                     if (place == null) {
+                        Quest quest = gameModule.getCurrentQuest();
+                        if (quest == null) {
+                            quest = questModule.getQuests().get(0);
+                            if (quest == null) {
+                                setPurpose("Квест не найден");
+                                return;
+                            }
+                            gameModule.setCurrentQuest(quest);
+                        }
+                        Place currentPlace = gameModule.getCurrentQuest().getPlaceMap().values().iterator().next();
+                        gameModule.setCurrentPlace(currentPlace);
+                    }
+                    place = gameModule.getCurrentPlace();
+                    if (place == null) {
+                        setPurpose("Сцена не найдена");
                         return;
                     }
+
                     String currPurpose = place.getStartPurpose();
                     if (currPurpose != null) {
                         setPurpose(currPurpose);
