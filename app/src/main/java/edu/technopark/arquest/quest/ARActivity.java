@@ -112,9 +112,6 @@ public class ARActivity extends AppCompatActivity {
 
     ViroViewARCore viroView;
 
-    @BindView(R.id.collision_txt)
-    TextView collisionText;
-
     @BindView(R.id.inventory_btn)
     ImageButton toInventoryBtn;
 
@@ -365,6 +362,8 @@ public class ARActivity extends AppCompatActivity {
 
     @OnClick(R.id.interact_btn)
     void interact() {
+        bounceButton(toJournalBtn);
+        bounceButton(toInventoryBtn);
         gameModule.interactLastCollided();
     }
 
