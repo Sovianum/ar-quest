@@ -188,6 +188,7 @@ public class ARActivity extends AppCompatActivity {
             Toast.makeText(ARActivity.this, "Вы выбрали: " + item.getName(), Toast.LENGTH_SHORT).show();
             //EventBus.getDefault().post();
             showReturnItemViews();
+            changeToActivityLayout();
             //TODO action to choose element
         }
     };
