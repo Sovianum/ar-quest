@@ -334,6 +334,7 @@ public class ARActivity extends AppCompatActivity {
         switch (interactionResult.getType()) {
             case NEW_ITEMS:
                 onNewItemsResult(interactionResult);
+                bounceButton(toInventoryBtn);
                 break;
             case TAKE_ITEMS:
                 onTakeItemsResult(interactionResult);
@@ -341,6 +342,7 @@ public class ARActivity extends AppCompatActivity {
                 break;
             case JOURNAL_RECORD:
                 onJournalUpdateResult(interactionResult);
+                bounceButton(toJournalBtn);
                 break;
             case MESSAGE:
                 onMessageResult(interactionResult);
@@ -362,8 +364,6 @@ public class ARActivity extends AppCompatActivity {
 
     @OnClick(R.id.interact_btn)
     void interact() {
-        bounceButton(toJournalBtn);
-        bounceButton(toInventoryBtn);
         gameModule.interactLastCollided();
     }
 
