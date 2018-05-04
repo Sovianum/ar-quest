@@ -1,11 +1,10 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/fragment_ar"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".quest.ARActivity">
-
-
 
 
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -14,6 +13,16 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:background="@color/colorARFragmentBackgroundLayout">
+
+        <android.support.design.widget.BottomNavigationView
+            android:id="@+id/bottom_navigation_ar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            app:itemBackground="@color/bottomNavBarColor"
+            app:itemIconTint="@color/bottom_nav_color_selector"
+            app:itemTextColor="@color/bottom_nav_color_selector"
+            app:menu="@menu/bottom_navigation_ar" />
 
         <include layout="@layout/toolbar" />
     </RelativeLayout>

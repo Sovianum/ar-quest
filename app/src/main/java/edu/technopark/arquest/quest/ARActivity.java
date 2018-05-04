@@ -3,10 +3,13 @@ package edu.technopark.arquest.quest;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BaseTransientBottomBar;
+import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -14,6 +17,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -46,7 +50,9 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import edu.technopark.arquest.App;
+import edu.technopark.arquest.BottomNavigationViewHelper;
 import edu.technopark.arquest.GameModule;
+import edu.technopark.arquest.GeolocationService;
 import edu.technopark.arquest.HintModule;
 import edu.technopark.arquest.MainActivity;
 import edu.technopark.arquest.PermissionHelper;
@@ -55,8 +61,10 @@ import edu.technopark.arquest.common.ContinuousAction;
 import edu.technopark.arquest.game.InteractionResult;
 import edu.technopark.arquest.game.Item;
 import edu.technopark.arquest.game.Place;
+import edu.technopark.arquest.game.journal.Journal;
 import edu.technopark.arquest.game.slot.Slot;
 import edu.technopark.arquest.model.Quest;
+import edu.technopark.arquest.quest.game.ActorPlayer;
 import edu.technopark.arquest.quest.game.QuestModule;
 import edu.technopark.arquest.quest.items.ItemAdapter;
 import edu.technopark.arquest.quest.items.ItemsListFragment;
@@ -146,6 +154,9 @@ public class ARActivity extends AppCompatActivity {
     @BindView(R.id.toolbar_actionbar)
     Toolbar toolBar;
 
+    @BindView(R.id.bottom_navigation_ar)
+    BottomNavigationView bottomNavigationView;
+
     @Inject
     GameModule gameModule;
 
@@ -154,6 +165,104 @@ public class ARActivity extends AppCompatActivity {
 
     @Inject
     HintModule hintModule;
+
+    private QuestsListFragment.OnQuestReactor showQuestInfoCallback = new QuestsListFragment.OnQuestReactor() {
+        @Override
+        public void onQuestReact(Quest quest) {
+            goToCurrentQuest();
+        }
+
+        @Override
+        public void onDowloadReact(Quest quest) {
+
+        }
+    };
+
+    private QuestsListFragment.OnQuestReactor startQuestCallback = new QuestsListFragment.OnQuestReactor() {
+        @Override
+        public void onQuestReact(final Quest quest) {
+            final String msg;
+            boolean needLoad;
+            Quest currQuest = gameModule.getCurrentQuest();
+
+            if (quest == null) {
+                msg = "Попытка загрузить null-квест";
+                needLoad = false;
+            } else if (currQuest == null) {
+                needLoad = true;
+                msg = "Вы выбрали квест " + quest.getTitle();
+            } else {
+                needLoad = quest.getId() != currQuest.getId();
+                msg = needLoad ? "Вы выбрали квест " + quest.getTitle() : "Вы уже играете в этот квест";
+            }
+            if (needLoad) {
+                Slot currInventory = gameModule.getCurrentInventory();
+                if (currInventory != null) {
+                    currInventory.clear();
+                }
+                ActorPlayer player = gameModule.getPlayer();
+                if (player != null) {
+                    player.release();
+                }
+                Journal<String> journal = gameModule.getCurrentJournal();
+                if (journal != null) {
+                    journal.clear();
+                }
+
+                gameModule.setCurrentQuest(quest);
+                selectFragment(questFragment, QuestFragment.TAG); //add help?
+            }
+
+            ARActivity.this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(
+                            ARActivity.this,
+                            msg,
+                            Toast.LENGTH_SHORT
+                    ).show();
+                }
+            });
+        }
+
+        @Override
+        public void onDowloadReact(final Quest quest) {
+            final String msg;
+
+            if (quest == null) {
+                msg = "Попытка загрузить null-квест";
+            } else {
+                msg = "Вы загружаете квест " + quest.getTitle();
+                //startDownload(quest.getId());
+            }
+
+            ARActivity.this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(
+                            ARActivity.this,
+                            msg,
+                            Toast.LENGTH_SHORT
+                    ).show();
+                }
+            });
+        }
+    };
+
+    private View.OnClickListener onARModeBtnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            goAR();
+        }
+    };
+
+    private View.OnClickListener onCancelQuestClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            showCancelAlert();
+        }
+    };
+
 
     ContinuousAction snackbarAction = new ContinuousAction(
             new Runnable() {
@@ -210,9 +319,42 @@ public class ARActivity extends AppCompatActivity {
         }
     };
 
+    private AlertDialog alertDialog;
+
+    private BottomNavigationView.OnNavigationItemSelectedListener onNavigationItemSelectedListener =
+            new BottomNavigationView.OnNavigationItemSelectedListener() {
+                @Override
+                public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+
+                    switch (item.getItemId()) {
+                        case R.id.action_quests:
+                            selectFragment(questsListFragment, QuestsListFragment.TAG);
+                            break;
+                        case R.id.action_current_quest:
+                            goToCurrentQuest();
+                            break;
+                        case R.id.action_ar:
+                            goAR();
+                            break;
+                        case R.id.action_settings:
+                            selectFragment(settingsFragment, SettingsFragment.TAG);
+                            break;
+                    }
+                    return false;
+                }
+            };
+
+    private boolean showTutorialSuggestion = true;
+
     private Snackbar messageSnackbar;
     private ItemsListFragment itemsListFragment;
     private JournalFragment journalFragment;
+    private QuestsListFragment questsListFragment;
+    private QuestFragment questFragment;
+    private PlaceFragment placeFragment;
+    private SettingsFragment settingsFragment;
+    private boolean fromAR = false;
+    private boolean inAR = false;
 
     public ARActivity() {
         super();
@@ -226,6 +368,7 @@ public class ARActivity extends AppCompatActivity {
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         snackbarAction.startIfNotRunning();
+        //BottomNavigationViewHelper.disableShiftMode(bottomNavigationView);
 
         if (gameModule.isWithAR()) {
             viroView = new ViroViewARCore(this, new ViroViewARCore.StartupListener() {
@@ -252,8 +395,17 @@ public class ARActivity extends AppCompatActivity {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        ButterKnife.bind(this);
+        setUpQuestFragment();
+
+
+        questsListFragment = new QuestsListFragment();
+        questsListFragment.setQuestCardClickedListener(showQuestInfoCallback);
+        questsListFragment.setStartQuestCallback(startQuestCallback);
+        settingsFragment = new SettingsFragment();
+
         setSupportActionBar(toolBar);
+        ButterKnife.bind(this);
+
         changeToActivityLayout();
         setUpHints();
     }
@@ -262,6 +414,11 @@ public class ARActivity extends AppCompatActivity {
     public void onStart() {
         super.onStart();
         if (viroView != null) viroView.onActivityStarted(this);
+        changeToFragmentLayout();
+        selectFragment(questsListFragment, QuestsListFragment.TAG);
+        setToolBarByFragment(QuestsListFragment.TAG);
+        bottomNavigationView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener);
+        BottomNavigationViewHelper.disableShiftMode(bottomNavigationView);
         EventBus.getDefault().register(this);
         hintModule.setActivity(this);
     }
@@ -327,12 +484,28 @@ public class ARActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (getSupportFragmentManager().getBackStackEntryCount() >= 1) {
-            changeToActivityLayout();
-        }
-        super.onBackPressed();
-        if (returnItemToInventoryBtn.getVisibility() == View.VISIBLE) {
-            hintModule.showHintOnce(R.id.release_item_hint);
+        if (inAR) {
+            changeToFragmentLayout();
+            selectFragment(questFragment, QuestFragment.TAG);
+        } else {
+            if (getSupportFragmentManager().getBackStackEntryCount() > 1) {
+                if (fromAR) {
+                    changeToActivityLayout();
+                    fromAR = false;
+                }
+                super.onBackPressed();
+                final String tag = getSupportFragmentManager().getBackStackEntryAt(getSupportFragmentManager()
+                        .getBackStackEntryCount() - 1).getName();
+                setToolBarByFragment(tag);
+                setBottomNavItemColor(tag);
+                showOrHideBars(tag);
+                if (returnItemToInventoryBtn.getVisibility() == View.VISIBLE) {
+                    hintModule.showHintOnce(R.id.release_item_hint);
+                }
+            } else {
+                super.onBackPressed();
+                super.onBackPressed();
+            }
         }
     }
 
@@ -396,13 +569,13 @@ public class ARActivity extends AppCompatActivity {
     @OnClick(R.id.inventory_btn)
     void toInventory() {
         changeToFragmentLayout();
-        selectFragment(itemsListFragment, ItemsListFragment.TAG);
+        selectFragmentFromAr(itemsListFragment, ItemsListFragment.TAG);
     }
 
     @OnClick(R.id.journal_btn)
     void toJournal() {
         changeToFragmentLayout();
-        selectFragment(journalFragment, JournalFragment.TAG);
+        selectFragmentFromAr(journalFragment, JournalFragment.TAG);
     }
 
 
@@ -492,6 +665,18 @@ public class ARActivity extends AppCompatActivity {
         toInventoryBtn.setVisibility(View.GONE);
         toJournalBtn.setVisibility(View.GONE);
         interactBtn.setVisibility(View.GONE);
+    }
+
+    private void setUpQuestFragment() {
+        placeFragment = new PlaceFragment();
+
+        questFragment = new QuestFragment();
+        questFragment.setOnARModeBtnClickListener(onARModeBtnClickListener);
+        questFragment.setOnCancelBtnClickListener(onCancelQuestClickListener);
+        questFragment.setOnJournalClickListener(getSelectFragmentListener(journalFragment));
+        questFragment.setOnItemClickListener(chooseItemOnClickListener);
+        questFragment.setOnPlacesClickListener(getSelectFragmentListener(placeFragment));
+        questFragment.setOnInventoryClickListener(getSelectFragmentListener(itemsListFragment));
     }
 
     private void setUpHints() {
@@ -629,7 +814,13 @@ public class ARActivity extends AppCompatActivity {
         Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
     }
 
+    private void selectFragmentFromAr(Fragment fragment, String tag) {
+        selectFragment(fragment, tag);
+        fromAR = true;
+    }
+
     private void selectFragment(Fragment fragment, String tag) {
+        showOrHideBars(tag);
         FragmentManager fragmentManager = getSupportFragmentManager();
         int index = fragmentManager.getBackStackEntryCount() - 1;
 
@@ -650,6 +841,22 @@ public class ARActivity extends AppCompatActivity {
         fragmentTransaction.commit();
         fragmentManager.executePendingTransactions();
         setToolBarByFragment(tag);
+        setBottomNavItemColor(tag);
+    }
+
+    private void showOrHideBars(String tag) {
+        if (tag.equals(PlaceFragment.TAG) || tag.equals(JournalFragment.TAG)
+                || tag.equals(ItemsListFragment.TAG)) {
+            bottomNavigationView.setVisibility(View.GONE);
+        } else {
+            bottomNavigationView.setVisibility(View.VISIBLE);
+            toolBar.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void changeToFragmentLayoutFromAr() {
+        changeToFragmentLayout();
+        fromAR = true;
     }
 
     private void changeToFragmentLayout() {
@@ -658,6 +865,8 @@ public class ARActivity extends AppCompatActivity {
         findViewById(R.id.ar_interact_button_layout).setVisibility(View.GONE);
         findViewById(R.id.return_item_layout).setVisibility(View.GONE);
         findViewById(R.id.ar_fragment_container).setVisibility(View.VISIBLE);
+        messageSnackbar.getView().setVisibility(View.GONE);
+        inAR = false;
     }
 
     private void changeToActivityLayout() {
@@ -666,6 +875,8 @@ public class ARActivity extends AppCompatActivity {
         findViewById(R.id.return_item_layout).setVisibility(View.VISIBLE);
         findViewById(R.id.ar_interact_button_layout).setVisibility(View.VISIBLE);
         findViewById(R.id.ar_fragment_container).setVisibility(View.GONE);
+        messageSnackbar.getView().setVisibility(View.VISIBLE);
+        inAR = true;
     }
 
     private static boolean isFragmentInBackstack(final FragmentManager fragmentManager, final String fragmentTagName) {
@@ -676,6 +887,33 @@ public class ARActivity extends AppCompatActivity {
         }
         return false;
     }
+
+    private void setBottomNavItemColor(String fragmentTag) {
+        bottomNavigationView.setOnNavigationItemSelectedListener(null);
+        if (QuestsListFragment.TAG.equals(fragmentTag)) {
+            bottomNavigationView.setSelectedItemId(R.id.action_quests);
+
+        } else if (QuestFragment.TAG.equals(fragmentTag)) {
+            bottomNavigationView.setSelectedItemId(R.id.action_current_quest);
+
+        } else if (JournalFragment.TAG.equals(fragmentTag)) {
+            bottomNavigationView.setSelectedItemId(R.id.action_current_quest);
+
+        } else if (ItemsListFragment.TAG.equals(fragmentTag)) {
+            bottomNavigationView.setSelectedItemId(R.id.action_current_quest);
+
+        } else if (PlaceFragment.TAG.equals(fragmentTag)) {
+            bottomNavigationView.setSelectedItemId(R.id.action_current_quest);
+
+        } else if (ARActivity.TAG.equals(fragmentTag)) {
+            bottomNavigationView.setSelectedItemId(R.id.action_ar);
+
+        } else if (SettingsFragment.TAG.equals(fragmentTag)) {
+            bottomNavigationView.setSelectedItemId(R.id.action_settings);
+        }
+        bottomNavigationView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener);
+    }
+
 
     private void setToolBarByFragment(String fragmentTag) {
         if (QuestsListFragment.TAG.equals(fragmentTag)) {
@@ -783,9 +1021,11 @@ public class ARActivity extends AppCompatActivity {
                                 gameModule.getCurrentInventory().clear();
                                 gameModule.getCurrentJournal().clear();
                                 gameModule.resetCurrentQuest();
-                                Intent intent = new Intent(ARActivity.this, MainActivity.class);
-                                intent.setAction(QuestsListFragment.TAG);
-                                startActivity(intent);
+                                changeToFragmentLayout();
+                                selectFragment(questsListFragment, QuestsListFragment.TAG);
+                                //Intent intent = new Intent(ARActivity.this, MainActivity.class);
+                                //intent.setAction(QuestsListFragment.TAG);
+                                //startActivity(intent);
                             }
                         });
         builder.setNegativeButton(android.R.string.no,
@@ -822,5 +1062,46 @@ public class ARActivity extends AppCompatActivity {
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
     }
+
+    public void goToCurrentQuest() {
+        if (gameModule.getCurrentQuest() == null) {
+            Toast.makeText(this, "Сначала выбери квест", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Place currentPlace = gameModule.getCurrentQuest().getPlaceMap().values().iterator().next();
+        gameModule.setCurrentPlace(currentPlace);
+        startService(new Intent(this, GeolocationService.class).putExtra(getString(R.string.foreground),
+                isForegroundTracking()));
+        selectFragment(questFragment, QuestFragment.TAG);
+    }
+
+    private boolean isForegroundTracking() {
+        SharedPreferences prefs = PreferenceManager
+                .getDefaultSharedPreferences(getApplicationContext());
+        return prefs.getBoolean(getString(R.string.foreground_tracking), true);
+    }
+
+    public void goAR() {
+        if (gameModule.getCurrentQuest() == null) {
+            Toast.makeText(this, "Сначала выбери квест", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Place currentPlace = gameModule.getCurrentQuest().getPlaceMap().values().iterator().next();
+        gameModule.setCurrentPlace(currentPlace);
+        changeToActivityLayout();
+    }
+
+    private <F extends Fragment> View.OnClickListener getSelectFragmentListener(final F fragment) {
+        if (fragment == null) {
+            throw new RuntimeException("tried to register null fragment");
+        }
+        return new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                selectFragment(fragment, fragment.getClass().getSimpleName());
+            }
+        };
+    }
+
 
 }
