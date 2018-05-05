@@ -821,6 +821,7 @@ public class ARActivity extends AppCompatActivity {
     private void onJournalUpdateResult(final InteractionResult result) {
         showMsg(result.getMsg());
         showMsg(getString(R.string.journal_updated_str));
+        showMsgAlert(result.getMsg());
         hintModule.showHintOnce(R.id.first_journal_message_hint);
     }
 
@@ -838,6 +839,23 @@ public class ARActivity extends AppCompatActivity {
 
     private void showMsg(final String msg) {
         Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+    }
+
+    private void showMsgAlert(final String msg) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(msg)
+                .setTitle(R.string.alert_last_message_title)
+                .setCancelable(true)
+                .setNeutralButton(android.R.string.ok,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                                checkAndRequestPermissions();
+                            }
+                        });
+
+        alertDialog = builder.create();
+        alertDialog.show();
     }
 
     private void selectFragmentFromAr(Fragment fragment, String tag) {

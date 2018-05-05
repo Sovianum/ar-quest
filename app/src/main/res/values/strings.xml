@@ -119,5 +119,7 @@
     <string name="journal_empty_text">Нет событий</string>
     <string name="checkpoints_empty_text">Места не найдены</string>
 
+    <string name="alert_last_message_title">Последнее событие</string>
+
 
 </resources>
