@@ -420,6 +420,19 @@ public class ARActivity extends AppCompatActivity {
         bottomNavigationView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener);
         BottomNavigationViewHelper.disableShiftMode(bottomNavigationView);
         EventBus.getDefault().register(this);
+        showGreeting();
+        if (!isFirstLaunch()) {
+//            showTutorialSuggestion = false;
+        }
+
+        if (showTutorialSuggestion && PermissionHelper.hasPermissions(this)) {
+            if (showTutorialSuggestion && !hintModule.getCallerSet().contains(TAG)) {
+                showTutorialSuggestion();
+                showTutorialSuggestion = false;
+                hintModule.getCallerSet().add(TAG);
+            }
+        }
+        setFirstLaunch(false);
         hintModule.setActivity(this);
     }
 
@@ -431,7 +444,7 @@ public class ARActivity extends AppCompatActivity {
         if (PermissionHelper.hasPermissions(this)) {
             if (viroView != null) viroView.onActivityResumed(this);
         } else {
-            PermissionHelper.requestPermissions(this);
+            //PermissionHelper.requestPermissions(this);
         }
 
         if (gameModule.isWithAR()) {
@@ -473,12 +486,25 @@ public class ARActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
+    //@Override
+    //public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    //    if (!PermissionHelper.hasPermissions(this)) {
+    //        Toast.makeText(this, "Camera permission is needed to run this application", Toast.LENGTH_LONG)
+    //                .show();
+    //        finish();
+    //    }
+    //}
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (!PermissionHelper.hasPermissions(this)) {
-            Toast.makeText(this, "Camera permission is needed to run this application", Toast.LENGTH_LONG)
-                    .show();
-            finish();
+            showNoPermission();
+        } else {
+            if (showTutorialSuggestion && !hintModule.getCallerSet().contains(TAG)) {
+                showTutorialSuggestion();
+                showTutorialSuggestion = false;
+                hintModule.getCallerSet().add(TAG);
+            }
         }
     }
 
@@ -962,6 +988,91 @@ public class ARActivity extends AppCompatActivity {
         }
     }
 
+    private void checkAndRequestPermissions() {
+        if (!PermissionHelper.hasPermissions(this)) {
+            PermissionHelper.requestPermissions(this);
+        }
+    }
+
+    private boolean isFirstLaunch() {
+        SharedPreferences prefs = PreferenceManager
+                .getDefaultSharedPreferences(getApplicationContext());
+        return prefs.getBoolean(getString(R.string.first_launch), true);
+    }
+
+    private void setFirstLaunch(boolean isFirstLaunch) {
+        SharedPreferences.Editor editor = PreferenceManager
+                .getDefaultSharedPreferences(getApplicationContext()).edit();
+
+        editor.putBoolean(getString(R.string.first_launch), isFirstLaunch);
+        editor.apply();
+    }
+
+    private void showGreeting() {
+        if (isFirstLaunch()) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage(R.string.greeting_message)
+                    .setTitle(R.string.greeting_title)
+                    .setCancelable(true)
+                    .setNeutralButton(android.R.string.ok,
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    dialog.cancel();
+                                    checkAndRequestPermissions();
+                                }
+                            });
+
+            alertDialog = builder.create();
+            alertDialog.show();
+        } else if (!PermissionHelper.hasPermissions(this)) {
+            showNoPermission();
+        }
+    }
+
+    private void showNoPermission() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.non_permission_message)
+                .setTitle(R.string.non_permission_title)
+                .setCancelable(false)
+                .setNeutralButton(android.R.string.ok,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                                checkAndRequestPermissions();
+                            }
+                        });
+
+        alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    private void showTutorialSuggestion() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.help_message)
+                .setTitle(R.string.help_title)
+                .setCancelable(true)
+                .setPositiveButton(android.R.string.yes,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                                startTutorial();
+                                //TODO:tutorial start
+
+                            }
+                        });
+        builder.setNegativeButton(android.R.string.no,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+
+                    }
+                });
+
+
+        alertDialog = builder.create();
+        alertDialog.show();
+    }
+
     private void showCongratulation() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(R.string.congrat_msg_skull)
@@ -975,10 +1086,11 @@ public class ARActivity extends AppCompatActivity {
                                 gameModule.getCurrentInventory().clear();
                                 gameModule.getCurrentJournal().clear();
                                 gameModule.resetCurrentQuest();
-                                Intent intent = new Intent(ARActivity.this, MainActivity.class);
-                                intent.setAction(QuestsListFragment.TAG);
-                                startActivity(intent);
-
+                                //Intent intent = new Intent(ARActivity.this, MainActivity.class);
+                                //intent.setAction(QuestsListFragment.TAG);
+                                //startActivity(intent);
+                                changeToFragmentLayout();
+                                selectFragment(questsListFragment, QuestsListFragment.TAG);
                             }
                         });
         AlertDialog alertDialog = builder.create();
@@ -998,10 +1110,11 @@ public class ARActivity extends AppCompatActivity {
                                 gameModule.getCurrentInventory().clear();
                                 gameModule.getCurrentJournal().clear();
                                 gameModule.resetCurrentQuest();
-                                Intent intent = new Intent(ARActivity.this, MainActivity.class);
-                                intent.setAction(QuestsListFragment.TAG);
-                                startActivity(intent);
-
+                                //Intent intent = new Intent(ARActivity.this, MainActivity.class);
+                                //intent.setAction(QuestsListFragment.TAG);
+                                //startActivity(intent);
+                                changeToFragmentLayout();
+                                selectFragment(questsListFragment, QuestsListFragment.TAG);
                             }
                         });
         AlertDialog alertDialog = builder.create();
@@ -1061,6 +1174,67 @@ public class ARActivity extends AppCompatActivity {
                         });
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
+    }
+
+    public void startTutorial() {
+        selectFragment(questsListFragment, QuestsListFragment.TAG);
+//        questsListFragment.refreshItems();
+        hintModule.clearHintShowHistory();
+        hintModule.clearHints();
+        hintModule.setEnabled(true);
+        setUpTutorial();
+        hintModule.showHintChainOnce(R.id.quests_list_hint, R.id.current_quest_hint, R.id.settings_hint, R.id.start_quest_hint);
+    }
+
+    private void setUpTutorial() {
+        questsListFragment.loadItems(questModule.getQuests());
+        hintModule.addHint(R.id.start_ar_hint, new HintModule.NoCompleteHint() {
+            @Override
+            public void setUpHint(ShowcaseView sv) {
+                sv.setTarget(new ViewTarget(
+                        bottomNavigationView.findViewById(R.id.action_ar)
+                ));
+                sv.setContentText(getString(R.string.start_ar_str));
+            }
+        });
+        hintModule.addHint(R.id.quests_list_hint, new HintModule.NoCompleteHint() {
+            @Override
+            public void setUpHint(ShowcaseView sv) {
+                sv.setTarget(new ViewTarget(
+                        bottomNavigationView.findViewById(R.id.action_quests)
+                ));
+                sv.setContentText("Здесь вы можете посмотреть список квестов");
+            }
+        });
+        hintModule.addHint(R.id.current_quest_hint, new HintModule.NoCompleteHint() {
+            @Override
+            public void setUpHint(ShowcaseView sv) {
+                sv.setTarget(new ViewTarget(
+                        bottomNavigationView.findViewById(R.id.action_current_quest)
+                ));
+                sv.setContentText("Здесь вы можете посмотреть информацию по текущему квесту");
+            }
+        });
+        hintModule.addHint(R.id.settings_hint, new HintModule.NoCompleteHint() {
+            @Override
+            public void setUpHint(ShowcaseView sv) {
+                sv.setTarget(new ViewTarget(
+                        bottomNavigationView.findViewById(R.id.action_settings)
+                ));
+                sv.setContentText("Здесь находятся настройки");
+            }
+        });
+        hintModule.addHint(R.id.start_quest_hint, new HintModule.NoCompleteHint() {
+            @Override
+            public void setUpHint(ShowcaseView sv) {
+                sv.setTarget(new ViewTarget(
+                        findViewById(R.id.start_or_download_quest_btn)
+                ));
+                sv.setContentText("Для того, чтобы начать свой первый квест, нажмите сюда!");
+            }
+        });
+
+//        hintModule.requestHint(R.id.select_quest_hint_name);
     }
 
     public void goToCurrentQuest() {
