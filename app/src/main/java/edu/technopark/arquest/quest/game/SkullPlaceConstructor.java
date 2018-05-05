@@ -426,7 +426,8 @@ public class SkullPlaceConstructor {
         // group of objects related to bottle
         bottleItem = new Item(
                 100, "Бутылка", "Бутылка со спиртным",
-                new VisualResource(Object3D.Type.FBX).setModelUri(asset("bottle_big.vrx"))
+                new VisualResource(Object3D.Type.FBX).setModelUri(asset("bottle_big.vrx")),
+                "bottle.png"
         );
         bottleItem.setUniformScale(smallScale);
 
@@ -452,7 +453,8 @@ public class SkullPlaceConstructor {
         // group of objects related to glass
         glassItem = new Item(
                 200, "Стакан", "Не особенно чистый стакан",
-                new VisualResource(Object3D.Type.FBX).setModelUri(asset("glass_big.vrx"))
+                new VisualResource(Object3D.Type.FBX).setModelUri(asset("glass_big.vrx")),
+                "glass.png"
         );
         glassItem.setUniformScale(smallScale);
 
@@ -478,7 +480,8 @@ public class SkullPlaceConstructor {
         // group of objects related to helmet
         helmetItem = new Item(
                 300, "Шлем", "Классный мотоциклетный шлем",
-                new VisualResource(Object3D.Type.FBX).setModelUri(asset("helmet2.vrx"))
+                new VisualResource(Object3D.Type.FBX).setModelUri(asset("helmet2.vrx")),
+                "helment.png"
         );
         helmetItem.setUniformScale(smallScale);
 
@@ -503,7 +506,8 @@ public class SkullPlaceConstructor {
 
         axeItem = new Item(
                 400, "Топор", "Отличный топор",
-                new VisualResource(Object3D.Type.FBX).setModelUri(asset("axe.vrx"))
+                new VisualResource(Object3D.Type.FBX).setModelUri(asset("axe.vrx")),
+                "axe.png"
         );
         axeItem.setUniformScale(smallScale);
 

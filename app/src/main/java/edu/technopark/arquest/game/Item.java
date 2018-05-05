@@ -15,6 +15,14 @@ public class Item extends Identifiable3D {
         setVisible(false);
     }
 
+    public Item(int id, String name, String description, VisualResource visualResource, String avatarName) {
+        super(id, name, false);
+        this.description = description;
+        this.visualResource = visualResource;
+        this.avatar = avatarName;
+        setVisible(false);
+    }
+
     public String getDescription() {
         return description;
     }
