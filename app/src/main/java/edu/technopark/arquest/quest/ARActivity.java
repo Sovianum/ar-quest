@@ -302,7 +302,6 @@ public class ARActivity extends AppCompatActivity {
                         setPurpose("Осмотритесь и попытайте счастье :)");
                     }
                     showButtons();
-                    hintModule.showHintChain(R.id.interact_btn_hint);
                 }
             }
     );
@@ -594,12 +593,14 @@ public class ARActivity extends AppCompatActivity {
 
     @OnClick(R.id.inventory_btn)
     void toInventory() {
+        toInventoryBtn.clearAnimation();
         changeToFragmentLayout();
         selectFragmentFromAr(itemsListFragment, ItemsListFragment.TAG);
     }
 
     @OnClick(R.id.journal_btn)
     void toJournal() {
+        toJournalBtn.clearAnimation();
         changeToFragmentLayout();
         selectFragmentFromAr(journalFragment, JournalFragment.TAG);
     }
@@ -607,7 +608,7 @@ public class ARActivity extends AppCompatActivity {
 
     @OnClick(R.id.help_btn)
     public void onHelpClickListener() {
-        hintModule.showHintChain(R.id.interact_btn_hint, R.id.inventory_btn_hint, R.id.journal_btn_hint);
+//        hintModule.showHintChain(R.id.interact_btn_hint, R.id.inventory_btn_hint, R.id.journal_btn_hint);
     }
 
     @OnClick(R.id.close_btn)
@@ -684,7 +685,7 @@ public class ARActivity extends AppCompatActivity {
         toJournalBtn.setVisibility(View.VISIBLE);
         interactBtn.setVisibility(View.VISIBLE);
 
-        EventBus.getDefault().post(InteractionResult.hintResult(R.id.interact_btn_hint));
+//        EventBus.getDefault().post(InteractionResult.hintResult(R.id.interact_btn_hint));
     }
 
     private void hideButtons() {
@@ -706,62 +707,57 @@ public class ARActivity extends AppCompatActivity {
     }
 
     private void setUpHints() {
-        hintModule.replaceHint(R.id.interact_btn_hint, getARScreenHint(new Function<ShowcaseView, Void>() {
-            @Override
-            public Void apply(@NonNull ShowcaseView input) {
-                input.setContentText(getString(R.string.act_btn_hint_str));
-                input.setTarget(new ViewTarget(interactBtn));
-                return null;
-            }
-        }));
-
+//        hintModule.replaceHint(R.id.interact_btn_hint, getARScreenHint(new Function<ShowcaseView, Void>() {
+//            @Override
+//            public Void apply(@NonNull ShowcaseView input) {
+//                input.setContentText(getString(R.string.act_btn_hint_str));
+//                input.setTarget(new ViewTarget(interactBtn));
+//                return null;
+//            }
+//        }));
         hintModule.replaceHint(R.id.journal_btn_hint, getARScreenHint(new Function<ShowcaseView, Void>() {
             @Override
             public Void apply(@NonNull ShowcaseView input) {
-                input.setContentText("Нажмите на эту кнопку, чтобы посмотреть список событий данного квеста");
-                input.setTarget(new ViewTarget(toJournalBtn));
+                bounceButton(toJournalBtn);
                 return null;
             }
         }));
-
         hintModule.replaceHint(R.id.inventory_btn_hint, getARScreenHint(new Function<ShowcaseView, Void>() {
             @Override
             public Void apply(@NonNull ShowcaseView input) {
-                input.setContentText("Нажмите на эту кнопку, чтобы посмотреть вещи в инвентаре");
-                input.setTarget(new ViewTarget(toInventoryBtn));
+                bounceButton(toInventoryBtn);
                 return null;
             }
         }));
-
-        hintModule.replaceHint(R.id.release_btn_hint, getARScreenHint(new Function<ShowcaseView, Void>() {
-            @Override
-            public Void apply(@NonNull ShowcaseView input) {
-                input.setContentText("Нажмите на эту кнопку, чтобы вернуть предмет в инвентарь");
-                input.setTarget(new ViewTarget(returnItemToInventoryBtn));
-                return null;
-            }
-        }));
+//        hintModule.replaceHint(R.id.release_btn_hint, getARScreenHint(new Function<ShowcaseView, Void>() {
+//            @Override
+//            public Void apply(@NonNull ShowcaseView input) {
+//                input.setContentText("Нажмите на эту кнопку, чтобы вернуть предмет в инвентарь");
+//                input.setTarget(new ViewTarget(returnItemToInventoryBtn));
+//                return null;
+//            }
+//        }));
         hintModule.replaceHint(R.id.first_item_hint, getARScreenHint(new Function<ShowcaseView, Void>() {
             @Override
             public Void apply(@NonNull ShowcaseView input) {
-                input.setContentText("Вы получили предмет. Для того, чтобы взять его в руки, перейдите в инвентарь и нажмите на карточку предмета");
-                input.setTarget(new ViewTarget(toInventoryBtn));
+                bounceButton(toInventoryBtn);
                 return null;
             }
         }));
         hintModule.replaceHint(R.id.first_journal_message_hint, getARScreenHint(new Function<ShowcaseView, Void>() {
             @Override
             public Void apply(@NonNull ShowcaseView input) {
-                input.setContentText("Ваш журнал обновлен. Для того, чтобы посмотреть записи, нажмите на эту кнопку");
-                input.setTarget(new ViewTarget(toJournalBtn));
+                bounceButton(toJournalBtn);
                 return null;
             }
         }));
         hintModule.replaceHint(R.id.release_item_hint, getARScreenHint(new Function<ShowcaseView, Void>() {
             @Override
             public Void apply(@NonNull ShowcaseView input) {
-                input.setContentText("Вы держите предмет в руках. Если вы хотите применить его к виртуальному объекту, подойдите к нему и нажмите на кнопку действия. Если вы хотите положить его обратно в инвентарь, нажмите на указанную кнопку");
-                input.setTarget(new ViewTarget(returnItemToInventoryBtn));
+                showMsgAlert(
+                        "Вы держите предмет в руках. Если вы хотите применить его к виртуальному объекту, подойдите к нему и нажмите на кнопку действия. " +
+                                "Если вы хотите положить его обратно в инвентарь, нажмите на появившуюся кнопку слева"
+                );
                 return null;
             }
         }));
@@ -998,9 +994,13 @@ public class ARActivity extends AppCompatActivity {
     private void interactBtnAndTextViewSetEnable(boolean enable) {
         interactBtn.setEnabled(enable);
         if (enable) {
+            if (interactBtn.getAnimation() != null) {
+                bounceButton(interactBtn);
+            }
             interactHelpTextView.setBackground(getResources().getDrawable(
                     R.drawable.round_text_view_style, this.getTheme()));
         } else {
+            interactBtn.clearAnimation();
             interactHelpTextView.setBackground(getResources().getDrawable(
                     R.drawable.round_text_view_disable_style, this.getTheme()));
         }
