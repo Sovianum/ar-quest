@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:state_pressed="true" >
+        <shape android:shape="oval">
+            <solid android:color="@color/roundButtonActionColorFocusedEnd"/>
+            <gradient
+                android:type="radial"
+                android:gradientRadius="1"
+                android:startColor="@color/roundButtonActionColorFocusedStart"
+                android:endColor="@color/roundButtonActionColorFocusedEnd"
+                android:angle="90" />
+        </shape>
+    </item>
+
+    <item android:state_focused="true" >
+        <shape android:shape="oval">
+            <solid android:color="@color/roundButtonActionColor"/>
+            <gradient
+                android:startColor="@color/roundButtonActionColorFocusedStart"
+                android:endColor="@color/roundButtonColorFocusedEnd"
+                android:angle="90" />
+        </shape>
+    </item>
+
+    <item android:state_enabled="false" >
+        <shape android:shape="oval">
+            <solid android:color="@color/roundButtonActionColorDisable"/>
+        </shape>
+    </item>
+
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="@color/roundButtonActionColor"/>
+        </shape>
+    </item>
+</selector>
