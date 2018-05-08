@@ -120,6 +120,10 @@
     <string name="checkpoints_empty_text">Места не найдены</string>
 
     <string name="alert_last_message_title">Последнее событие</string>
+    <string name="quest_title_str">Название квеста</string>
+    <string name="quest_places_title_str">Место действия</string>
+    <string name="quest_places_txt_str">Описание места действия</string>
+    <string name="quest_description_str">Описание квеста</string>
 
 
 </resources>

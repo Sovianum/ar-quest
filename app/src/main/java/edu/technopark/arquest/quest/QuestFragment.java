@@ -4,16 +4,12 @@ package edu.technopark.arquest.quest;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.LinearLayoutManager;
-import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
-
-import java.util.ArrayList;
 
 import javax.inject.Inject;
 
@@ -22,16 +18,14 @@ import butterknife.ButterKnife;
 import edu.technopark.arquest.App;
 import edu.technopark.arquest.GameModule;
 import edu.technopark.arquest.R;
-import edu.technopark.arquest.game.Item;
-import edu.technopark.arquest.game.journal.Journal;
-import edu.technopark.arquest.game.journal.TimestampRecord;
+import edu.technopark.arquest.model.Quest;
 import edu.technopark.arquest.quest.items.ItemAdapter;
 import edu.technopark.arquest.quest.place.PlacesAdapter;
 
 public class QuestFragment extends Fragment {
     public static final String TAG = QuestFragment.class.getSimpleName();
 
-    @BindView(R.id.to_ar_mode_btn)
+    /*@BindView(R.id.to_ar_mode_btn)
     Button toARModeBtn;
 
     @BindView(R.id.cancel_quest_btn)
@@ -65,7 +59,25 @@ public class QuestFragment extends Fragment {
     TextView emptyTextViewInventory;
 
     @BindView(R.id.empty_view_places)
-    TextView emptyTextViewPlaces;
+    TextView emptyTextViewPlaces;*/
+
+    @BindView(R.id.to_ar_mode_btn)
+    Button toARModeBtn;
+
+    @BindView(R.id.quest_title_txt)
+    TextView questTitleTxt;
+
+    @BindView(R.id.quest_places_title)
+    TextView questPlacesTitleTxt;
+
+    @BindView(R.id.quest_places_txt)
+    TextView questPlacesTxt;
+
+    @BindView(R.id.quest_description_title)
+    TextView questDescriptionTitleTxt;
+
+    @BindView(R.id.quest_description_txt)
+    TextView questDescriptionTxt;
 
     private View.OnClickListener onARModeBtnClickListener;
     private View.OnClickListener onCancelBtnClickListener;
@@ -77,6 +89,7 @@ public class QuestFragment extends Fragment {
     private PlacesAdapter placesAdapter;
 
     private ItemAdapter.OnItemClickListener onItemClickListener;
+    private Quest quest;
 
     @Inject
     GameModule gameModule;
@@ -86,36 +99,37 @@ public class QuestFragment extends Fragment {
         // Inflate the layout for this fragment
         App.getAppComponent().inject(this);
 
-        LinearLayout view = (LinearLayout) inflater.inflate(R.layout.fragment_quest, container, false);
+        RelativeLayout view = (RelativeLayout) inflater.inflate(R.layout.fragment_quest, container, false);
         ButterKnife.bind(this, view);
         if (onARModeBtnClickListener != null) {
             toARModeBtn.setOnClickListener(onARModeBtnClickListener);
         }
         if (onCancelBtnClickListener != null) {
-            cancelQuestBtn.setOnClickListener(onCancelBtnClickListener);
+            //cancelQuestBtn.setOnClickListener(onCancelBtnClickListener);
         }
         if (onJournalClickListener != null) {
-            journalText.setOnClickListener(onJournalClickListener);
+            //journalText.setOnClickListener(onJournalClickListener);
         }
         if (onPlacesClickListener != null) {
-            placesText.setOnClickListener(onPlacesClickListener);
+            //placesText.setOnClickListener(onPlacesClickListener);
         }
-        refreshLastJournalRecord();
+        //refreshLastJournalRecord();
         if (onInventoryClickListener != null) {
-            inventoryText.setOnClickListener(onInventoryClickListener);
+            //inventoryText.setOnClickListener(onInventoryClickListener);
         }
 
-        LinearLayoutManager manager = new LinearLayoutManager(getActivity());
-        recyclerViewItems.setLayoutManager(manager);
-        itemAdapter = new ItemAdapter(new ArrayList<Item>(), onItemClickListener);
-        recyclerViewItems.setAdapter(itemAdapter);
-        recyclerViewItems.setEmptyView(emptyTextViewInventory);
+        //LinearLayoutManager manager = new LinearLayoutManager(getActivity());
+        //recyclerViewItems.setLayoutManager(manager);
+        //itemAdapter = new ItemAdapter(new ArrayList<Item>(), onItemClickListener);
+        //recyclerViewItems.setAdapter(itemAdapter);
+        //recyclerViewItems.setEmptyView(emptyTextViewInventory);
 
-        LinearLayoutManager managerPlaces = new LinearLayoutManager(getActivity());
-        recyclerViewPlaces.setLayoutManager(managerPlaces);
-        placesAdapter = new PlacesAdapter();
-        recyclerViewPlaces.setAdapter(placesAdapter);
-        recyclerViewPlaces.setEmptyView(emptyTextViewPlaces);
+        //LinearLayoutManager managerPlaces = new LinearLayoutManager(getActivity());
+        //recyclerViewPlaces.setLayoutManager(managerPlaces);
+        //placesAdapter = new PlacesAdapter();
+        //recyclerViewPlaces.setAdapter(placesAdapter);
+        //recyclerViewPlaces.setEmptyView(emptyTextViewPlaces);
+        setQuestTxt();
         return view;
     }
 
@@ -134,34 +148,34 @@ public class QuestFragment extends Fragment {
 
     public void setOnCancelBtnClickListener(View.OnClickListener listener) {
         onCancelBtnClickListener = listener;
-        if (cancelQuestBtn != null) {
-            cancelQuestBtn.setOnClickListener(listener);
-        }
+        //if (cancelQuestBtn != null) {
+       //     cancelQuestBtn.setOnClickListener(listener);
+        //}
     }
 
     public void setOnJournalClickListener(View.OnClickListener listener) {
         this.onJournalClickListener = listener;
-        if (journalText != null) {
-            journalText.setOnClickListener(onJournalClickListener);
-        }
+        //if (journalText != null) {
+        //    journalText.setOnClickListener(onJournalClickListener);
+        //}
     }
 
     public void setOnPlacesClickListener(View.OnClickListener listener) {
         this.onPlacesClickListener = listener;
-        if (placesText != null) {
-            placesText.setOnClickListener(onPlacesClickListener);
-        }
+        //if (placesText != null) {
+        //    placesText.setOnClickListener(onPlacesClickListener);
+        //}
     }
 
     public void setOnInventoryClickListener(View.OnClickListener listener) {
         this.onInventoryClickListener = listener;
-        if (inventoryText != null) {
-            inventoryText.setOnClickListener(onInventoryClickListener);
-        }
+        //if (inventoryText != null) {
+        //    inventoryText.setOnClickListener(onInventoryClickListener);
+        //}
     }
 
 
-    public void refreshLastJournalRecord() {
+    /*public void refreshLastJournalRecord() {
         final Journal<String> journal = gameModule.getCurrentJournal();
         try {
             TimestampRecord<String> lastMessage = journal.getRecords().get(journal.getRecords().size() - 1);
@@ -171,7 +185,7 @@ public class QuestFragment extends Fragment {
         } catch (ArrayIndexOutOfBoundsException e) {
 
         }
-    }
+    }*/
 
     @Override
     public void onStart() {
@@ -194,5 +208,17 @@ public class QuestFragment extends Fragment {
 
     public void setOnItemClickListener(ItemAdapter.OnItemClickListener listener) {
         this.onItemClickListener = listener;
+    }
+
+    public void setQuest(Quest quest) {
+        this.quest = quest;
+    }
+
+    private void setQuestTxt() {
+        if (quest != null) {
+            questTitleTxt.setText(quest.getTitle());
+            questPlacesTxt.setText("Любое место");
+            questDescriptionTxt.setText(quest.getDescription());
+        }
     }
 }

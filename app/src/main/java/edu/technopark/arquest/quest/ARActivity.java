@@ -191,9 +191,11 @@ public class ARActivity extends AppCompatActivity {
             } else if (currQuest == null) {
                 needLoad = true;
                 msg = "Вы выбрали квест " + quest.getTitle();
+                questFragment.setQuest(quest);
             } else {
                 needLoad = quest.getId() != currQuest.getId();
                 msg = needLoad ? "Вы выбрали квест " + quest.getTitle() : "Вы уже играете в этот квест";
+                questFragment.setQuest(quest);
             }
             if (needLoad) {
                 Slot currInventory = gameModule.getCurrentInventory();

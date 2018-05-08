@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/fragment_quest"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -10,6 +10,64 @@
     android:layout_marginEnd="@dimen/quest_layout_right_margin_size">
 
     <TextView
+        android:id="@+id/quest_title_txt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/quest_title_str"
+        android:textSize="20sp"
+        android:textAlignment="center" />
+
+    <TextView
+        android:id="@+id/quest_places_title"
+        android:layout_below="@+id/quest_title_txt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:textSize="18sp"
+        android:text="@string/quest_places_title_str"
+        android:textAlignment="center" />
+
+    <TextView
+        android:id="@+id/quest_places_txt"
+        android:layout_below="@+id/quest_places_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:text="@string/quest_places_txt_str"
+        android:textAlignment="center" />
+
+    <TextView
+        android:id="@+id/quest_description_title"
+        android:layout_below="@+id/quest_places_txt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:textSize="18sp"
+        android:text="@string/quest_description_str"
+        android:textAlignment="center" />
+
+    <TextView
+        android:id="@+id/quest_description_txt"
+        android:layout_below="@+id/quest_description_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:text="@string/quest_description_str"
+        android:textAlignment="center" />
+
+    <Button
+        android:id="@+id/to_ar_mode_btn"
+        android:layout_below="@+id/quest_description_txt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
+        android:layout_marginStart="30dp"
+        android:drawableBottom="@drawable/ic_camera_alt_black_24dp"
+        android:text="@string/to_ar_fragment"
+        android:textSize="12sp"/>
+
+    <!--<TextView
         android:id="@+id/journal_txt"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -81,7 +139,7 @@
 
     <Space
         android:layout_width="match_parent"
-        android:layout_height="@dimen/spaces_login" />
+        android:layout_height="@dimen/spaces_login" />-->
 
 
-</LinearLayout>
+</RelativeLayout>
