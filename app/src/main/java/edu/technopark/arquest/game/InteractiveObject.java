@@ -36,6 +36,7 @@ public class InteractiveObject extends Identifiable3D {
 
     private int currentStateID;
     private Map<Integer, ObjectState> states;
+    private Vector lastSetPosition;
 
     // all interactive objects tell if they have collided with player
     private PhysicsBody.CollisionListener defaultCollisionListener = new PhysicsBody.CollisionListener() {
@@ -60,6 +61,19 @@ public class InteractiveObject extends Identifiable3D {
         super(id, name, true);
         this.description = description;
         this.items = items;
+    }
+
+    @Override
+    public void setPosition(Vector position) {
+        lastSetPosition = position;
+        super.setPosition(position);
+    }
+
+    public Vector getLastSetPosition() {
+        if (lastSetPosition == null) {
+            return new Vector(0, 0, 0);
+        }
+        return lastSetPosition;
     }
 
     public Collection<InteractionResult> interact(final InteractionArgument argument) {
