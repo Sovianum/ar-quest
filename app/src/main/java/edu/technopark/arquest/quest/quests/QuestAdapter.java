@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ProgressBar;
-import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.github.amlcurran.showcaseview.ShowcaseView;
@@ -73,8 +72,8 @@ public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         //TextView startQuestTextView;
         @BindView(R.id.start_or_download_quest_btn)
         Button startQuestButton;
-        @BindView(R.id.ratingBar_quest)
-        RatingBar ratingBar;
+        //@BindView(R.id.ratingBar_quest)
+        //RatingBar ratingBar;
         @BindView(R.id.progressDownload)
         ProgressBar mProgressBar;
 
@@ -148,7 +147,7 @@ public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         final CardViewHolder cardHolder = (CardViewHolder) holder;
         cardHolder.titleView.setText(quest.getTitle());
         cardHolder.descriptionView.setText(quest.getDescription());
-        cardHolder.ratingBar.setRating(quest.getRating());
+        //cardHolder.ratingBar.setRating(quest.getRating());
 
         cardHolder.expanderView.setOnClickListener(new View.OnClickListener() {
             @Override
