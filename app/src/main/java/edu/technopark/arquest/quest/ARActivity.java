@@ -513,6 +513,12 @@ public class ARActivity extends AppCompatActivity {
             changeToFragmentLayout();
             selectFragment(questFragment, QuestFragment.TAG);
         } else {
+            if (fromAR) {
+                changeToActivityLayout();
+                fromAR = false;
+                super.onBackPressed();
+                return;
+            }
             if (getSupportFragmentManager().getBackStackEntryCount() > 1) {
                 if (fromAR) {
                     changeToActivityLayout();
