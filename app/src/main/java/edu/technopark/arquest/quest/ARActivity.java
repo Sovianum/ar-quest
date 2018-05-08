@@ -263,13 +263,15 @@ public class ARActivity extends AppCompatActivity {
         }
     };
 
-
     ContinuousAction snackbarAction = new ContinuousAction(
             new Runnable() {
                 @Override
                 public void run() {
-                    showSnackbarMessage(getString(R.string.direct_camera_to_floor_str), false);
-//                    hideButtons();
+                    showSnackbarMessage(getString(R.string.direct_camera_to_floor_str));
+                    gameModule.getScene().displayPointCloud(true);
+                    if (viroView != null) {
+                        viroView.setCameraARHitTestListener(planeDetector);
+                    }
                 }
             },
             new Runnable() {
@@ -279,12 +281,8 @@ public class ARActivity extends AppCompatActivity {
                     if (place == null) {
                         Quest quest = gameModule.getCurrentQuest();
                         if (quest == null) {
-                            quest = questModule.getQuests().get(0);
-                            if (quest == null) {
-                                setPurpose("Квест не найден");
-                                return;
-                            }
-                            gameModule.setCurrentQuest(quest);
+                            setPurpose("Квест не найден");
+                            return;
                         }
                         Place currentPlace = gameModule.getCurrentQuest().getPlaceMap().values().iterator().next();
                         gameModule.setCurrentPlace(currentPlace);
@@ -302,6 +300,7 @@ public class ARActivity extends AppCompatActivity {
                         setPurpose("Осмотритесь и попытайте счастье :)");
                     }
                     showButtons();
+                    placeRendered = true;
                 }
             }
     );
@@ -354,6 +353,7 @@ public class ARActivity extends AppCompatActivity {
     private SettingsFragment settingsFragment;
     private boolean fromAR = false;
     private boolean inAR = false;
+    private boolean placeRendered = false;
 
     public ARActivity() {
         super();
@@ -412,13 +412,22 @@ public class ARActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
+        EventBus.getDefault().register(this);
+        hintModule.setActivity(this);
         if (viroView != null) viroView.onActivityStarted(this);
+
+        if (gameModule.isWithAR()) {
+            gameModule.setCurrentQuest(questModule.getIntroQuest());
+//            gameModule.setCurrentPlace(questModule.getIntroPlace());
+            changeToActivityLayout();
+            return;
+        }
+
         changeToFragmentLayout();
         selectFragment(questsListFragment, QuestsListFragment.TAG);
         setToolBarByFragment(QuestsListFragment.TAG);
         bottomNavigationView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener);
         BottomNavigationViewHelper.disableShiftMode(bottomNavigationView);
-        EventBus.getDefault().register(this);
         showGreeting();
         if (!isFirstLaunch()) {
 //            showTutorialSuggestion = false;
@@ -432,7 +441,6 @@ public class ARActivity extends AppCompatActivity {
             }
         }
         setFirstLaunch(false);
-        hintModule.setActivity(this);
     }
 
     @Override
@@ -513,6 +521,12 @@ public class ARActivity extends AppCompatActivity {
             changeToFragmentLayout();
             selectFragment(questFragment, QuestFragment.TAG);
         } else {
+            if (fromAR) {
+                changeToActivityLayout();
+                fromAR = false;
+                super.onBackPressed();
+                return;
+            }
             if (getSupportFragmentManager().getBackStackEntryCount() > 1) {
                 if (fromAR) {
                     changeToActivityLayout();
@@ -646,37 +660,24 @@ public class ARActivity extends AppCompatActivity {
         returnItemToInventoryHelpTextView.setVisibility(View.GONE);
     }
 
-    private void showSnackbarMessage(String message, boolean finishOnDismiss) {
-        messageSnackbar =
-                Snackbar.make(
-                        findViewById(android.R.id.content),
-                        message,
-                        Snackbar.LENGTH_INDEFINITE);
-        messageSnackbar.getView().setBackgroundColor(0xbf323232);
-        if (finishOnDismiss) {
-            messageSnackbar.setAction(
-                    "Dismiss",
-                    new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            messageSnackbar.dismiss();
-                        }
-                    });
-            messageSnackbar.addCallback(
-                    new BaseTransientBottomBar.BaseCallback<Snackbar>() {
-                        @Override
-                        public void onDismissed(Snackbar transientBottomBar, int event) {
-                            super.onDismissed(transientBottomBar, event);
-                            finish();
-                        }
-                    });
+    private void showSnackbarMessage(String message) {
+        if (messageSnackbar == null) {
+            messageSnackbar =
+                    Snackbar.make(
+                            findViewById(android.R.id.content),
+                            message,
+                            Snackbar.LENGTH_INDEFINITE);
+            messageSnackbar.getView().setBackgroundColor(0xbf323232);
+            messageSnackbar.show();
+            return;
         }
-        messageSnackbar.show();
+        messageSnackbar.setText(message);
+        messageSnackbar.getView().setVisibility(View.VISIBLE);
     }
 
     private void hideSnackbarMessage() {
         if (messageSnackbar != null) {
-            messageSnackbar.dismiss();
+            messageSnackbar.getView().setVisibility(View.GONE);
         }
     }
 
@@ -769,7 +770,8 @@ public class ARActivity extends AppCompatActivity {
         if (purpose == null) {
             return;
         }
-        messageSnackbar.setText(purpose);
+        showSnackbarMessage(purpose);
+//        messageSnackbar.setText(purpose);
         gameModule.getCurrentQuest().setCurrPurpose(purpose);
     }
 
@@ -786,7 +788,7 @@ public class ARActivity extends AppCompatActivity {
                 if (quest == null) {
                     return;
                 }
-                showSnackbarMessage(quest.getCurrPurpose(), false);
+                showSnackbarMessage(quest.getCurrPurpose());
             }
         };
     }
@@ -815,8 +817,6 @@ public class ARActivity extends AppCompatActivity {
     }
 
     private void onJournalUpdateResult(final InteractionResult result) {
-        showMsg(result.getMsg());
-        showMsg(getString(R.string.journal_updated_str));
         showMsgAlert(result.getMsg());
         hintModule.showHintOnce(R.id.first_journal_message_hint);
     }
@@ -834,7 +834,7 @@ public class ARActivity extends AppCompatActivity {
     }
 
     private void showMsg(final String msg) {
-        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+        showMsgAlert(msg);
     }
 
     private void showMsgAlert(final String msg) {
@@ -917,6 +917,9 @@ public class ARActivity extends AppCompatActivity {
         findViewById(R.id.ar_fragment_container).setVisibility(View.GONE);
         messageSnackbar.getView().setVisibility(View.VISIBLE);
         inAR = true;
+        if (!placeRendered) {
+            snackbarAction.startIfNotRunning();
+        }
     }
 
     private static boolean isFragmentInBackstack(final FragmentManager fragmentManager, final String fragmentTagName) {
@@ -1104,15 +1107,16 @@ public class ARActivity extends AppCompatActivity {
                                 gameModule.getCurrentInventory().clear();
                                 gameModule.getCurrentJournal().clear();
                                 gameModule.resetCurrentQuest();
-                                //Intent intent = new Intent(ARActivity.this, MainActivity.class);
-                                //intent.setAction(QuestsListFragment.TAG);
-                                //startActivity(intent);
                                 changeToFragmentLayout();
                                 selectFragment(questsListFragment, QuestsListFragment.TAG);
                             }
                         });
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
+        gameModule.unloadCurrentScene();
+        placeRendered = false;
+        toJournalBtn.clearAnimation();
+        toInventoryBtn.clearAnimation();
     }
 
     private void showDefeat() {
@@ -1154,9 +1158,12 @@ public class ARActivity extends AppCompatActivity {
                                 gameModule.resetCurrentQuest();
                                 changeToFragmentLayout();
                                 selectFragment(questsListFragment, QuestsListFragment.TAG);
-                                //Intent intent = new Intent(ARActivity.this, MainActivity.class);
-                                //intent.setAction(QuestsListFragment.TAG);
-                                //startActivity(intent);
+
+                                gameModule.unloadCurrentScene();
+                                placeRendered = false;
+                                toJournalBtn.clearAnimation();
+                                toInventoryBtn.clearAnimation();
+                                hideSnackbarMessage();
                             }
                         });
         builder.setNegativeButton(android.R.string.no,

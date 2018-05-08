@@ -47,14 +47,7 @@ public class QuestModule {
     }
 
     public List<Quest> getQuests() {
-        //Quest q1 = new Quest(
-        //        2,
-        //        "Демо-квест взаимодействие с персонажами",
-        //        "Это демонстрационный квест из одного места." +
-        //                "Здесь вы можете опробовать взаимодействие с виртуальным объектами", 3
-        //);
-
-        Quest q2 = new Quest(
+        Quest q = new Quest(
                 2,
                 "Тайна пьяного черепа",
                 "Вы попадаете в очень странное место с загадочными персонажами. Ваша цель " +
@@ -63,27 +56,35 @@ public class QuestModule {
         );
 
         if (gameModule.isWithAR()) {
-            q2.addPlace(getSkullPlace());
+            q.addPlace(getSkullPlace());
         } else {
-            q2.addPlace(new Place());
+            q.addPlace(new Place());
         }
 
-        return Collections.singletonList(q2);
+        return Collections.singletonList(q);
     }
 
-    public Place getSingleObjectPlace() {
-        InteractiveObject andy = new InteractiveObject(
-                1, "obj", "obj"
+    public Quest getIntroQuest() {
+        Quest q = new Quest(
+                2,
+                "Обучающий квест",
+                "Обучающий квест", 3
         );
-        andy.setScale(new Vector(0.0003, 0.0003, 0.0003));
-        andy.setVisualResource(new VisualResource(Object3D.Type.FBX).setModelUri("file:///android_asset/helmet_skull.vrx"));
-        andy.setPosition(new Vector(0, 0, -0.5f));
-        andy.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.3f));
 
-        Place place = new Place();
-        place.loadInteractiveObjects(CollectionUtils.listOf(andy));
+        if (gameModule.isWithAR()) {
+            q.addPlace(getIntroPlace());
+        } else {
+            q.addPlace(new Place());
+        }
+        return q;
+    }
 
-        return place;
+    public Place getIntroPlace() {
+        final float mainScale = 0.001f;
+        final float smallScale = 0.0001f;
+        final String assetPrefix = "file:///android_asset/";
+        IntroPlaceConstructor constructor = new IntroPlaceConstructor(mainScale, smallScale, assetPrefix);
+        return constructor.getPlace();
     }
 
     public Place getSkullPlace() {
@@ -93,179 +94,5 @@ public class QuestModule {
 
         SkullPlaceConstructor constructor = new SkullPlaceConstructor(mainScale, smallScale, assetPrefix);
         return constructor.getPlace();
-    }
-
-    public Place getNewStyleInteractionDemoPlace() {
-        final float scale = 0.001f;
-
-        final Item rose = new Item(
-                20, "rose", "rose",
-                new VisualResource(Object3D.Type.OBJ).setModelUri("file:///android_asset/rose.obj").setTextureUri("rose.jpg")
-        );
-        rose.setScale(new Vector(scale, scale, scale));
-
-        final Item banana = new Item(
-                10, "banana", "banana",
-                new VisualResource(Object3D.Type.OBJ).setModelUri("file:///android_asset/banana.obj").setTextureUri("banana.lpg")
-        );
-        banana.setScale(new Vector(scale, scale, scale));
-
-        InteractiveObject andy = new InteractiveObject(
-                1, "andy", "andy",
-                CollectionUtils.singleItemList(rose)
-        );
-        andy.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.3f));
-
-        final InteractiveObject whiteGuy = new InteractiveObject(
-                2, "white", "white",
-                CollectionUtils.singleItemList(banana)
-        );
-        whiteGuy.setVisualResource(new VisualResource(Object3D.Type.OBJ).setModelUri("file:///android_asset/bigmax.obj").setTextureUri("bigmax.jpg"));
-        whiteGuy.setPosition(new Vector(0.25f, 0, 0));
-        whiteGuy.setScale(new Vector(0.003f, 0.003f, 0.003f));
-        whiteGuy.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.3f));
-
-        andy.setVisualResource(new VisualResource(Object3D.Type.OBJ).setModelUri("file:///android_asset/andy.obj").setTextureUri("andy.png"));
-        andy.setPosition(new Vector(0, 0, -0.5f));
-        andy.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.3f));
-
-        ObjectState andyState1 = new ObjectState(1, true);
-        andyState1.setActions(CollectionUtils.listOf(
-                new ScriptAction(
-                        1,
-                        CollectionUtils.listOf(
-                                InteractionResult.journalRecordResult("Андроид сказал: Возьми поесть у белого человека"),
-                                InteractionResult.nextPurposeResult("Найдите неподалеку белого человека и попросите поесть"),
-                                InteractionResult.transitionsResult(
-                                        CollectionUtils.listOf(
-                                                new ScriptAction.StateTransition(andy.getName(), 2),
-                                                new ScriptAction.StateTransition(whiteGuy.getName(), 1)
-                                        )
-                                ),
-                                InteractionResult.hintResult(R.id.journal_btn_hint)
-                        )
-                )
-        ));
-        andyState1.setConditions(ActionCondition.makeConditionMap(
-                CollectionUtils.singleItemList(1),
-                CollectionUtils.singleItemList(
-                        new ActionCondition(1)
-                )
-        ));
-
-        ObjectState andyState2 = new ObjectState(2, false);
-        andyState2.setActions(CollectionUtils.listOf(
-                new ScriptAction(
-                        1,
-                        CollectionUtils.listOf(
-                                InteractionResult.journalRecordResult("Андроид сказал: Отблагодари белого человека"),
-                                InteractionResult.nextPurposeResult("Передайте розу белому человеку"),
-                                InteractionResult.newItemsResult(new Slot.RepeatedItem(rose)),
-                                InteractionResult.takeItemsResult(new Slot.RepeatedItem(banana)),
-                                InteractionResult.transitionsResult(
-                                        CollectionUtils.listOf(
-                                                new ScriptAction.StateTransition(andy.getName(), 3)
-                                        )
-                                )
-                        )
-                )
-        ));
-        andyState2.setConditions(ActionCondition.makeConditionMap(
-                CollectionUtils.singleItemList(1),
-                CollectionUtils.singleItemList(
-                        new ActionCondition(
-                                CollectionUtils.singleItemList(
-                                        new ActionCondition.ItemInfo(banana.getId(), 1)
-                                ),
-                                2
-                        )
-                )
-        ));
-
-        ObjectState andyState3 = new ObjectState(3, false);
-        andyState3.setActions(CollectionUtils.listOf(
-                new ScriptAction(
-                        1,
-                        CollectionUtils.listOf(
-                                InteractionResult.messageResult("Мне нечего тебе сказать")
-                        )
-                )
-        ));
-        andyState3.setConditions(ActionCondition.makeConditionMap(
-                CollectionUtils.singleItemList(1),
-                CollectionUtils.singleItemList(new ActionCondition(3))
-        ));
-
-        andy.setStates(CollectionUtils.listOf(andyState1, andyState2, andyState3));
-
-        ObjectState guyState0 = new ObjectState(0, true);
-        guyState0.setEnabled(false);
-
-        ObjectState guyState1 = new ObjectState(1, false);
-        guyState1.setActions(CollectionUtils.listOf(
-                new ScriptAction(
-                        1,
-                        CollectionUtils.listOf(
-                                InteractionResult.newItemsResult(new Slot.RepeatedItem(banana)),
-                                InteractionResult.journalRecordResult("Белый человек сказал: Дай ему поесть"),
-                                InteractionResult.nextPurposeResult("Передайте банан андроиду"),
-                                InteractionResult.hintResult(R.id.inventory_btn_hint),
-                                InteractionResult.transitionsResult(CollectionUtils.listOf(
-                                        new ScriptAction.StateTransition(whiteGuy.getName(), 2)
-                                ))
-                        )
-                )
-        ));
-        guyState1.setConditions(ActionCondition.makeConditionMap(
-                CollectionUtils.listOf(1),
-                CollectionUtils.listOf(new ActionCondition(1))
-        ));
-
-        ObjectState guyState2= new ObjectState(2, false);
-        guyState2.setActions(CollectionUtils.listOf(
-                new ScriptAction(
-                        1,
-                        CollectionUtils.listOf(
-                                InteractionResult.journalRecordResult("Белый человек сказал: Да за кого он меня принимает?!"),
-                                InteractionResult.nextPurposeResult(""),
-                                InteractionResult.questEndResult(),
-                                InteractionResult.transitionsResult(CollectionUtils.listOf(
-                                        new ScriptAction.StateTransition(whiteGuy.getName(), 3)
-                                ))
-                        )
-                )
-        ));
-        guyState2.setConditions(ActionCondition.makeConditionMap(
-                CollectionUtils.listOf(1),
-                CollectionUtils.listOf(new ActionCondition(
-                        CollectionUtils.listOf(
-                                new ActionCondition.ItemInfo(rose.getId(), 1)
-                        ),
-                        2
-                ))
-        ));
-
-        ObjectState guyState3 = new ObjectState(3, false);
-        guyState3.setActions(CollectionUtils.listOf(
-                new ScriptAction(
-                        1,
-                        CollectionUtils.listOf(
-                                InteractionResult.messageResult("Ммм?")
-                        )
-                )
-        ));
-        guyState3.setConditions(ActionCondition.makeConditionMap(
-                CollectionUtils.listOf(1),
-                CollectionUtils.listOf(new ActionCondition(3))
-        ));
-
-        whiteGuy.setStates(CollectionUtils.listOf(guyState0, guyState1, guyState2, guyState3));
-
-        andy.setAction(andy.getActionFromStates());
-        whiteGuy.setAction(whiteGuy.getActionFromStates());
-        Place place = new Place();
-        place.loadInteractiveObjects(CollectionUtils.listOf(andy, whiteGuy));
-
-        return place;
     }
 }

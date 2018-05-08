@@ -20,8 +20,9 @@ import edu.technopark.arquest.game.script.ObjectState;
 import edu.technopark.arquest.game.script.ScriptAction;
 import edu.technopark.arquest.game.slot.Slot;
 import edu.technopark.arquest.model.VisualResource;
+import edu.technopark.arquest.quest.PlaceConstructor;
 
-public class SkullPlaceConstructor {
+public class SkullPlaceConstructor extends PlaceConstructor {
     private static void setContainerStates(InteractiveObject container, Slot.RepeatedItem item, InteractionResult... extraResults) {
         ObjectState state1 = new ObjectState(1, true);
         state1.setVisible(true);
@@ -71,7 +72,6 @@ public class SkullPlaceConstructor {
 
     private float mainScale;
     private float smallScale;
-    private String assetPrefix;
 
     private Item bottleItem;
     private InteractiveObject bottleContainer;
@@ -94,9 +94,9 @@ public class SkullPlaceConstructor {
     private InteractiveObject pig;
 
     public SkullPlaceConstructor(float mainScale, float smallScale, String assetPrefix) {
+        super(assetPrefix);
         this.mainScale = mainScale;
         this.smallScale = smallScale;
-        this.assetPrefix = assetPrefix;
     }
 
     public Place getPlace() {
@@ -439,7 +439,7 @@ public class SkullPlaceConstructor {
         );
         bottleContainer.setUniformScale(mainScale);
         bottleContainer.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.5f));
-        bottleContainer.setPosition(new Vector(-1, 0, 0));
+        bottleContainer.setOriginalPosition(new Vector(-1, 0, 0));
 
         bottleSmall = new InteractiveObject(
                 102, "Бутылка на постаменте", "Из этой бутылки пьет череп"
@@ -466,7 +466,7 @@ public class SkullPlaceConstructor {
         );
         glassContainer.setUniformScale(mainScale);
         glassContainer.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.5f));
-        glassContainer.setPosition(new Vector(-2, 0, 0));
+        glassContainer.setOriginalPosition(new Vector(-2, 0, 0));
 
         glassSmall = new InteractiveObject(
                 202, "Стакан на постаменте", "Из этого стакана пьет череп"
@@ -493,7 +493,7 @@ public class SkullPlaceConstructor {
         );
         helmetContainer.setUniformScale(mainScale);
         helmetContainer.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.5f));
-        helmetContainer.setPosition(new Vector(0, 0, -2));
+        helmetContainer.setOriginalPosition(new Vector(0, 0, -2));
 
         columnHelmet = new InteractiveObject(
                 302, "Шлем на черепе", "Шлем на черепе"
@@ -520,13 +520,13 @@ public class SkullPlaceConstructor {
         );
         axeContainer.setUniformScale(mainScale);
         axeContainer.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.5f));
-        axeContainer.setPosition(new Vector(0, 0, -4));
+        axeContainer.setOriginalPosition(new Vector(0, 0, -4));
 
         column = new InteractiveObject(
                 1001, "Колонна", "Колонна, на которой лежит череп"
         );
         column.setVisualResource(
-                new VisualResource(Object3D.Type.FBX).setModelUri(assetPrefix + "column.vrx")
+                new VisualResource(Object3D.Type.FBX).setModelUri(asset("column.vrx"))
         );
         column.setUniformScale(mainScale);
         column.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.5f));
@@ -535,7 +535,7 @@ public class SkullPlaceConstructor {
                 1002, "Карта", "Карта"
         );
         map.setVisualResource(
-                new VisualResource(Object3D.Type.FBX).setModelUri(assetPrefix + "map.vrx")
+                new VisualResource(Object3D.Type.FBX).setModelUri(asset("map.vrx"))
         );
         map.setUniformScale(mainScale);
         map.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeSphere(0.5f));
@@ -544,7 +544,7 @@ public class SkullPlaceConstructor {
                 1003, "Череп", "Череп"
         );
         skull.setVisualResource(
-                new VisualResource(Object3D.Type.FBX).setModelUri(assetPrefix + "skull.vrx")
+                new VisualResource(Object3D.Type.FBX).setModelUri(asset("skull.vrx"))
         );
         skull.setUniformScale(mainScale);
         skull.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeBox(0.5f, 2f, 0.5f));
@@ -553,14 +553,10 @@ public class SkullPlaceConstructor {
                 1004, "Свин", "Свин"
         );
         pig.setVisualResource(
-                new VisualResource(Object3D.Type.FBX).setModelUri(assetPrefix + "pig.vrx")
+                new VisualResource(Object3D.Type.FBX).setModelUri(asset("pig.vrx"))
         );
         pig.setUniformScale(mainScale);
         pig.initPhysicsBody(PhysicsBody.RigidBodyType.KINEMATIC, 0, new PhysicsShapeBox(0.5f, 2f, 0.5f));
-        pig.setPosition(new Vector(0.5, 0.5, 2.5));
-    }
-
-    private String asset(String name) {
-        return assetPrefix + name;
+        pig.setOriginalPosition(new Vector(0.5, 0.5, 2.5));
     }
 }

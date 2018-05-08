@@ -67,8 +67,6 @@ public class GameModule {
     private Map<String, InteractiveObject.InteractiveObjectCollisionEvent> collisionMap;
     private InteractiveObject.InteractiveObjectCollisionEvent lastCollision;
 
-    private Vector previousSceneOrigin;
-
     @Inject
     AssetModule assetModule;
 
@@ -209,39 +207,19 @@ public class GameModule {
         return scene;
     }
 
-//    public ARScene getNewScene() {
-//        return getNewScene(new Vector(0, 0, 0));
-//    }
-//
-//    public ARScene getNewScene(Vector origin) {
-//        scene = new ARScene();
-//
-//        List<Vector> lightPositions = new ArrayList<Vector>();
-//        lightPositions.add(new Vector(-10,  10, 1));
-//        lightPositions.add(new Vector(10,  10, 1));
-//
-//        float intensity = 300;
-//        List<Integer> lightColors = new ArrayList();
-//        lightColors.add(Color.WHITE);
-//        lightColors.add(Color.WHITE);
-//
-//        for (int i = 0; i < lightPositions.size(); i++) {
-//            OmniLight light = new OmniLight();
-//            light.setColor(lightColors.get(i));
-//            light.setPosition(lightPositions.get(i));
-//            light.setAttenuationStartDistance(20);
-//            light.setAttenuationEndDistance(30);
-//            light.setIntensity(intensity);
-//            scene.getRootNode().addLight(light);
-//        }
-//
-//        //Add an HDR environment map to give the Android's more interesting ambient lighting.
-//        Texture environment = Texture.loadRadianceHDRTexture(Uri.parse("file:///android_asset/ibl_newport_loft.hdr"));
-//        scene.setLightingEnvironment(environment);
-//
-//        loadCurrentPlace(origin);
-//        return scene;
-//    }
+    public void unloadCurrentScene() {
+        Place place = getCurrentPlace();
+        if (place == null || scene == null) {
+            return;
+        }
+        for (Object3D object3D : place.getAll()) {
+            object3D.removeFromParentNode();
+            object3D.clearPhysicsBody();
+        }
+        for (InteractiveObject obj : place.getInteractive()) {
+            obj.setCurrentStateID(obj.getCurrentStateID());
+        }
+    }
 
     public void loadCurrentPlace(Vector origin) {
         Place place = getCurrentPlace();
@@ -264,16 +242,12 @@ public class GameModule {
             root.addChildNode(object3D);
         }
 
-        if (previousSceneOrigin == null) {
-            previousSceneOrigin = new Vector(0, 0, 0);
-        }
         for (InteractiveObject obj : place.getInteractive()) {
             obj.setCurrentStateID(obj.getCurrentStateID()); // init visual conditions
             // getLastSetPosition is used cos getPositionRealtime returns Vector(0, 0, 0)
             // unless object has already been rendered
-            obj.setPosition(obj.getLastSetPosition().subtract(previousSceneOrigin).add(origin));
+            obj.setPosition(obj.getOriginalPosition().add(origin));
         }
-        previousSceneOrigin = origin;
     }
 
     public void interactLastCollided() {
