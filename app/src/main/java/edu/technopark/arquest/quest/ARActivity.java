@@ -24,6 +24,7 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -115,6 +116,7 @@ public class ARActivity extends AppCompatActivity {
             // if found plane, stop tracking planes
             if (result != null){
                 snackbarAction.stopIfRunning();
+                stopPhoneWithHandAnimation();
                 gameModule.getScene().displayPointCloud(false);
                 gameModule.loadCurrentPlace(result.getPosition());
                 viroView.setCameraARHitTestListener(null);
@@ -159,6 +161,9 @@ public class ARActivity extends AppCompatActivity {
 
     @BindView(R.id.bottom_navigation_ar)
     BottomNavigationView bottomNavigationView;
+
+    @BindView(R.id.img_hand_with_phone)
+    ImageView handWithPhoneImg;
 
     @Inject
     GameModule gameModule;
@@ -278,6 +283,7 @@ public class ARActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     showSnackbarMessage(getString(R.string.direct_camera_to_floor_str));
+                    animateHandWithPhone = true;
                     gameModule.getScene().displayPointCloud(true);
                     if (viroView != null) {
                         viroView.setCameraARHitTestListener(planeDetector);
@@ -364,6 +370,7 @@ public class ARActivity extends AppCompatActivity {
     private boolean fromAR = false;
     private boolean inAR = false;
     private boolean placeRendered = false;
+    private boolean animateHandWithPhone = false;
 
     public ARActivity() {
         super();
@@ -441,6 +448,10 @@ public class ARActivity extends AppCompatActivity {
             }
         }
         setFirstLaunch(false);
+
+        if (animateHandWithPhone) {
+            startHandWithPhoneAnimation();
+        }
 
 
         if (gameModule.isWithAR()) {
@@ -662,6 +673,38 @@ public class ARActivity extends AppCompatActivity {
         final Animation bounceAnim = AnimationUtils.loadAnimation(this, R.anim.bounce_button_repeated);
         bounceAnim.setInterpolator(new ButtonBounceRepeatedInterpolator(0.4, 2));
         view.startAnimation(bounceAnim);
+    }
+
+    public void startHandWithPhoneAnimation() {
+        if (handWithPhoneImg != null) {
+            handWithPhoneImg.setVisibility(View.VISIBLE);
+            final Animation translationAnim = AnimationUtils.loadAnimation(this, R.anim.floor_camera_animation);
+            translationAnim.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    if (animateHandWithPhone && handWithPhoneImg != null) {
+                        handWithPhoneImg.startAnimation(animation);
+                    }
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
+            handWithPhoneImg.startAnimation(translationAnim);
+        }
+    }
+
+    public void stopPhoneWithHandAnimation() {
+        animateHandWithPhone = false;
+        handWithPhoneImg.clearAnimation();
+        handWithPhoneImg.setVisibility(View.GONE);
     }
 
     private void initFragments() throws FileNotFoundException {
@@ -943,6 +986,7 @@ public class ARActivity extends AppCompatActivity {
         findViewById(R.id.return_item_layout).setVisibility(View.GONE);
         findViewById(R.id.ar_fragment_container).setVisibility(View.VISIBLE);
         messageSnackbar.getView().setVisibility(View.GONE);
+        handWithPhoneImg.setVisibility(View.GONE);
         inAR = false;
     }
 
@@ -956,6 +1000,9 @@ public class ARActivity extends AppCompatActivity {
         inAR = true;
         if (!placeRendered) {
             snackbarAction.startIfNotRunning();
+        }
+        if (animateHandWithPhone) {
+            handWithPhoneImg.setVisibility(View.VISIBLE);
         }
     }
 

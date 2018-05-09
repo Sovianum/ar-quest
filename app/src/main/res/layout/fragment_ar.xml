@@ -254,5 +254,13 @@
 
     </LinearLayout>
 
+    <ImageView
+        android:id="@+id/img_hand_with_phone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/hand_with_phone"
+        android:visibility="gone"
+        android:layout_centerInParent="true"/>
+
 
 </RelativeLayout>
