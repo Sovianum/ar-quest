@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.BaseTransientBottomBar;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -183,19 +182,19 @@ public class ARActivity extends AppCompatActivity {
         public void onQuestReact(final Quest quest) {
             final String msg;
             boolean needLoad;
+            boolean needSelectFragment = true;
             Quest currQuest = gameModule.getCurrentQuest();
 
             if (quest == null) {
                 msg = "Попытка загрузить null-квест";
                 needLoad = false;
+                needSelectFragment = false;
             } else if (currQuest == null) {
                 needLoad = true;
                 msg = "Вы выбрали квест " + quest.getTitle();
-                questFragment.setQuest(quest);
             } else {
                 needLoad = quest.getId() != currQuest.getId();
                 msg = needLoad ? "Вы выбрали квест " + quest.getTitle() : "Вы уже играете в этот квест";
-                questFragment.setQuest(quest);
             }
             if (needLoad) {
                 Slot currInventory = gameModule.getCurrentInventory();
@@ -212,8 +211,13 @@ public class ARActivity extends AppCompatActivity {
                 }
 
                 gameModule.setCurrentQuest(quest);
-                selectFragment(questFragment, QuestFragment.TAG); //add help?
             }
+
+            if (needSelectFragment) {
+                questFragment.setQuest(quest);
+                selectFragment(questFragment, QuestFragment.TAG);
+            }
+
 
             ARActivity.this.runOnUiThread(new Runnable() {
                 @Override
@@ -418,13 +422,6 @@ public class ARActivity extends AppCompatActivity {
         hintModule.setActivity(this);
         if (viroView != null) viroView.onActivityStarted(this);
 
-        if (gameModule.isWithAR()) {
-            gameModule.setCurrentQuest(questModule.getIntroQuest());
-//            gameModule.setCurrentPlace(questModule.getIntroPlace());
-            changeToActivityLayout();
-            return;
-        }
-
         changeToFragmentLayout();
         selectFragment(questsListFragment, QuestsListFragment.TAG);
         setToolBarByFragment(QuestsListFragment.TAG);
@@ -443,6 +440,14 @@ public class ARActivity extends AppCompatActivity {
             }
         }
         setFirstLaunch(false);
+
+
+        if (gameModule.isWithAR()) {
+            gameModule.setCurrentQuest(questModule.getIntroQuest());
+//            gameModule.setCurrentPlace(questModule.getIntroPlace());
+            changeToActivityLayout();
+            return;
+        }
     }
 
     @Override
@@ -963,9 +968,11 @@ public class ARActivity extends AppCompatActivity {
     private void setToolBarByFragment(String fragmentTag) {
         if (QuestsListFragment.TAG.equals(fragmentTag)) {
             toolBar.setTitle(getString(R.string.quest_list_fragment_title));
+            clearNavigationIcon();
 
         } else if (QuestFragment.TAG.equals(fragmentTag)) {
             toolBar.setTitle(getString(R.string.quest_fragment_title));
+            clearNavigationIcon();
 
         } else if (JournalFragment.TAG.equals(fragmentTag)) {
             toolBar.setTitle(getString(R.string.journal_fragment_title));
@@ -981,6 +988,7 @@ public class ARActivity extends AppCompatActivity {
 
         } else if (SettingsFragment.TAG.equals(fragmentTag)) {
             toolBar.setTitle(getString(R.string.settings_fragment_title));
+            clearNavigationIcon();
         }
     }
 
@@ -994,6 +1002,11 @@ public class ARActivity extends AppCompatActivity {
                 toolBar.setNavigationOnClickListener(null);
             }
         });
+    }
+
+    private void clearNavigationIcon() {
+        toolBar.setNavigationIcon(null);
+        toolBar.setNavigationOnClickListener(null);
     }
 
     private void interactBtnAndTextViewSetEnable(boolean enable) {

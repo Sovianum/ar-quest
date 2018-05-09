@@ -74,6 +74,7 @@
     <string name="select_quest_hint_name">StartQuestRequest</string>
     <string name="start_ar_str">Чтобы перейти в режим дополненной реальности, нажмите на эту кнопку</string>
     <string name="find_floor_str">Наведите камеру на пол</string>
+    <string name="find_floor_help_str">Если ничего не происходит</string>
     <string name="greeting_title">Привет!</string>
     <string name="greeting_message">Добро пожаловать в ARQuest - приложение, где квесты представлены в дополненной реальности.
     Для работы приложения требуются разрешения на использование камеры и геоданных.</string>

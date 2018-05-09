@@ -3,7 +3,6 @@ package edu.technopark.arquest.quest.quests;
 import android.content.Context;
 import android.os.Environment;
 import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -90,23 +89,24 @@ public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    onItemClickListener.onItemClick(item);
+                    //onItemClickListener.onItemClick(item);
+                    startQuestClickListener.onQuestReact(item);
                 }
             });
         }
 
         public void setDownloadable() {
             mProgressBar.setVisibility(View.GONE);
-            startQuestButton.setText(fragment.getResources().getString(R.string.download_btn_str));
+            /*startQuestButton.setText(fragment.getResources().getString(R.string.download_btn_str));
             startQuestButton.setCompoundDrawablesWithIntrinsicBounds(null, null,
                     ContextCompat.getDrawable(fragment.getActivity(),
-                            R.drawable.ic_file_download_black_24dp), null);
+                            R.drawable.ic_file_download_black_24dp), null);*/
         }
 
         public void setStartable() {
             mProgressBar.setVisibility(View.GONE);
-            startQuestButton.setText(fragment.getResources().getString(R.string.start_quest_str));
-            startQuestButton.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+            //startQuestButton.setText(fragment.getResources().getString(R.string.start_quest_str));
+            //startQuestButton.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
         }
 
         public void setDownloadProgress(int downloadProgress) {
@@ -170,22 +170,22 @@ public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
         if (!checkFileExists(fileNameStubs)) { //STUBS FOR TESTING, ITS WORKING WRONG!!!!!!!!
             cardHolder.setStartable();
-            cardHolder.startQuestButton.setOnClickListener(new View.OnClickListener() {
+            /*cardHolder.startQuestButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     startQuestClickListener.onQuestReact(quest);
                     hintModule.showHintOnce(R.id.start_ar_hint);
                 }
-            });
+            });*/
         } else {
             cardHolder.setDownloadable();
-            cardHolder.startQuestButton.setOnClickListener(new View.OnClickListener() {
+            /*cardHolder.startQuestButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     startQuestClickListener.onDowloadReact(quest);
                     cardHolder.mProgressBar.setVisibility(View.VISIBLE);
                 }
-            });
+            });*/
         }
 
         questItemMap.put(quest.getId(), position);
@@ -261,7 +261,7 @@ public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                     .findViewByPosition(itemPosition);
             ProgressBar progressBar = downloadedQuestView.findViewById(R.id.progressDownload);
             progressBar.setProgress(100);
-            Button startQuestButton = downloadedQuestView.findViewById(R.id.start_or_download_quest_btn);
+            /*Button startQuestButton = downloadedQuestView.findViewById(R.id.start_or_download_quest_btn);
             startQuestButton.setText(fragment.getResources().getString(R.string.start_quest_str));
             startQuestButton.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
             startQuestButton.setOnClickListener(new View.OnClickListener() {
@@ -269,7 +269,7 @@ public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 public void onClick(View v) {
                     startQuestClickListener.onQuestReact(quests.get(itemPosition));
                 }
-            });
+            });*/
             progressBar.setVisibility(View.GONE);
         } catch (NullPointerException e) {
             return;
