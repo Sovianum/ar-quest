@@ -14,7 +14,6 @@ public class InteractionResult {
         NEW_PLACE,
         QUEST_END,
         MESSAGE,
-        HINT,
         NEXT_PURPOSE,
         ERROR,
         LOSE
@@ -76,19 +75,11 @@ public class InteractionResult {
         return result;
     }
 
-    public static InteractionResult hintResult(int hintID) {
-        InteractionResult result = new InteractionResult(Type.HINT);
-        result.entityID = hintID;
-        return result;
-    }
-
     Type type;
     String msg;
     Slot.RepeatedItem items;
     int entityID; // entityID has meaning only for NEW_PLACE and HINT type
     Collection<ScriptAction.StateTransition> transitions;
-
-    private InteractionResult(Type type){this.type = type;}
 
     public Type getType() {
         return type;
@@ -109,4 +100,6 @@ public class InteractionResult {
     public Collection<ScriptAction.StateTransition> getTransitions() {
         return transitions;
     }
+
+    private InteractionResult(Type type){this.type = type;}
 }

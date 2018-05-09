@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.BaseTransientBottomBar;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -17,6 +16,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
@@ -42,6 +42,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.FileNotFoundException;
+import java.util.List;
 import java.util.Locale;
 
 import javax.inject.Inject;
@@ -59,6 +60,7 @@ import edu.technopark.arquest.PermissionHelper;
 import edu.technopark.arquest.R;
 import edu.technopark.arquest.common.ContinuousAction;
 import edu.technopark.arquest.game.InteractionResult;
+import edu.technopark.arquest.game.InteractionResultChain;
 import edu.technopark.arquest.game.Item;
 import edu.technopark.arquest.game.Place;
 import edu.technopark.arquest.game.journal.Journal;
@@ -118,14 +120,6 @@ public class ARActivity extends AppCompatActivity {
             }
         }
     };
-
-//    private ARHitTestListener renderLoopEmulator = new ARHitTestListener() {
-//        @Override
-//        public void onHitTestFinished(ARHitTestResult[] arHitTestResults) {
-//            viroView.get
-//            EventBus.getDefault().post(new CameraUpdateEvent(position, rotation, forward));
-//        }
-//    };
 
     ViroViewARCore viroView;
 
@@ -562,35 +556,50 @@ public class ARActivity extends AppCompatActivity {
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onInteractionResult(InteractionResult interactionResult) {
-        switch (interactionResult.getType()) {
+    public void onInteractionResults(List<InteractionResult> interactionResults) {
+        InteractionResultChain chain = new InteractionResultChain(
+                interactionResults, new Function<InteractionResultChain, Void>() {
+            @Override
+            public Void apply(@NonNull InteractionResultChain chain) {
+                onInteractionResults(chain);
+                return null;
+            }
+        });
+        chain.onNext();
+    }
+
+    public void onInteractionResults(InteractionResultChain chain) {
+        InteractionResult result = chain.getCurrent();
+        Log.e("INNER", result.getType().toString());
+        if (result == null) return;
+
+        switch (result.getType()) {
             case NEW_ITEMS:
-                onNewItemsResult(interactionResult);
+                onNewItemsResult(chain);
                 bounceButton(toInventoryBtn);
                 break;
             case TAKE_ITEMS:
-                onTakeItemsResult(interactionResult);
+                onTakeItemsResult(chain);
                 hideReturnItemViews();
                 break;
             case JOURNAL_RECORD:
-                onJournalUpdateResult(interactionResult);
+                onJournalUpdateResult(chain);
                 bounceButton(toJournalBtn);
                 break;
             case MESSAGE:
-                onMessageResult(interactionResult);
-                break;
-            case HINT:
-                onHintResult(interactionResult);
+                onMessageResult(chain);
                 break;
             case NEXT_PURPOSE:
-                onNextPurposeResult(interactionResult);
+                onNextPurposeResult(chain);
                 break;
             case QUEST_END:
-                showCongratulation();
+                showCongratulation(chain);
                 break;
             case LOSE:
-                showDefeat();
+                showDefeat(chain);
                 break;
+            default:
+                chain.onNext();
         }
     }
 
@@ -618,7 +627,6 @@ public class ARActivity extends AppCompatActivity {
         changeToFragmentLayout();
         selectFragmentFromAr(journalFragment, JournalFragment.TAG);
     }
-
 
     @OnClick(R.id.help_btn)
     public void onHelpClickListener() {
@@ -680,14 +688,6 @@ public class ARActivity extends AppCompatActivity {
         toInventoryBtn.setVisibility(View.VISIBLE);
         toJournalBtn.setVisibility(View.VISIBLE);
         interactBtn.setVisibility(View.VISIBLE);
-
-//        EventBus.getDefault().post(InteractionResult.hintResult(R.id.interact_btn_hint));
-    }
-
-    private void hideButtons() {
-        toInventoryBtn.setVisibility(View.GONE);
-        toJournalBtn.setVisibility(View.GONE);
-        interactBtn.setVisibility(View.GONE);
     }
 
     private void setUpQuestFragment() {
@@ -703,14 +703,6 @@ public class ARActivity extends AppCompatActivity {
     }
 
     private void setUpHints() {
-//        hintModule.replaceHint(R.id.interact_btn_hint, getARScreenHint(new Function<ShowcaseView, Void>() {
-//            @Override
-//            public Void apply(@NonNull ShowcaseView input) {
-//                input.setContentText(getString(R.string.act_btn_hint_str));
-//                input.setTarget(new ViewTarget(interactBtn));
-//                return null;
-//            }
-//        }));
         hintModule.replaceHint(R.id.journal_btn_hint, getARScreenHint(new Function<ShowcaseView, Void>() {
             @Override
             public Void apply(@NonNull ShowcaseView input) {
@@ -725,14 +717,6 @@ public class ARActivity extends AppCompatActivity {
                 return null;
             }
         }));
-//        hintModule.replaceHint(R.id.release_btn_hint, getARScreenHint(new Function<ShowcaseView, Void>() {
-//            @Override
-//            public Void apply(@NonNull ShowcaseView input) {
-//                input.setContentText("Нажмите на эту кнопку, чтобы вернуть предмет в инвентарь");
-//                input.setTarget(new ViewTarget(returnItemToInventoryBtn));
-//                return null;
-//            }
-//        }));
         hintModule.replaceHint(R.id.first_item_hint, getARScreenHint(new Function<ShowcaseView, Void>() {
             @Override
             public Void apply(@NonNull ShowcaseView input) {
@@ -791,51 +775,71 @@ public class ARActivity extends AppCompatActivity {
         };
     }
 
-    private void onNewItemsResult(final InteractionResult result) {
+    private void onNewItemsResult(final InteractionResultChain chain) {
+        InteractionResult result = chain.getCurrent();
+        if (result == null) return;
+
         Slot.RepeatedItem repeatedItem = result.getItems();
-        showMsg(
+        showMsgAlert(
                 String.format(
                         Locale.ENGLISH,
                         getString(R.string.inventory_updated_str),
                         repeatedItem.getCnt(), repeatedItem.getItem().getName()
-                )
+                ), chain
         );
         hintModule.showHintOnce(R.id.first_item_hint);
     }
 
-    private void onTakeItemsResult(final InteractionResult result) {
+    private void onTakeItemsResult(final InteractionResultChain chain) {
+        hideReturnItemViews();
+        InteractionResult result = chain.getCurrent();
+        if (result == null) return;
+
         Slot.RepeatedItem repeatedItem = result.getItems();
-        showMsg(
+        showMsgAlert(
                 String.format(
                         Locale.ENGLISH,
                         "%d %s изъяты из инвентаря",
                         repeatedItem.getCnt(), repeatedItem.getItem().getName()
-                )
+                ), chain
         );
     }
 
-    private void onJournalUpdateResult(final InteractionResult result) {
-        showMsgAlert(result.getMsg());
+    private void onJournalUpdateResult(final InteractionResultChain chain) {
+        InteractionResult result = chain.getCurrent();
+        if (result == null) return;
+
+        showMsgAlert(result.getMsg(), chain);
         hintModule.showHintOnce(R.id.first_journal_message_hint);
     }
 
-    private void onMessageResult(final InteractionResult result) {
-        showMsg(result.getMsg());
+    private void onMessageResult(final InteractionResultChain chain) {
+        InteractionResult result = chain.getCurrent();
+        if (result == null) return;
+
+        showMsgAlert(result.getMsg(), chain);
     }
 
-    private void onHintResult(final InteractionResult result) {
+    private void onHintResult(final InteractionResultChain chain) {
+        InteractionResult result = chain.getCurrent();
+        if (result == null) return;
+
         hintModule.showHintOnce(result.getEntityID());
+        chain.onNext();
     }
 
-    private void onNextPurposeResult(final InteractionResult result) {
+    private void onNextPurposeResult(final InteractionResultChain chain) {
+        InteractionResult result = chain.getCurrent();
+        if (result == null) return;
         setPurpose(result.getMsg());
-    }
-
-    private void showMsg(final String msg) {
-        showMsgAlert(msg);
+        chain.onNext();
     }
 
     private void showMsgAlert(final String msg) {
+        showMsgAlert(msg, null);
+    }
+
+    private void showMsgAlert(final String msg, final InteractionResultChain chain) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(msg)
                 .setTitle(R.string.alert_last_message_title)
@@ -845,6 +849,9 @@ public class ARActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();
                                 checkAndRequestPermissions();
+                                if (chain != null) {
+                                    chain.onNext();
+                                }
                             }
                         });
 
@@ -955,7 +962,6 @@ public class ARActivity extends AppCompatActivity {
         }
         bottomNavigationView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener);
     }
-
 
     private void setToolBarByFragment(String fragmentTag) {
         if (QuestsListFragment.TAG.equals(fragmentTag)) {
@@ -1091,7 +1097,7 @@ public class ARActivity extends AppCompatActivity {
         alertDialog.show();
     }
 
-    private void showCongratulation() {
+    private void showCongratulation(final InteractionResultChain chain) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(R.string.congrat_msg_skull)
                 .setTitle(R.string.congrat_title)
@@ -1100,12 +1106,10 @@ public class ARActivity extends AppCompatActivity {
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();
-                                gameModule.getPlayer().release();
-                                gameModule.getCurrentInventory().clear();
-                                gameModule.getCurrentJournal().clear();
-                                gameModule.resetCurrentQuest();
+                                resetGameState();
                                 changeToFragmentLayout();
                                 selectFragment(questsListFragment, QuestsListFragment.TAG);
+                                chain.onNext();
                             }
                         });
         AlertDialog alertDialog = builder.create();
@@ -1116,7 +1120,7 @@ public class ARActivity extends AppCompatActivity {
         toInventoryBtn.clearAnimation();
     }
 
-    private void showDefeat() {
+    private void showDefeat(final InteractionResultChain chain) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(R.string.defeat_msg_skull)
                 .setTitle(R.string.defeat_title)
@@ -1125,15 +1129,10 @@ public class ARActivity extends AppCompatActivity {
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();
-                                gameModule.getPlayer().release();
-                                gameModule.getCurrentInventory().clear();
-                                gameModule.getCurrentJournal().clear();
-                                gameModule.resetCurrentQuest();
-                                //Intent intent = new Intent(ARActivity.this, MainActivity.class);
-                                //intent.setAction(QuestsListFragment.TAG);
-                                //startActivity(intent);
+                                resetGameState();
                                 changeToFragmentLayout();
                                 selectFragment(questsListFragment, QuestsListFragment.TAG);
+                                chain.onNext();
                             }
                         });
         AlertDialog alertDialog = builder.create();
@@ -1149,17 +1148,10 @@ public class ARActivity extends AppCompatActivity {
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();
-                                gameModule.getPlayer().release();
-                                gameModule.getCurrentInventory().clear();
-                                gameModule.getCurrentJournal().clear();
-                                gameModule.resetCurrentQuest();
+                                resetGameState();
+
                                 changeToFragmentLayout();
                                 selectFragment(questsListFragment, QuestsListFragment.TAG);
-
-                                gameModule.unloadCurrentScene();
-                                placeRendered = false;
-                                toJournalBtn.clearAnimation();
-                                toInventoryBtn.clearAnimation();
                                 hideSnackbarMessage();
                             }
                         });
@@ -1197,16 +1189,6 @@ public class ARActivity extends AppCompatActivity {
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
     }
-
-//    public void startTutorial() {
-//        selectFragment(questsListFragment, QuestsListFragment.TAG);
-////        questsListFragment.refreshItems();
-//        hintModule.clearHintShowHistory();
-//        hintModule.clearHints();
-//        hintModule.setEnabled(true);
-//        setUpTutorial();
-//        hintModule.showHintChainOnce(R.id.quests_list_hint, R.id.current_quest_hint, R.id.settings_hint, R.id.start_quest_hint);
-//    }
 
     private void setUpTutorial() {
         questsListFragment.loadItems(questModule.getQuests());
@@ -1287,6 +1269,18 @@ public class ARActivity extends AppCompatActivity {
         changeToActivityLayout();
     }
 
+    private void resetGameState() {
+        gameModule.getPlayer().release();
+        gameModule.getCurrentInventory().clear();
+        gameModule.getCurrentJournal().clear();
+        gameModule.resetCurrentQuest();
+
+        gameModule.unloadCurrentScene();
+        placeRendered = false;
+        toJournalBtn.clearAnimation();
+        toInventoryBtn.clearAnimation();
+    }
+
     private <F extends Fragment> View.OnClickListener getSelectFragmentListener(final F fragment) {
         if (fragment == null) {
             throw new RuntimeException("tried to register null fragment");
@@ -1298,6 +1292,4 @@ public class ARActivity extends AppCompatActivity {
             }
         };
     }
-
-
 }

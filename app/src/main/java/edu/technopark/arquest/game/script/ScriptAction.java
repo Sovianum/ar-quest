@@ -4,6 +4,7 @@ package edu.technopark.arquest.game.script;
 import edu.technopark.arquest.game.InteractionResult;
 
 import java.util.Collection;
+import java.util.List;
 
 public class ScriptAction {
     public static class StateTransition {
@@ -25,9 +26,9 @@ public class ScriptAction {
     }
 
     private int id;
-    private Collection<InteractionResult> interactionResults;
+    private List<InteractionResult> interactionResults;
 
-    public ScriptAction(int id, Collection<InteractionResult> interactionResults) {
+    public ScriptAction(int id, List<InteractionResult> interactionResults) {
         this.id = id;
         this.interactionResults = interactionResults;
     }
@@ -36,7 +37,7 @@ public class ScriptAction {
         return id;
     }
 
-    public Collection<InteractionResult> getInteractionResults() {
+    public List<InteractionResult> getInteractionResults() {
         return interactionResults;
     }
 }

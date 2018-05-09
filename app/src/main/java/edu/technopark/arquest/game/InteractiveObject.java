@@ -11,6 +11,7 @@ import org.greenrobot.eventbus.EventBus;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -75,11 +76,10 @@ public class InteractiveObject extends Identifiable3D {
         return originalPosition;
     }
 
-    public Collection<InteractionResult> interact(final InteractionArgument argument) {
+    public List<InteractionResult> interact(final InteractionArgument argument) {
         if (!isEnabled()) {
             return CollectionUtils.singleItemList(InteractionResult.errorResult(""));
         }
-        Log.e("INTERACTION", getName());
         return action.act(argument);
     }
 
@@ -102,7 +102,7 @@ public class InteractiveObject extends Identifiable3D {
     public Action getActionFromStates() {
         return new Action() {
             @Override
-            public Collection<InteractionResult> act(InteractionArgument argument) {
+            public List<InteractionResult> act(InteractionArgument argument) {
                 ObjectState currState = states.get(currentStateID);
                 ScriptAction matchingAction = currState.getMatchingAction(argument.getItems(), argument.getStrings());
                 if (matchingAction != null) {

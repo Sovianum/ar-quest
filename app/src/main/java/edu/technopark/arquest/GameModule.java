@@ -261,9 +261,7 @@ public class GameModule {
         } else {
             argument = new InteractionArgument(null, null);
         }
-        for (InteractionResult result : lastCollision.object.interact(argument)) {
-            EventBus.getDefault().post(result);
-        }
+        EventBus.getDefault().post(lastCollision.object.interact(argument));
     }
 
     public void returnToInventory() {
@@ -274,9 +272,7 @@ public class GameModule {
         Item item = player.getItem();
         if (item != null) {
             argument = new InteractionArgument(null, Collections.singletonList(new Slot.RepeatedItem(item)));
-            for (InteractionResult result : lastCollision.object.interact(argument)) {
-                EventBus.getDefault().post(result);
-            }
+            EventBus.getDefault().post(lastCollision.object.interact(argument));
         }
     }
 
@@ -304,20 +300,22 @@ public class GameModule {
     }
 
     @Subscribe
-    public void handleInteractionResult(final InteractionResult result) {
-        switch (result.getType()) {
-            case TRANSITIONS:
-                onTransitionsResult(result);
-                break;
-            case NEW_ITEMS:
-                onNewItemsResult(result);
-                break;
-            case TAKE_ITEMS:
-                onTakeItemsResult(result);
-                break;
-            case JOURNAL_RECORD:
-                onJournalUpdateResult(result);
-                break;
+    public void handleInteractionResults(final List<InteractionResult> results) {
+        for (InteractionResult result : results) {
+            switch (result.getType()) {
+                case TRANSITIONS:
+                    onTransitionsResult(result);
+                    break;
+                case NEW_ITEMS:
+                    onNewItemsResult(result);
+                    break;
+                case TAKE_ITEMS:
+                    onTakeItemsResult(result);
+                    break;
+                case JOURNAL_RECORD:
+                    onJournalUpdateResult(result);
+                    break;
+            }
         }
     }
 
