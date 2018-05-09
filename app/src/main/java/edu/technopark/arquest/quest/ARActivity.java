@@ -75,6 +75,7 @@ import edu.technopark.arquest.quest.place.PlaceFragment;
 import edu.technopark.arquest.quest.quests.QuestsListFragment;
 import edu.technopark.arquest.settings.SettingsFragment;
 import edu.technopark.arquest.ui.ButtonBounceInterpolator;
+import edu.technopark.arquest.ui.ButtonBounceRepeatedInterpolator;
 
 public class ARActivity extends AppCompatActivity {
     public static final String TAG = ARActivity.class.getSimpleName();
@@ -185,19 +186,19 @@ public class ARActivity extends AppCompatActivity {
         public void onQuestReact(final Quest quest) {
             final String msg;
             boolean needLoad;
+            boolean needSelectFragment = true;
             Quest currQuest = gameModule.getCurrentQuest();
 
             if (quest == null) {
                 msg = "Попытка загрузить null-квест";
                 needLoad = false;
+                needSelectFragment = false;
             } else if (currQuest == null) {
                 needLoad = true;
                 msg = "Вы выбрали квест " + quest.getTitle();
-                questFragment.setQuest(quest);
             } else {
                 needLoad = quest.getId() != currQuest.getId();
                 msg = needLoad ? "Вы выбрали квест " + quest.getTitle() : "Вы уже играете в этот квест";
-                questFragment.setQuest(quest);
             }
             if (needLoad) {
                 Slot currInventory = gameModule.getCurrentInventory();
@@ -214,8 +215,13 @@ public class ARActivity extends AppCompatActivity {
                 }
 
                 gameModule.setCurrentQuest(quest);
-                selectFragment(questFragment, QuestFragment.TAG); //add help?
             }
+
+            if (needSelectFragment) {
+                questFragment.setQuest(quest);
+                selectFragment(questFragment, QuestFragment.TAG);
+            }
+
 
             ARActivity.this.runOnUiThread(new Runnable() {
                 @Override
@@ -435,6 +441,14 @@ public class ARActivity extends AppCompatActivity {
             }
         }
         setFirstLaunch(false);
+
+
+        if (gameModule.isWithAR()) {
+            gameModule.setCurrentQuest(questModule.getIntroQuest());
+//            gameModule.setCurrentPlace(questModule.getIntroPlace());
+            changeToActivityLayout();
+            return;
+        }
     }
 
     @Override
@@ -576,7 +590,7 @@ public class ARActivity extends AppCompatActivity {
         switch (result.getType()) {
             case NEW_ITEMS:
                 onNewItemsResult(chain);
-                bounceButton(toInventoryBtn);
+                bounceButtonRepeated(toInventoryBtn);
                 break;
             case TAKE_ITEMS:
                 onTakeItemsResult(chain);
@@ -584,7 +598,7 @@ public class ARActivity extends AppCompatActivity {
                 break;
             case JOURNAL_RECORD:
                 onJournalUpdateResult(chain);
-                bounceButton(toJournalBtn);
+                bounceButtonRepeated(toJournalBtn);
                 break;
             case MESSAGE:
                 onMessageResult(chain);
@@ -641,6 +655,12 @@ public class ARActivity extends AppCompatActivity {
     public void bounceButton(View view) {
         final Animation bounceAnim = AnimationUtils.loadAnimation(this, R.anim.bounce_button);
         bounceAnim.setInterpolator(new ButtonBounceInterpolator(0.2, 20));
+        view.startAnimation(bounceAnim);
+    }
+
+    public void bounceButtonRepeated(View view) {
+        final Animation bounceAnim = AnimationUtils.loadAnimation(this, R.anim.bounce_button_repeated);
+        bounceAnim.setInterpolator(new ButtonBounceRepeatedInterpolator(0.4, 2));
         view.startAnimation(bounceAnim);
     }
 
@@ -706,28 +726,28 @@ public class ARActivity extends AppCompatActivity {
         hintModule.replaceHint(R.id.journal_btn_hint, getARScreenHint(new Function<ShowcaseView, Void>() {
             @Override
             public Void apply(@NonNull ShowcaseView input) {
-                bounceButton(toJournalBtn);
+                bounceButtonRepeated(toJournalBtn);
                 return null;
             }
         }));
         hintModule.replaceHint(R.id.inventory_btn_hint, getARScreenHint(new Function<ShowcaseView, Void>() {
             @Override
             public Void apply(@NonNull ShowcaseView input) {
-                bounceButton(toInventoryBtn);
+                bounceButtonRepeated(toInventoryBtn);
                 return null;
             }
         }));
         hintModule.replaceHint(R.id.first_item_hint, getARScreenHint(new Function<ShowcaseView, Void>() {
             @Override
             public Void apply(@NonNull ShowcaseView input) {
-                bounceButton(toInventoryBtn);
+                bounceButtonRepeated(toInventoryBtn);
                 return null;
             }
         }));
         hintModule.replaceHint(R.id.first_journal_message_hint, getARScreenHint(new Function<ShowcaseView, Void>() {
             @Override
             public Void apply(@NonNull ShowcaseView input) {
-                bounceButton(toJournalBtn);
+                bounceButtonRepeated(toJournalBtn);
                 return null;
             }
         }));
@@ -966,9 +986,11 @@ public class ARActivity extends AppCompatActivity {
     private void setToolBarByFragment(String fragmentTag) {
         if (QuestsListFragment.TAG.equals(fragmentTag)) {
             toolBar.setTitle(getString(R.string.quest_list_fragment_title));
+            clearNavigationIcon();
 
         } else if (QuestFragment.TAG.equals(fragmentTag)) {
             toolBar.setTitle(getString(R.string.quest_fragment_title));
+            clearNavigationIcon();
 
         } else if (JournalFragment.TAG.equals(fragmentTag)) {
             toolBar.setTitle(getString(R.string.journal_fragment_title));
@@ -984,6 +1006,7 @@ public class ARActivity extends AppCompatActivity {
 
         } else if (SettingsFragment.TAG.equals(fragmentTag)) {
             toolBar.setTitle(getString(R.string.settings_fragment_title));
+            clearNavigationIcon();
         }
     }
 
@@ -997,6 +1020,11 @@ public class ARActivity extends AppCompatActivity {
                 toolBar.setNavigationOnClickListener(null);
             }
         });
+    }
+
+    private void clearNavigationIcon() {
+        toolBar.setNavigationIcon(null);
+        toolBar.setNavigationOnClickListener(null);
     }
 
     private void interactBtnAndTextViewSetEnable(boolean enable) {

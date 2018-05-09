@@ -204,7 +204,7 @@ public class SkullPlaceConstructor extends PlaceConstructor {
                 new ScriptAction(
                         1,
                         Collections.singletonList(
-                                InteractionResult.journalRecordResult("Череп сказал: Быть или не быть?.. Так, в чем вопрос, чувак?")
+                                InteractionResult.journalRecordResult("Череп сказал: Быть или не быть?.. Так, в чем же вопрос?")
                         )
                 )
         ));
@@ -220,7 +220,7 @@ public class SkullPlaceConstructor extends PlaceConstructor {
                 new ScriptAction(
                         1,
                         Arrays.asList(
-                                InteractionResult.journalRecordResult("Череп сказал: Карта? Я бы рад, да в горле что-то совсем пересохло. Принеси мне чего-нибудь выпить, чувак."),
+                                InteractionResult.journalRecordResult("Череп сказал: Карта? Я бы рад, да в горле что-то совсем пересохло. Принеси мне чего-нибудь выпить, приятель."),
                                 InteractionResult.nextPurposeResult("Дайте черепу бутылку с выпивкой. Она должна быть неподалеку"),
                                 InteractionResult.transitionsResult(Collections.singletonList(
                                         new ScriptAction.StateTransition(skull.getName(), 3)
@@ -273,8 +273,8 @@ public class SkullPlaceConstructor extends PlaceConstructor {
                 new ScriptAction(
                         1,
                         Arrays.asList(
-                                InteractionResult.journalRecordResult("Череп сказал: Во! Теперь ништяк! Тока шлем теперь мой найди, и лады."),
-                                InteractionResult.journalRecordResult("Вы думаете: Мысль: достала меня эта костяшка. Может, привести аргумент посильнее? Где-то поблизости я тут видел топор..."),
+                                InteractionResult.journalRecordResult("Череп сказал: Другое дело! Только шлем теперь мой найди, тогда получишь карту."),
+                                InteractionResult.journalRecordResult("Вы думаете: достала меня эта костяшка. Может, привести аргумент посильнее? Где-то поблизости я тут видел топор..."),
                                 InteractionResult.nextPurposeResult("Раздобудьте этой костяшке шлем... Ну, или топор - по настроению)"),
                                 InteractionResult.transitionsResult(Arrays.asList(
                                         new ScriptAction.StateTransition(skull.getName(), 5),
@@ -305,7 +305,7 @@ public class SkullPlaceConstructor extends PlaceConstructor {
                 new ScriptAction(
                         1,
                         Arrays.asList(
-                                InteractionResult.journalRecordResult("Череп сказал: Отлично! Карта? Какая карта? Не, чувак, ты что-то спутал...)"),
+                                InteractionResult.journalRecordResult("Череп сказал: Отлично! Карта? Какая карта? В шлеме тебя совсем не слышно."),
                                 InteractionResult.journalRecordResult("Вы подумали: Ну, все, пора доставать топор"),
                                 InteractionResult.nextPurposeResult("Примените к черепу топор"),
                                 InteractionResult.transitionsResult(
@@ -334,7 +334,7 @@ public class SkullPlaceConstructor extends PlaceConstructor {
                 new ScriptAction(
                         3,
                         Collections.singletonList(
-                                InteractionResult.messageResult("Череп сказал: Шлем бы мне, а то дождь весь мозг пропапал")
+                                InteractionResult.messageResult("Череп сказал: Шлем бы мне, а то дождь весь мозг прокапал")
                         )
                 )
         ));
