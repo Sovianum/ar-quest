@@ -72,6 +72,7 @@ import edu.technopark.arquest.quest.place.PlaceFragment;
 import edu.technopark.arquest.quest.quests.QuestsListFragment;
 import edu.technopark.arquest.settings.SettingsFragment;
 import edu.technopark.arquest.ui.ButtonBounceInterpolator;
+import edu.technopark.arquest.ui.ButtonBounceRepeatedInterpolator;
 
 public class ARActivity extends AppCompatActivity {
     public static final String TAG = ARActivity.class.getSimpleName();
@@ -573,7 +574,7 @@ public class ARActivity extends AppCompatActivity {
         switch (interactionResult.getType()) {
             case NEW_ITEMS:
                 onNewItemsResult(interactionResult);
-                bounceButton(toInventoryBtn);
+                bounceButtonRepeated(toInventoryBtn);
                 break;
             case TAKE_ITEMS:
                 onTakeItemsResult(interactionResult);
@@ -581,7 +582,7 @@ public class ARActivity extends AppCompatActivity {
                 break;
             case JOURNAL_RECORD:
                 onJournalUpdateResult(interactionResult);
-                bounceButton(toJournalBtn);
+                bounceButtonRepeated(toJournalBtn);
                 break;
             case MESSAGE:
                 onMessageResult(interactionResult);
@@ -645,6 +646,12 @@ public class ARActivity extends AppCompatActivity {
     public void bounceButton(View view) {
         final Animation bounceAnim = AnimationUtils.loadAnimation(this, R.anim.bounce_button);
         bounceAnim.setInterpolator(new ButtonBounceInterpolator(0.2, 20));
+        view.startAnimation(bounceAnim);
+    }
+
+    public void bounceButtonRepeated(View view) {
+        final Animation bounceAnim = AnimationUtils.loadAnimation(this, R.anim.bounce_button_repeated);
+        bounceAnim.setInterpolator(new ButtonBounceRepeatedInterpolator(0.4, 2));
         view.startAnimation(bounceAnim);
     }
 
@@ -726,14 +733,14 @@ public class ARActivity extends AppCompatActivity {
         hintModule.replaceHint(R.id.journal_btn_hint, getARScreenHint(new Function<ShowcaseView, Void>() {
             @Override
             public Void apply(@NonNull ShowcaseView input) {
-                bounceButton(toJournalBtn);
+                bounceButtonRepeated(toJournalBtn);
                 return null;
             }
         }));
         hintModule.replaceHint(R.id.inventory_btn_hint, getARScreenHint(new Function<ShowcaseView, Void>() {
             @Override
             public Void apply(@NonNull ShowcaseView input) {
-                bounceButton(toInventoryBtn);
+                bounceButtonRepeated(toInventoryBtn);
                 return null;
             }
         }));
@@ -748,14 +755,14 @@ public class ARActivity extends AppCompatActivity {
         hintModule.replaceHint(R.id.first_item_hint, getARScreenHint(new Function<ShowcaseView, Void>() {
             @Override
             public Void apply(@NonNull ShowcaseView input) {
-                bounceButton(toInventoryBtn);
+                bounceButtonRepeated(toInventoryBtn);
                 return null;
             }
         }));
         hintModule.replaceHint(R.id.first_journal_message_hint, getARScreenHint(new Function<ShowcaseView, Void>() {
             @Override
             public Void apply(@NonNull ShowcaseView input) {
-                bounceButton(toJournalBtn);
+                bounceButtonRepeated(toJournalBtn);
                 return null;
             }
         }));
