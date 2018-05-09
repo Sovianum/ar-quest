@@ -426,22 +426,12 @@ public class ARActivity extends AppCompatActivity {
         hintModule.setActivity(this);
         if (viroView != null) viroView.onActivityStarted(this);
 
-        if (gameModule.isWithAR()) {
-            gameModule.setCurrentQuest(questModule.getIntroQuest());
-//            gameModule.setCurrentPlace(questModule.getIntroPlace());
-            changeToActivityLayout();
-            return;
-        }
-
         changeToFragmentLayout();
         selectFragment(questsListFragment, QuestsListFragment.TAG);
         setToolBarByFragment(QuestsListFragment.TAG);
         bottomNavigationView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener);
         BottomNavigationViewHelper.disableShiftMode(bottomNavigationView);
         showGreeting();
-        if (!isFirstLaunch()) {
-//            showTutorialSuggestion = false;
-        }
 
         if (showTutorialSuggestion && PermissionHelper.hasPermissions(this)) {
             if (showTutorialSuggestion && !hintModule.getCallerSet().contains(TAG)) {
@@ -777,7 +767,10 @@ public class ARActivity extends AppCompatActivity {
         }
         showSnackbarMessage(purpose);
 //        messageSnackbar.setText(purpose);
-        gameModule.getCurrentQuest().setCurrPurpose(purpose);
+        Quest quest = gameModule.getCurrentQuest();
+        if (quest != null) {
+            quest.setCurrPurpose(purpose);
+        }
     }
 
     private HintModule.Hint getARScreenHint(final Function<ShowcaseView, Void> callable) {
@@ -1082,16 +1075,14 @@ public class ARActivity extends AppCompatActivity {
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();
-                                startTutorial();
-                                //TODO:tutorial start
-
+                                gameModule.setCurrentQuest(questModule.getIntroQuest());
+                                changeToActivityLayout();
                             }
-                        });
-        builder.setNegativeButton(android.R.string.no,
+                        })
+                .setNegativeButton(android.R.string.no,
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         dialog.cancel();
-
                     }
                 });
 
@@ -1207,15 +1198,15 @@ public class ARActivity extends AppCompatActivity {
         alertDialog.show();
     }
 
-    public void startTutorial() {
-        selectFragment(questsListFragment, QuestsListFragment.TAG);
-//        questsListFragment.refreshItems();
-        hintModule.clearHintShowHistory();
-        hintModule.clearHints();
-        hintModule.setEnabled(true);
-        setUpTutorial();
-        hintModule.showHintChainOnce(R.id.quests_list_hint, R.id.current_quest_hint, R.id.settings_hint, R.id.start_quest_hint);
-    }
+//    public void startTutorial() {
+//        selectFragment(questsListFragment, QuestsListFragment.TAG);
+////        questsListFragment.refreshItems();
+//        hintModule.clearHintShowHistory();
+//        hintModule.clearHints();
+//        hintModule.setEnabled(true);
+//        setUpTutorial();
+//        hintModule.showHintChainOnce(R.id.quests_list_hint, R.id.current_quest_hint, R.id.settings_hint, R.id.start_quest_hint);
+//    }
 
     private void setUpTutorial() {
         questsListFragment.loadItems(questModule.getQuests());
