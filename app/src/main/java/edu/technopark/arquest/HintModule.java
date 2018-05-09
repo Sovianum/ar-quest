@@ -152,7 +152,7 @@ public class HintModule {
             @Override
             public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
                 if (!enabled || localCounter >= hintIDs.length) {
-                    sv.setOnShowcaseEventListener(null);
+//                    sv.setOnShowcaseEventListener(null);
 
                     if (isOnce) {
                         for (int id : hintIDs) {
@@ -196,9 +196,9 @@ public class HintModule {
         if (!enabled) return;
 
         Hint hint = setUpHint(hintID, outerListener);
-        if (hint != null) {
-            sv.show();
-        }
+//        if (hint != null) {
+//            sv.show();
+//        }
     }
 
     private Hint setUpHint(int hintName, final OnShowcaseEventListener outerListener) {
