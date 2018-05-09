@@ -816,7 +816,14 @@ public class ARActivity extends AppCompatActivity {
         if (result == null) return;
 
         Slot.RepeatedItem repeatedItem = result.getItems();
-        showMsgAlert(
+        /*showMsgAlert(
+                String.format(
+                        Locale.ENGLISH,
+                        "%d %s изъяты из инвентаря",
+                        repeatedItem.getCnt(), repeatedItem.getItem().getName()
+                ), chain
+        );*/
+        showMsgToast(
                 String.format(
                         Locale.ENGLISH,
                         "%d %s изъяты из инвентаря",
@@ -853,6 +860,10 @@ public class ARActivity extends AppCompatActivity {
         if (result == null) return;
         setPurpose(result.getMsg());
         chain.onNext();
+    }
+
+    private void showMsgToast(final String msg, final InteractionResultChain chain) {
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 
     private void showMsgAlert(final String msg) {
