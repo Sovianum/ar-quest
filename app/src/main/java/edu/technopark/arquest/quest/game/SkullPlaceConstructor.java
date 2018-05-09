@@ -356,7 +356,7 @@ public class SkullPlaceConstructor extends PlaceConstructor {
                 new ScriptAction(
                         1,
                         Arrays.asList(
-                                InteractionResult.journalRecordResult("Череп сказал: Эй, да чего ты такой нервный?! На, смотри!"),
+                                InteractionResult.journalRecordResult("Череп сказал: Эй, да чего ты такой нервный?! На, смотри карту!"),
                                 InteractionResult.journalRecordResult("Вы подумали: сразу бы так"),
                                 InteractionResult.nextPurposeResult("Вы получили данные о новых квестах"),
                                 InteractionResult.transitionsResult(
