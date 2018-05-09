@@ -83,7 +83,8 @@ public class FlyingAnimator {
         animatingPast = true;
         Orientation newOrientation = orientationQueue.poll();
         long newTime = timeQueue.poll();
-        long timeDelta = (newTime - lastTime) / 5;
+//        long timeDelta = (newTime - lastTime) / 5;
+        long timeDelta = 0;
         lastTime = newTime;
 
         AnimationTransaction.begin();
