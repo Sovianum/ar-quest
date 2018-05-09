@@ -63,6 +63,17 @@ public class ItemsListFragment extends Fragment {
         refreshItems();
     }
 
+    public void refreshItems() {
+        if (gameModule == null) {
+            return;
+        }
+        if (gameModule.getCurrentInventory() == null) { //stubs for compatibility!!!
+            loadItems(new ArrayList<Item>());
+        } else {
+            loadItems(gameModule.getCurrentInventory().getItems());
+        }
+    }
+
     public void loadItems(List<Item> items) {
         if (adapter != null) {
             adapter.setItems(items);
@@ -72,13 +83,4 @@ public class ItemsListFragment extends Fragment {
     public void setOnItemClickListener(ItemAdapter.OnItemClickListener listener) {
         this.onItemClickListener = listener;
     }
-
-    private void refreshItems() {
-        if (gameModule.getCurrentInventory() == null) { //stubs for compatibility!!!
-            loadItems(new ArrayList<Item>());
-        } else {
-            loadItems(gameModule.getCurrentInventory().getItems());
-        }
-    }
-
 }

@@ -119,6 +119,14 @@ public class ARActivity extends AppCompatActivity {
         }
     };
 
+//    private ARHitTestListener renderLoopEmulator = new ARHitTestListener() {
+//        @Override
+//        public void onHitTestFinished(ARHitTestResult[] arHitTestResults) {
+//            viroView.get
+//            EventBus.getDefault().post(new CameraUpdateEvent(position, rotation, forward));
+//        }
+//    };
+
     ViroViewARCore viroView;
 
     @BindView(R.id.inventory_btn)
@@ -630,11 +638,6 @@ public class ARActivity extends AppCompatActivity {
     @OnClick(R.id.close_btn)
     public void onCloseClickListener() {
         showCancelAlert();
-        //Intent intent = new Intent(this, MainActivity.class);
-        //intent.setAction(QuestFragment.TAG);
-        //startActivity(intent);
-        //overridePendingTransition( R.anim.from_down_to_center, R.anim.from_center_to_up_anim);
-        //finish();
     }
 
     public void bounceButton(View view) {
@@ -862,6 +865,7 @@ public class ARActivity extends AppCompatActivity {
     }
 
     private void selectFragment(Fragment fragment, String tag) {
+        itemsListFragment.refreshItems();
         showOrHideBars(tag);
         FragmentManager fragmentManager = getSupportFragmentManager();
         int index = fragmentManager.getBackStackEntryCount() - 1;
