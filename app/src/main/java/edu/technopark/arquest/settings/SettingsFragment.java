@@ -11,28 +11,26 @@ import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import javax.inject.Inject;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import edu.technopark.arquest.App;
 import edu.technopark.arquest.GeolocationService;
 import edu.technopark.arquest.R;
 import edu.technopark.arquest.network.NetworkModule;
 
-import javax.inject.Inject;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
 public class SettingsFragment extends Fragment {
     @Inject
     NetworkModule networkModule;
 
-    @BindView(R.id.logout_btn)
-    Button logoutButton;
+    //@BindView(R.id.logout_btn)
+    //Button logoutButton;
 
     @BindView(R.id.switch_geoservice_btn)
     Switch switchGeo;
@@ -54,9 +52,9 @@ public class SettingsFragment extends Fragment {
         App.getAppComponent().inject(this);
         LinearLayout view = (LinearLayout) inflater.inflate(R.layout.fragment_settings, container, false);
         ButterKnife.bind(this, view);
-        if (onLogoutClickListener != null) {
-            logoutButton.setOnClickListener(onLogoutClickListener);
-        }
+        //if (onLogoutClickListener != null) {
+        //    logoutButton.setOnClickListener(onLogoutClickListener);
+        //}
         setForeground();
         switchGeo.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -124,11 +122,11 @@ public class SettingsFragment extends Fragment {
         editor.apply();
     }
 
-    public void setOnLogoutClickListener(View.OnClickListener listener) {
-        onLogoutClickListener = listener;
-        if (logoutButton != null) {
-            logoutButton.setOnClickListener(onLogoutClickListener);
-        }
-    }
+    //public void setOnLogoutClickListener(View.OnClickListener listener) {
+    //    onLogoutClickListener = listener;
+    //    if (logoutButton != null) {
+    //        logoutButton.setOnClickListener(onLogoutClickListener);
+    //    }
+    //}
 
 }

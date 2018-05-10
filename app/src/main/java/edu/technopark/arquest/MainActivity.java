@@ -270,7 +270,7 @@ public class MainActivity extends AppCompatActivity {
         //}
 
         settingsFragment = new SettingsFragment();
-        settingsFragment.setOnLogoutClickListener(onLogoutClickListener);
+        //settingsFragment.setOnLogoutClickListener(onLogoutClickListener);
 
         //startService(new Intent(this, GeolocationService.class));
 

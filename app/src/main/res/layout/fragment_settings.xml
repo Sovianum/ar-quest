@@ -25,12 +25,12 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/spaces_login" />
 
-    <Button
+    <!--<Button
         android:id="@+id/logout_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/logout_btn"
         android:textColor="@color/red"
-        style="?android:attr/borderlessButtonStyle" />
+        style="?android:attr/borderlessButtonStyle" />-->
 
 </LinearLayout>
