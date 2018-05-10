@@ -3,7 +3,6 @@ package edu.technopark.arquest.quest.game;
 import com.viro.core.Object3D;
 import com.viro.core.PhysicsBody;
 import com.viro.core.PhysicsShapeBox;
-import com.viro.core.PhysicsShapeSphere;
 import com.viro.core.Vector;
 
 import java.util.Arrays;
@@ -158,7 +157,7 @@ public class IntroPlaceConstructor extends PlaceConstructor {
         item = new Item(
                 100, "Скелет", "Скелет",
                 new VisualResource(Object3D.Type.FBX).setModelUri(asset("skeleton.vrx")),
-                "skeleton.jpg"
+                "skeleton.png"
         );
         item.setUniformScale(smallScale);
 
