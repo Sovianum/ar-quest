@@ -38,7 +38,7 @@ public class IntroPlaceConstructor extends PlaceConstructor {
 
         Place place = new Place();
         place.loadInteractiveObjects(Collections.singletonList(npc));
-        place.setStartPurpose("Подойдите к неписю и поговорите с ним");
+        place.setStartPurpose("Подойдите к обучателю и поговорите с ним");
         return place;
     }
 
@@ -49,12 +49,12 @@ public class IntroPlaceConstructor extends PlaceConstructor {
                         1,
                         Arrays.asList(
                                 InteractionResult.journalRecordResult(
-                                        "Непись сказал: Здравствуй, благородный искатель приключений. Я сориентирую тебя в нашем мире." +
+                                        "Обучатель сказал: Здравствуй, благородный искатель приключений. Я сориентирую тебя в нашем мире." +
                                         "Все действия встреченных тобой существ записываются в журнал. Эту мою фразу ты тоже сможешь в нем увидеть." +
                                         "Посмотри в свой журнал и поговори со мной еще раз для того, чтобы начать работать с инвентарем."
                                 ),
                                 InteractionResult.nextPurposeResult(
-                                        "Посмотрите в свой журнал и еще раз поговорите с неписем"
+                                        "Посмотрите в свой журнал и еще раз поговорите с обучателем"
                                 ),
                                 InteractionResult.transitionsResult(Collections.singletonList(
                                         new ScriptAction.StateTransition(npc.getName(), 2)
@@ -75,10 +75,10 @@ public class IntroPlaceConstructor extends PlaceConstructor {
                         1,
                         Arrays.asList(
                                 InteractionResult.journalRecordResult(
-                                        "Непись сказал: Кажется, у тебя в инвентаре моя копия. Дай мне на нее посмотреть"
+                                        "Обучатель сказал: Кажется, у тебя в инвентаре моя копия. Дай мне на нее посмотреть"
                                 ),
                                 InteractionResult.nextPurposeResult(
-                                        "Возьмите из инвентаря копию скелета и покажите ее неписю"
+                                        "Возьмите из инвентаря копию скелета и покажите ее обучателю"
                                 ),
                                 InteractionResult.newItemsResult(new Slot.RepeatedItem(item)),
                                 InteractionResult.transitionsResult(Collections.singletonList(
@@ -100,10 +100,10 @@ public class IntroPlaceConstructor extends PlaceConstructor {
                         1,
                         Arrays.asList(
                                 InteractionResult.journalRecordResult(
-                                        "Непись сказал: Да, и правда, один в один. Оставь его себе и поговори со мной еще раз"
+                                        "Обучатель сказал: Да, и правда, один в один. Оставь его себе и поговори со мной еще раз"
                                 ),
                                 InteractionResult.nextPurposeResult(
-                                        "Положите предмет обратно в инвентарь и еще раз поговорите с неписем"
+                                        "Положите предмет обратно в инвентарь и еще раз поговорите с обучателем"
                                 ),
                                 InteractionResult.transitionsResult(Collections.singletonList(
                                         new ScriptAction.StateTransition(npc.getName(), 4)
@@ -114,7 +114,7 @@ public class IntroPlaceConstructor extends PlaceConstructor {
                         2,
                         Collections.singletonList(
                                 InteractionResult.journalRecordResult(
-                                        "Непись сказал: Сначала достань мою копию из инвентаря"
+                                        "Обучатель сказал: Сначала достань мою копию из инвентаря"
                                 )
                         )
                 )
@@ -162,7 +162,7 @@ public class IntroPlaceConstructor extends PlaceConstructor {
         item.setUniformScale(smallScale);
 
         npc = new InteractiveObject(
-                101, "Непись", "Непись", Collections.singletonList(item)
+                101, "Обучающий персонаж", "Обучающий персонаж", Collections.singletonList(item)
         );
         npc.setVisualResource(
                 new VisualResource(Object3D.Type.FBX).setModelUri(asset("skeleton.vrx"))
