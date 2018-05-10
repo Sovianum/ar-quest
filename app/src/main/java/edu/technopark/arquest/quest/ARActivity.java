@@ -56,7 +56,6 @@ import edu.technopark.arquest.BottomNavigationViewHelper;
 import edu.technopark.arquest.GameModule;
 import edu.technopark.arquest.GeolocationService;
 import edu.technopark.arquest.HintModule;
-import edu.technopark.arquest.MainActivity;
 import edu.technopark.arquest.PermissionHelper;
 import edu.technopark.arquest.R;
 import edu.technopark.arquest.common.ContinuousAction;
@@ -1239,7 +1238,6 @@ public class ARActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();
                                 resetGameState();
-
                                 changeToFragmentLayout();
                                 selectFragment(questsListFragment, QuestsListFragment.TAG);
                                 hideSnackbarMessage();
@@ -1253,29 +1251,6 @@ public class ARActivity extends AppCompatActivity {
                 });
 
 
-        AlertDialog alertDialog = builder.create();
-        alertDialog.show();
-    }
-
-    private void showCancel() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(R.string.congrat_msg_skull)
-                .setTitle(R.string.congrat_title)
-                .setCancelable(false)
-                .setPositiveButton(android.R.string.yes,
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-                                gameModule.getPlayer().release();
-                                gameModule.getCurrentInventory().clear();
-                                gameModule.getCurrentJournal().clear();
-                                gameModule.resetCurrentQuest();
-                                Intent intent = new Intent(ARActivity.this, MainActivity.class);
-                                intent.setAction(QuestsListFragment.TAG);
-                                startActivity(intent);
-
-                            }
-                        });
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
     }
@@ -1369,6 +1344,7 @@ public class ARActivity extends AppCompatActivity {
         placeRendered = false;
         toJournalBtn.clearAnimation();
         toInventoryBtn.clearAnimation();
+        stopPhoneWithHandAnimation();
     }
 
     private <F extends Fragment> View.OnClickListener getSelectFragmentListener(final F fragment) {
