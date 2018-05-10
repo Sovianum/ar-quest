@@ -25,6 +25,23 @@
         android:toYDelta="-10%p"
         android:duration="1000" />
 
+    <!--<scale
+        android:startOffset="2002"
+        android:fromXScale="1.0"
+        android:toXScale="0.8"
+        android:fromYScale="1.0"
+        android:toYScale="0.8"
+        android:duration="1000"/>
+
+
+    <scale
+        android:startOffset="3003"
+        android:fromXScale="0.8"
+        android:toXScale="1.0"
+        android:fromYScale="0.8"
+        android:toYScale="1.0"
+        android:duration="1500"/>-->
+
     <translate
         android:startOffset="3003"
         android:fromYDelta="0%p"

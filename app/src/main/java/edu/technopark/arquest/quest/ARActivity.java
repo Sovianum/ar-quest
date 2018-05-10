@@ -115,7 +115,7 @@ public class ARActivity extends AppCompatActivity {
             // if found plane, stop tracking planes
             if (result != null){
                 snackbarAction.stopIfRunning();
-                stopPhoneWithHandAnimation();
+                stopHandWithPhoneAnimation();
                 gameModule.getScene().displayPointCloud(false);
                 gameModule.loadCurrentPlace(result.getPosition());
                 viroView.setCameraARHitTestListener(null);
@@ -686,7 +686,8 @@ public class ARActivity extends AppCompatActivity {
 
                 @Override
                 public void onAnimationEnd(Animation animation) {
-                    if (animateHandWithPhone && handWithPhoneImg != null) {
+                    if ((animateHandWithPhone) && (handWithPhoneImg != null) &&
+                            (handWithPhoneImg.getVisibility() != View.GONE)) {
                         handWithPhoneImg.startAnimation(animation);
                     }
                 }
@@ -700,8 +701,12 @@ public class ARActivity extends AppCompatActivity {
         }
     }
 
-    public void stopPhoneWithHandAnimation() {
+    public void stopHandWithPhoneAnimation() {
         animateHandWithPhone = false;
+        hideHandWithPhone();
+    }
+
+    public void hideHandWithPhone() {
         handWithPhoneImg.clearAnimation();
         handWithPhoneImg.setVisibility(View.GONE);
     }
@@ -985,7 +990,7 @@ public class ARActivity extends AppCompatActivity {
         findViewById(R.id.return_item_layout).setVisibility(View.GONE);
         findViewById(R.id.ar_fragment_container).setVisibility(View.VISIBLE);
         messageSnackbar.getView().setVisibility(View.GONE);
-        handWithPhoneImg.setVisibility(View.GONE);
+        hideHandWithPhone();
         inAR = false;
     }
 
@@ -1001,7 +1006,7 @@ public class ARActivity extends AppCompatActivity {
             snackbarAction.startIfNotRunning();
         }
         if (animateHandWithPhone) {
-            handWithPhoneImg.setVisibility(View.VISIBLE);
+            startHandWithPhoneAnimation();
         }
     }
 
@@ -1344,7 +1349,7 @@ public class ARActivity extends AppCompatActivity {
         placeRendered = false;
         toJournalBtn.clearAnimation();
         toInventoryBtn.clearAnimation();
-        stopPhoneWithHandAnimation();
+        hideHandWithPhone();
     }
 
     private <F extends Fragment> View.OnClickListener getSelectFragmentListener(final F fragment) {
