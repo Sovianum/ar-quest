@@ -38,7 +38,7 @@ public class IntroPlaceConstructor extends PlaceConstructor {
 
         Place place = new Place();
         place.loadInteractiveObjects(Collections.singletonList(npc));
-        place.setStartPurpose("Подойдите к обучателю и поговорите с ним (когда ты подойдешь достаточно близко, кнопка в центре станет зеленой)");
+        place.setStartPurpose("Подойдите к обучателю и поговорите с ним (кнопка в центре станет зеленой)");
         return place;
     }
 

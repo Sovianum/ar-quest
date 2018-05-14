@@ -441,7 +441,7 @@ public class ARActivity extends AppCompatActivity {
 
         if (showTutorialSuggestion && PermissionHelper.hasPermissions(this)) {
             if (showTutorialSuggestion && !hintModule.getCallerSet().contains(TAG)) {
-                showTutorialSuggestion();
+                showTutorialSuggestionStart();
                 showTutorialSuggestion = false;
                 hintModule.getCallerSet().add(TAG);
             }
@@ -526,7 +526,7 @@ public class ARActivity extends AppCompatActivity {
             showNoPermission();
         } else {
             if (showTutorialSuggestion && !hintModule.getCallerSet().contains(TAG)) {
-                showTutorialSuggestion();
+                showTutorialSuggestionStart();
                 showTutorialSuggestion = false;
                 hintModule.getCallerSet().add(TAG);
             }
@@ -1171,8 +1171,31 @@ public class ARActivity extends AppCompatActivity {
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();
-                                gameModule.setCurrentQuest(questModule.getIntroQuest());
-                                changeToActivityLayout();
+                                onTutorialAccept();
+                            }
+                        })
+                .setNegativeButton(android.R.string.no,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
+
+
+        alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    private void showTutorialSuggestionStart() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.help_message)
+                .setTitle(R.string.help_title)
+                .setCancelable(true)
+                .setPositiveButton(android.R.string.yes,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                                onTutorialAccept();
                             }
                         })
                 .setNegativeButton(android.R.string.no,
@@ -1189,6 +1212,13 @@ public class ARActivity extends AppCompatActivity {
 
         alertDialog = builder.create();
         alertDialog.show();
+    }
+
+    private void onTutorialAccept() {
+        Quest q = questModule.getIntroQuest();
+        gameModule.setCurrentQuest(q);
+        questFragment.setQuest(q);
+        changeToActivityLayout();
     }
 
     private void showCongratulation(final InteractionResultChain chain) {
