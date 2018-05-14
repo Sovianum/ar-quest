@@ -125,6 +125,7 @@
     <string name="quest_places_title_str">Место действия</string>
     <string name="quest_places_txt_str">Описание места действия</string>
     <string name="quest_description_str">Описание квеста</string>
+    <string name="Tutorial">Обучение</string>
 
 
 </resources>

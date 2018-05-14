@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
-    <!-- "Mark Favorite", should appear as action button if possible -->
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/tool_bar"
+    >
     <item
         android:id="@+id/action_help"
         android:icon="@drawable/ic_help_outline_white_24dp"
-        android:title="help"
+        android:title="@string/Tutorial"
         app:showAsAction="ifRoom"/>
 
     <!-- Settings, should always be in the overflow -->

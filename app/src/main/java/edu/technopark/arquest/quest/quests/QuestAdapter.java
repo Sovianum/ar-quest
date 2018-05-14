@@ -152,13 +152,14 @@ public class QuestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         cardHolder.expanderView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (cardHolder.descriptionView.getMaxLines() == cardHolder.defaultMaxLines) {
-                    cardHolder.descriptionView.setMaxLines(Integer.MAX_VALUE);
-                    cardHolder.expanderView.setText(R.string.hide_str);
-                } else {
-                    cardHolder.descriptionView.setMaxLines(cardHolder.defaultMaxLines);
-                    cardHolder.expanderView.setText(R.string.show_more_str);
-                }
+                startQuestClickListener.onQuestReact(quest);
+                //if (cardHolder.descriptionView.getMaxLines() == cardHolder.defaultMaxLines) {
+                //    cardHolder.descriptionView.setMaxLines(Integer.MAX_VALUE);
+                //    cardHolder.expanderView.setText(R.string.hide_str);
+                //} else {
+                //    cardHolder.descriptionView.setMaxLines(cardHolder.defaultMaxLines);
+                //    cardHolder.expanderView.setText(R.string.show_more_str);
+                //}
             }
         });
 

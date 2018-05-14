@@ -17,6 +17,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
@@ -140,8 +141,8 @@ public class ARActivity extends AppCompatActivity {
     @BindView(R.id.close_btn)
     ImageButton closeBtn;
 
-    @BindView(R.id.help_btn)
-    ImageButton helpBtn;
+    //@BindView(R.id.help_btn)
+    //ImageButton helpBtn;
 
     @BindView(R.id.inventory_help_text)
     TextView inventoryHelpTextView;
@@ -418,11 +419,19 @@ public class ARActivity extends AppCompatActivity {
         questsListFragment.setStartQuestCallback(startQuestCallback);
         settingsFragment = new SettingsFragment();
 
-        setSupportActionBar(toolBar);
+
         ButterKnife.bind(this);
+        setSupportActionBar(toolBar);
 
         changeToActivityLayout();
         setUpHints();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.tool_bar, menu);
+        setToolBarByFragment(QuestsListFragment.TAG);
+        return true;
     }
 
     @Override
@@ -652,10 +661,10 @@ public class ARActivity extends AppCompatActivity {
         selectFragmentFromAr(journalFragment, JournalFragment.TAG);
     }
 
-    @OnClick(R.id.help_btn)
-    public void onHelpClickListener() {
+    //@OnClick(R.id.help_btn)
+    //public void onHelpClickListener() {
 //        hintModule.showHintChain(R.id.interact_btn_hint, R.id.inventory_btn_hint, R.id.journal_btn_hint);
-    }
+    //}
 
     @OnClick(R.id.close_btn)
     public void onCloseClickListener() {
@@ -1049,27 +1058,50 @@ public class ARActivity extends AppCompatActivity {
         if (QuestsListFragment.TAG.equals(fragmentTag)) {
             toolBar.setTitle(getString(R.string.quest_list_fragment_title));
             clearNavigationIcon();
+            showHelpButton();
 
         } else if (QuestFragment.TAG.equals(fragmentTag)) {
             toolBar.setTitle(getString(R.string.quest_fragment_title));
             clearNavigationIcon();
+            showHelpButton();
 
         } else if (JournalFragment.TAG.equals(fragmentTag)) {
             toolBar.setTitle(getString(R.string.journal_fragment_title));
             goBackByNavigationIcon();
+            hideHelpButton();
 
         } else if (ItemsListFragment.TAG.equals(fragmentTag)) {
             toolBar.setTitle(getString(R.string.items_list_fragment));
             goBackByNavigationIcon();
+            hideHelpButton();
 
         } else if (PlaceFragment.TAG.equals(fragmentTag)) {
             toolBar.setTitle(getString(R.string.place_fragment_title));
             goBackByNavigationIcon();
+            hideHelpButton();
 
         } else if (SettingsFragment.TAG.equals(fragmentTag)) {
             toolBar.setTitle(getString(R.string.settings_fragment_title));
             clearNavigationIcon();
+            showHelpButton();
         }
+    }
+
+    private boolean needShowHelpIcon(String fragmentTag) {
+        if (QuestsListFragment.TAG.equals(fragmentTag)) {
+            return true;
+        } else if (QuestFragment.TAG.equals(fragmentTag)) {
+            return true;
+        } else if (JournalFragment.TAG.equals(fragmentTag)) {
+            return false;
+        } else if (ItemsListFragment.TAG.equals(fragmentTag)) {
+            return false;
+        } else if (PlaceFragment.TAG.equals(fragmentTag)) {
+            return false;
+        } else if (SettingsFragment.TAG.equals(fragmentTag)) {
+            return false;
+        }
+        return true;
     }
 
     private void goBackByNavigationIcon() {
@@ -1082,6 +1114,31 @@ public class ARActivity extends AppCompatActivity {
                 toolBar.setNavigationOnClickListener(null);
             }
         });
+    }
+
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_help:
+                showTutorialSuggestion();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void hideHelpButton() {
+        toolBar.getMenu().clear();
+        //toolBar.hideOverflowMenu();
+        //toolBar.
+    }
+
+    private void showHelpButton() {
+        toolBar.getMenu().clear();
+        toolBar.inflateMenu(R.menu.tool_bar);
+        //toolBar.getMenu().clear();
+        //toolBar.getMenu().getItem(R.id.action_help).setVisible(false);
     }
 
     private void clearNavigationIcon() {
@@ -1202,7 +1259,7 @@ public class ARActivity extends AppCompatActivity {
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         dialog.cancel();
-                        resetGameState();
+                        //resetGameState();
                         changeToFragmentLayout();
                         selectFragment(questsListFragment, QuestsListFragment.TAG);
                         hideSnackbarMessage();
