@@ -931,7 +931,7 @@ public class ARActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(msg)
                 .setTitle(R.string.alert_last_message_title)
-                .setCancelable(true)
+                .setCancelable(false)
                 .setNeutralButton(android.R.string.ok,
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
@@ -1230,7 +1230,7 @@ public class ARActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();
                                 try {
-                                    resetGameState();
+                                    //resetGameState();
                                     gameModule.unloadCurrentScene();
                                     placeRendered = false;
                                 } catch (NullPointerException e) {
