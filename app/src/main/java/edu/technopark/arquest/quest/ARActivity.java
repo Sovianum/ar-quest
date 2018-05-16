@@ -545,8 +545,9 @@ public class ARActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         if (inAR) {
-            changeToFragmentLayout();
-            selectFragment(questFragment, QuestFragment.TAG);
+            showCancelAlert();
+            //changeToFragmentLayout();
+            //selectFragment(questFragment, QuestFragment.TAG);
         } else {
             if (fromAR) {
                 changeToActivityLayout();
@@ -1186,7 +1187,7 @@ public class ARActivity extends AppCompatActivity {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setMessage(R.string.greeting_message)
                     .setTitle(R.string.greeting_title)
-                    .setCancelable(true)
+                    .setCancelable(false)
                     .setNeutralButton(android.R.string.ok,
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
@@ -1223,11 +1224,17 @@ public class ARActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(R.string.help_message)
                 .setTitle(R.string.help_title)
-                .setCancelable(true)
+                .setCancelable(false)
                 .setPositiveButton(android.R.string.yes,
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();
+                                try {
+                                    resetGameState();
+                                    gameModule.unloadCurrentScene();
+                                    placeRendered = false;
+                                } catch (NullPointerException e) {
+                                }
                                 onTutorialAccept();
                             }
                         })
@@ -1247,7 +1254,7 @@ public class ARActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(R.string.help_message)
                 .setTitle(R.string.help_title)
-                .setCancelable(true)
+                .setCancelable(false)
                 .setPositiveButton(android.R.string.yes,
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
