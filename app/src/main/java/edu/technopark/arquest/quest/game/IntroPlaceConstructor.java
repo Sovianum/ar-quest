@@ -23,7 +23,7 @@ public class IntroPlaceConstructor extends PlaceConstructor {
     private float mainScale;
     private float smallScale;
 
-    private Item item;
+    private Item apple;
     private InteractiveObject npc;
 
     public IntroPlaceConstructor(float mainScale, float smallScale, String assetPrefix) {
@@ -75,12 +75,12 @@ public class IntroPlaceConstructor extends PlaceConstructor {
                         1,
                         Arrays.asList(
                                 InteractionResult.journalRecordResult(
-                                        "Обучатель сказал: Кажется, у тебя в инвентаре моя копия. Дай мне на нее посмотреть"
+                                        "Обучатель сказал: Кажется, у тебя в инвентаре есть яблоко. Не хочешь поделиться"
                                 ),
                                 InteractionResult.nextPurposeResult(
-                                        "Возьмите из инвентаря копию скелета и покажите ее обучателю"
+                                        "Возьмите из инвентаря яблоко и дайте его обучателю"
                                 ),
-                                InteractionResult.newItemsResult(new Slot.RepeatedItem(item)),
+                                InteractionResult.newItemsResult(new Slot.RepeatedItem(apple)),
                                 InteractionResult.transitionsResult(Collections.singletonList(
                                         new ScriptAction.StateTransition(npc.getName(), 3)
                                 ))
@@ -100,10 +100,10 @@ public class IntroPlaceConstructor extends PlaceConstructor {
                         1,
                         Arrays.asList(
                                 InteractionResult.journalRecordResult(
-                                        "Обучатель сказал: Да, и правда, один в один. Оставь его себе и поговори со мной еще раз"
+                                        "Обучатель сказал: А я хотел зеленое. Оставь его себе и поговори со мной еще раз"
                                 ),
                                 InteractionResult.nextPurposeResult(
-                                        "Положите предмет обратно в инвентарь и еще раз поговорите с обучателем"
+                                        "Положите яблоко обратно в инвентарь с помощью кнопки слева и еще раз поговорите с обучателем"
                                 ),
                                 InteractionResult.transitionsResult(Collections.singletonList(
                                         new ScriptAction.StateTransition(npc.getName(), 4)
@@ -114,7 +114,7 @@ public class IntroPlaceConstructor extends PlaceConstructor {
                         2,
                         Collections.singletonList(
                                 InteractionResult.journalRecordResult(
-                                        "Обучатель сказал: Сначала достань мою копию из инвентаря"
+                                        "Обучатель сказал: Сначала достань яблоко из инвентаря"
                                 )
                         )
                 )
@@ -123,7 +123,7 @@ public class IntroPlaceConstructor extends PlaceConstructor {
                 Arrays.asList(1, 2),
                 Arrays.asList(
                         new ActionCondition(Collections.singletonList(
-                                new ActionCondition.ItemInfo(item.getId(), 1)
+                                new ActionCondition.ItemInfo(apple.getId(), 1)
                         ), 3),
                         new ActionCondition(3)
 
@@ -135,7 +135,7 @@ public class IntroPlaceConstructor extends PlaceConstructor {
                 new ScriptAction(1, Collections.singletonList(InteractionResult.questEndResult())),
                 new ScriptAction(2, Collections.singletonList(
                         InteractionResult.journalRecordResult(
-                                "Сначала убери предмет в инвентарь с помощью кнопки слева"
+                                "Сначала убери яблоко в инвентарь с помощью кнопки слева"
                         )
                 ))
         ));
@@ -144,7 +144,7 @@ public class IntroPlaceConstructor extends PlaceConstructor {
                 Arrays.asList(
                         new ActionCondition(4),
                         new ActionCondition(Collections.singletonList(
-                                new ActionCondition.ItemInfo(item.getId(), 1)
+                                new ActionCondition.ItemInfo(apple.getId(), 1)
                         ), 4)
                 )
         ));
@@ -154,15 +154,15 @@ public class IntroPlaceConstructor extends PlaceConstructor {
     }
 
     private void createObjects() {
-        item = new Item(
-                100, "Скелет", "Скелет",
-                new VisualResource(Object3D.Type.FBX).setModelUri(asset("skeleton.vrx")),
-                "skeleton.png"
+        apple = new Item(
+                100, "Яблоко", "Яблоко",
+                new VisualResource(Object3D.Type.FBX).setModelUri(asset("apple.vrx")),
+                "apple.jpg"
         );
-        item.setUniformScale(smallScale);
+        apple.setUniformScale(mainScale);
 
         npc = new InteractiveObject(
-                101, "Обучающий персонаж", "Обучающий персонаж", Collections.singletonList(item)
+                101, "Обучающий персонаж", "Обучающий персонаж", Collections.singletonList(apple)
         );
         npc.setVisualResource(
                 new VisualResource(Object3D.Type.FBX).setModelUri(asset("skeleton.vrx"))
