@@ -157,7 +157,7 @@ public class IntroPlaceConstructor extends PlaceConstructor {
         apple = new Item(
                 100, "Яблоко", "Яблоко",
                 new VisualResource(Object3D.Type.FBX).setModelUri(asset("apple.vrx")),
-                "apple.jpg"
+                "apple.png"
         );
         apple.setUniformScale(mainScale);
 
