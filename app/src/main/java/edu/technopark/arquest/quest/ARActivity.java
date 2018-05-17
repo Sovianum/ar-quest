@@ -1412,8 +1412,8 @@ public class ARActivity extends AppCompatActivity {
         }
         Place currentPlace = gameModule.getCurrentQuest().getPlaceMap().values().iterator().next();
         gameModule.setCurrentPlace(currentPlace);
-        startService(new Intent(this, GeolocationService.class).putExtra(getString(R.string.foreground),
-                isForegroundTracking()));
+//        startService(new Intent(this, GeolocationService.class).putExtra(getString(R.string.foreground),
+//                isForegroundTracking()));
         selectFragment(questFragment, QuestFragment.TAG);
     }
 
