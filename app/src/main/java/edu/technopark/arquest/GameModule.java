@@ -109,20 +109,24 @@ public class GameModule {
 
     public void resetCurrentQuest() {
         currentQuest = null;
+        unloadCurrentScene();
+        if (player != null) {
+            player.setPlace(null);
+        }
     }
 
-    public void setCurrentQuest(Quest currentQuest) {
-        if (currentQuest == null || currentQuest == this.currentQuest) {
+    public void setCurrentQuest(Quest quest) {
+        if (quest == null || quest == this.currentQuest) {
             return;
         }
-        this.currentQuest = currentQuest;
+        this.currentQuest = quest;
 
-        if (journals.getJournal(currentQuest.getId()) == null) {
-            journals.addJournal(currentQuest.getId(), new Journal<String>());
+        if (journals.getJournal(quest.getId()) == null) {
+            journals.addJournal(quest.getId(), new Journal<String>());
         }
 
-        if (inventories.getInventory(currentQuest.getId()) == null && withAR) {
-            inventories.addInventory(currentQuest.getId(), new Slot(0, Player.INVENTORY, false));
+        if (inventories.getInventory(quest.getId()) == null && withAR) {
+            inventories.addInventory(quest.getId(), new Slot(0, Player.INVENTORY, false));
         }
     }
 

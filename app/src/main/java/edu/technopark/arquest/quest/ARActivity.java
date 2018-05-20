@@ -64,6 +64,7 @@ import edu.technopark.arquest.game.InteractionResult;
 import edu.technopark.arquest.game.InteractionResultChain;
 import edu.technopark.arquest.game.Item;
 import edu.technopark.arquest.game.Place;
+import edu.technopark.arquest.game.Player;
 import edu.technopark.arquest.game.journal.Journal;
 import edu.technopark.arquest.game.slot.Slot;
 import edu.technopark.arquest.model.Quest;
@@ -1266,7 +1267,7 @@ public class ARActivity extends AppCompatActivity {
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         dialog.cancel();
-                        //resetGameState();
+                        resetGameState();
                         changeToFragmentLayout();
                         selectFragment(questsListFragment, QuestsListFragment.TAG);
                         hideSnackbarMessage();
@@ -1279,6 +1280,7 @@ public class ARActivity extends AppCompatActivity {
     }
 
     private void onTutorialAccept() {
+        resetGameState();
         Quest q = questModule.getIntroQuest();
         gameModule.setCurrentQuest(q);
         questFragment.setQuest(q);
@@ -1434,9 +1436,15 @@ public class ARActivity extends AppCompatActivity {
     }
 
     private void resetGameState() {
-        gameModule.getPlayer().release();
-        gameModule.getCurrentInventory().clear();
-        gameModule.getCurrentJournal().clear();
+        ActorPlayer player = gameModule.getPlayer();
+        if (player != null) player.release();
+
+        Slot inventory = gameModule.getCurrentInventory();
+        if (inventory != null) inventory.clear();
+
+        Journal<String> journal = gameModule.getCurrentJournal();
+        if (journal != null) journal.clear();
+
         gameModule.resetCurrentQuest();
 
         gameModule.unloadCurrentScene();
